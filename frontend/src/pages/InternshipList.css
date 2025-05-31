@@ -1,0 +1,81 @@
+/* InternshipList.css */
+
+/* Container Styles */
+.internship-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* Header Styles */
+.internship-header {
+  font-size: 2rem;
+  color: #2d3748; /* Dark gray */
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+/* Internship Card Grid */
+.internship-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Individual Card Styles */
+.internship-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.internship-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.internship-title {
+  font-size: 1.25rem;
+  color: #1a365d; /* Dark blue */
+  margin-bottom: 0.5rem;
+}
+
+.internship-company {
+  color: #4a5568; /* Medium gray */
+  font-weight: 500;
+}
+
+/* Loading/Error States */
+.loading-text,
+.error-text {
+  text-align: center;
+  color: #718096; /* Light gray */
+  font-size: 1.1rem;
+}
+
+.error-text {
+  color: #e53e3e; /* Red for errors */
+}
+
+:root {
+  --bg-color: white;
+  --text-color: #2d3748;
+}
+[data-theme="dark"] {
+  --bg-color: #1a202c;
+  --text-color: #e2e8f0;
+}
+.internship-card {
+  background: var(--bg-color);
+  color: var(--text-color);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.internship-card {
+  animation: fadeIn 0.5s ease-in-out;
+}
