@@ -1,0 +1,153 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import axios from 'axios';
+
+export const AuthContext = createContext();
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [isGuest, setIsGuest] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      // Use /me endpoint instead of verify-token
+      axios.get("http://localhost:8000/me", {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      .then(res => {
+        setUser(res.data);
+        console.log('User loaded:', res.data);
+      })
+      .catch(() => {
+        localStorage.removeItem("token");
+        setUser(null);
+      })
+      .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
+    }
+  }, []);
+
+  const login = async (email, password) => {
+    try {
+      // FastAPI expects form data for OAuth2PasswordRequestForm
+      const formData = new FormData();
+      formData.append('username', email);
+      formData.append('password', password);
+
+      const res = await axios.post("http://localhost:8000/token", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      
+      localStorage.setItem("token", res.data.access_token);
+      
+      // Get user data after login
+      const userRes = await axios.get("http://localhost:8000/me", {
+        headers: { Authorization: `Bearer ${res.data.access_token}` }
+      });
+      
+      setUser(userRes.data);
+      console.log('Login successful, user set:', userRes.data);
+      
+      return res.data;
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
+    }
+  };
+
+  const signup = async (userData) => {
+    try {
+      console.log('Attempting signup with data:', userData);
+      
+      // Convert camelCase to snake_case for backend
+      const signupData = {
+        full_name: userData.fullName || userData.full_name,
+        username: userData.username,
+        email: userData.email,
+        confirm_email: userData.confirmEmail || userData.confirm_email,
+        dob: userData.dob,
+        password: userData.password,
+        confirm_password: userData.confirmPassword || userData.confirm_password
+      };
+
+      console.log('Sending signup data to backend:', signupData);
+
+      const response = await axios.post("http://localhost:8000/signup", signupData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      console.log('Signup successful:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Signup error:', error);
+      
+      if (error.response) {
+        console.error('Error response:', error.response.data);
+        console.error('Error status:', error.response.status);
+        
+        // Handle validation errors from backend
+        if (error.response.data?.detail) {
+          if (Array.isArray(error.response.data.detail)) {
+            // Pydantic validation errors
+            const errorMessages = error.response.data.detail.map(err => err.msg).join(', ');
+            throw new Error(errorMessages);
+          } else {
+            // Single error message
+            throw new Error(error.response.data.detail);
+          }
+        }
+      } else if (error.request) {
+        console.error('No response received:', error.request);
+        throw new Error('Network error - could not connect to server');
+      } else {
+        console.error('Error setting up request:', error.message);
+        throw new Error(error.message);
+      }
+      
+      throw new Error('Signup failed');
+    }
+  };
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    setUser(null);
+    setIsGuest(null);
+  };
+
+  const loginAsGuest = () => {
+    setIsGuest(true);
+    setUser(null);
+  };
+
+  // Helper function to check if user is authenticated
+  const isAuthenticated = !!user;
+
+  return (
+    <AuthContext.Provider value={{ 
+      user, 
+      isGuest, 
+      loading,
+      isAuthenticated,
+      login, 
+      signup, 
+      logout, 
+      loginAsGuest
+    }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
