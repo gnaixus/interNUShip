@@ -89,3 +89,12 @@
 .authLink:hover {
   text-decoration: underline;
 }
+
+/* Add to Auth.module.css */
+.guestButton {
+  background: #4a5568 !important;
+}
+
+.guestButton:hover {
+  background: #2d3748 !important;
+}
