@@ -1,3 +1,5 @@
+/* Home.module.css - Ultra Minimal */
+
 /* Base */
 .homeContainer {
   min-height: 100vh;
@@ -298,8 +300,9 @@
 
 .internshipsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
   gap: 24px;
+  align-items: start;
 }
 
 /* Cards */
@@ -310,6 +313,10 @@
   padding: 24px;
   transition: transform 0.3s ease;
   position: relative;
+  height: fit-content;
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
 }
 
 .internshipCard:hover {
@@ -409,11 +416,14 @@
   color: #e2e8f0;
   margin-bottom: 20px;
   font-size: 14px;
+  flex-grow: 1;
+  line-height: 1.5;
 }
 
 .cardActions {
   display: flex;
   gap: 12px;
+  margin-top: auto;
 }
 
 .applyButton {
@@ -538,10 +548,12 @@
   transform: translateY(-2px);
 }
 
+/* Mobile Navigation - Hidden by default */
 .mobileNavToggle {
   display: none;
 }
 
+/* Mobile */
 @media (max-width: 768px) {
   .headerLeft {
     gap: 16px;
@@ -597,6 +609,11 @@
   
   .internshipsGrid {
     grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .internshipCard {
+    min-height: auto;
   }
   
   .jobDetails {
@@ -619,6 +636,12 @@
 @media (max-width: 480px) {
   .internshipCard {
     padding: 20px;
+    min-height: auto;
+  }
+  
+  .internshipsGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
   
   .statsGrid {
