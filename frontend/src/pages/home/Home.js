@@ -2,340 +2,239 @@ import React, { useState } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import styles from '../../styles/Home.module.css';
-import { formatDateToDDMMYYYY } from '../utils/dateHelpers';
 
 const Home = () => {
-  const { user, isGuest } = useAuth();
+  const { user, isGuest, logout } = useAuth();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
-  // Mock data for featured internships
-  const featuredInternships = [
-    {
-      id: 1,
-      title: 'Software Engineering Intern',
-      company: 'TechCorp Singapore',
-      location: 'Singapore',
-      type: 'Full-time',
-      duration: '3 months',
-      stipend: 'S$2,000/month',
-      category: 'technology',
-      matchPercentage: user ? 92 : null,
-      logo: '💻',
-      description: 'Build innovative web applications using React and Node.js',
-      deadline: '2025-06-15'
-    },
-    {
-      id: 2,
-      title: 'Data Science Intern',
-      company: 'Analytics Plus',
-      location: 'Remote',
-      type: 'Part-time',
-      duration: '6 months',
-      stipend: 'S$1,500/month',
-      category: 'data',
-      matchPercentage: user ? 87 : null,
-      logo: '📊',
-      description: 'Analyze large datasets and create machine learning models',
-      deadline: '2025-06-20'
-    },
-    {
-      id: 3,
-      title: 'Marketing Intern',
-      company: 'Creative Agency',
-      location: 'Singapore',
-      type: 'Full-time',
-      duration: '4 months',
-      stipend: 'S$1,800/month',
-      category: 'marketing',
-      matchPercentage: user ? 75 : null,
-      logo: '📈',
-      description: 'Create engaging marketing campaigns for tech startups',
-      deadline: '2025-06-10'
-    },
-    {
-      id: 4,
-      title: 'UX Design Intern',
-      company: 'Design Studio',
-      location: 'Hybrid',
-      type: 'Full-time',
-      duration: '3 months',
-      stipend: 'S$1,700/month',
-      category: 'design',
-      matchPercentage: user ? 81 : null,
-      logo: '🎨',
-      description: 'Design user experiences for mobile and web applications',
-      deadline: '2025-06-25'
-    }
+  // Simplified mock data
+  const internships = [
+    { id: 1, title: 'Software Engineering Intern', company: 'TechCorp Singapore', location: 'Singapore', 
+      stipend: 'S$1,200/month', duration: '3 months', category: 'technology', match: 92, logo: '💻',
+      description: 'Build innovative web applications using React and Node.js', deadline: '15/06/2025' },
+    { id: 2, title: 'Data Science Intern', company: 'Analytics Plus', location: 'Remote',
+      stipend: 'S$1,100/month', duration: '6 months', category: 'data', match: 87, logo: '📊',
+      description: 'Analyse large datasets and create machine learning models', deadline: '20/06/2025' },
+    { id: 3, title: 'Marketing Intern', company: 'Creative Agency', location: 'Singapore',
+      stipend: 'S$1,200/month', duration: '4 months', category: 'marketing', match: 75, logo: '📈',
+      description: 'Create engaging marketing campaigns for tech startups', deadline: '10/06/2025' },
+    { id: 4, title: 'UX Design Intern', company: 'Design Studio', location: 'Hybrid',
+      stipend: 'S$1,100/month', duration: '3 months', category: 'design', match: 81, logo: '🎨',
+      description: 'Design user experiences for mobile and web applications', deadline: '25/06/2025' }
   ];
 
   const categories = [
-    { id: 'all', name: 'All Categories', icon: '🌟' },
-    { id: 'technology', name: 'Technology', icon: '💻' },
-    { id: 'data', name: 'Data Science', icon: '📊' },
+    { id: 'all', name: 'All', icon: '🌟' },
+    { id: 'technology', name: 'Tech', icon: '💻' },
+    { id: 'data', name: 'Data', icon: '📊' },
     { id: 'marketing', name: 'Marketing', icon: '📈' },
-    { id: 'design', name: 'Design', icon: '🎨' },
-    { id: 'finance', name: 'Finance', icon: '💰' },
-    { id: 'consulting', name: 'Consulting', icon: '💼' }
+    { id: 'design', name: 'Design', icon: '🎨' }
   ];
 
-  const handleApplyClick = (internship) => {
-    if (user) {
-      navigate(`/apply/${internship.id}`);
-    } else if (isGuest) {
-      const shouldSignUp = window.confirm('Sign up to apply for internships and unlock personalised matches!');
-      if (shouldSignUp) {
-        navigate('/signup');
-      }
-    } else {
-      navigate('/login');
-    }
+  const handleAction = (action, internship = null) => {
+    const actions = {
+      apply: () => user ? navigate(`/apply/${internship.id}`) : promptSignup('apply'),
+      bookmark: () => user ? alert(`Bookmarked: ${internship.title}`) : promptSignup('bookmark'),
+      details: () => navigate(`/internships/${internship.id}`),
+      logout: () => { logout(); navigate('/login'); }
+    };
+    actions[action]?.();
   };
 
-  const handleBookmarkClick = (internship) => {
-    if (user) {
-      // TODO: Add to bookmarks
-      alert(`Bookmarked: ${internship.title}`);
-    } else {
-      const shouldSignUp = window.confirm('Sign up to bookmark internships!');
-      if (shouldSignUp) {
-        navigate('/signup');
-      }
-    }
+  const promptSignup = (action) => {
+    if (window.confirm(`Sign up to ${action} internships!`)) navigate('/signup');
   };
 
-  const filteredInternships = featuredInternships.filter(internship => {
-    const matchesSearch = internship.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         internship.company.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || internship.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  const filtered = internships.filter(i => 
+    (selectedCategory === 'all' || i.category === selectedCategory) &&
+    (i.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+     i.company.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  const UserHeader = () => (
+    <div className={styles.userHeader}>
+      <div className={styles.userInfo}>
+        {user && <span>👋 {user.full_name || user.email}</span>}
+        {isGuest && <span>🔍 Browsing as Guest</span>}
+      </div>
+      <div className={styles.headerActions}>
+        {user && (
+          <>
+            <button className={styles.profileBtn} onClick={() => navigate('/profile')}>
+              Profile
+            </button>
+            <button className={styles.logoutBtn} onClick={() => handleAction('logout')}>
+              Logout
+            </button>
+          </>
+        )}
+        {!user && !isGuest && (
+          <>
+            <button className={styles.loginBtn} onClick={() => navigate('/login')}>Login</button>
+            <button className={styles.signupBtn} onClick={() => navigate('/signup')}>Sign Up</button>
+          </>
+        )}
+        {isGuest && (
+          <button className={styles.signupBtn} onClick={() => navigate('/signup')}>
+            Sign Up
+          </button>
+        )}
+      </div>
+    </div>
+  );
+
+  const HeroSection = () => (
+    <section className={styles.heroSection}>
+      <h1 className={styles.heroTitle}>
+        {user ? `Welcome back, ${user.full_name || user.email}!` : 
+         isGuest ? 'Discover Your Dream Internship' : 'Find Your Perfect Internship at NUS'}
+      </h1>
+      <p className={styles.heroSubtitle}>
+        {user ? 'Ready to take the next step in your career?' : 
+         'Connect with top companies and land your ideal internship.'}
+      </p>
+      
+      {user && (
+        <div className={styles.userStats}>
+          {[{num: 4, label: 'New Matches'}, {num: 1, label: 'Applications'}, {num: 2, label: 'Bookmarks'}]
+            .map(stat => (
+              <div key={stat.label} className={styles.statItem}>
+                <span className={styles.statNumber}>{stat.num}</span>
+                <span className={styles.statLabel}>{stat.label}</span>
+              </div>
+            ))}
+        </div>
+      )}
+    </section>
+  );
+
+  const SearchSection = () => (
+    <section className={styles.searchSection}>
+      <h2>Find Your Next Opportunity</h2>
+      <div className={styles.searchBar}>
+        <div className={styles.searchInput}>
+          <span className={styles.searchIcon}>🔍</span>
+          <input
+            type="text"
+            placeholder="Search internships or companies..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
+      
+      <div className={styles.categories}>
+        {categories.map(cat => (
+          <button
+            key={cat.id}
+            className={`${styles.categoryChip} ${selectedCategory === cat.id ? styles.active : ''}`}
+            onClick={() => setSelectedCategory(cat.id)}
+          >
+            {cat.icon} {cat.name}
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+
+  const InternshipCard = ({ internship }) => (
+    <div className={styles.internshipCard}>
+      {user && <div className={styles.matchBadge}>{internship.match}% Match</div>}
+      
+      <div className={styles.cardHeader}>
+        <div className={styles.companyLogo}>{internship.logo}</div>
+        <div className={styles.companyInfo}>
+          <h3 className={styles.jobTitle}>{internship.title}</h3>
+          <p className={styles.companyName}>{internship.company}</p>
+        </div>
+        <button className={styles.bookmarkButton} onClick={() => handleAction('bookmark', internship)}>
+          🔖
+        </button>
+      </div>
+
+      <div className={styles.jobDetails}>
+        {[
+          {icon: '📍', text: internship.location},
+          {icon: '💰', text: internship.stipend},
+          {icon: '⏱️', text: internship.duration},
+          {icon: '📅', text: `Due ${internship.deadline}`}
+        ].map((detail, i) => (
+          <div key={i} className={styles.detailItem}>
+            <span className={styles.detailIcon}>{detail.icon}</span>
+            {detail.text}
+          </div>
+        ))}
+      </div>
+
+      <p className={styles.jobDescription}>{internship.description}</p>
+
+      <div className={styles.cardActions}>
+        <button className={styles.applyButton} onClick={() => handleAction('apply', internship)}>
+          {user ? 'Apply Now' : 'Sign Up to Apply'}
+        </button>
+        <button className={styles.detailsButton} onClick={() => handleAction('details', internship)}>
+          Details
+        </button>
+      </div>
+    </div>
+  );
+
+  const StatsSection = () => (
+    <section className={styles.statsSection}>
+      <div className={styles.statsGrid}>
+        {[
+          {icon: '🎯', number: '500+', label: 'Active Internships'},
+          {icon: '👥', number: '5,000+', label: 'NUS Students'},
+          {icon: '✅', number: '95%', label: 'Success Rate'}
+        ].map(stat => (
+          <div key={stat.label} className={styles.statCard}>
+            <div className={styles.statIcon}>{stat.icon}</div>
+            <div className={styles.statContent}>
+              <h3>{stat.number}</h3>
+              <p>{stat.label}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
 
   return (
     <div className={styles.homeContainer}>
-      {/* Hero Section */}
-      <section className={styles.heroSection}>
-        <div className={styles.heroContent}>
-          <div className={styles.heroText}>
-            <h1 className={styles.heroTitle}>
-              {user ? `Welcome back, ${user.full_name || user.email}!` : 
-               isGuest ? 'Discover Your Dream Internship' :
-               'Find Your Perfect Internship at NUS'}
-            </h1>
-            <p className={styles.heroSubtitle}>
-              {user ? 'Ready to take the next step in your career? We\'ve got personalised recommendations waiting for you.' :
-               'Connect with top companies, track your applications, and land your ideal internship opportunity.'}
-            </p>
-            
-            {user && (
-              <div className={styles.userStats}>
-                <div className={styles.statItem}>
-                  <span className={styles.statNumber}>12</span>
-                  <span className={styles.statLabel}>New Matches</span>
-                </div>
-                <div className={styles.statItem}>
-                  <span className={styles.statNumber}>3</span>
-                  <span className={styles.statLabel}>Applications</span>
-                </div>
-                <div className={styles.statItem}>
-                  <span className={styles.statNumber}>8</span>
-                  <span className={styles.statLabel}>Bookmarks</span>
-                </div>
-              </div>
-            )}
-          </div>
-          
-          <div className={styles.heroActions}>
-            {!user && !isGuest && (
-              <>
-                <button 
-                  className={styles.ctaPrimary}
-                  onClick={() => navigate('/signup')}
-                >
-                  Get Started
-                </button>
-                <button 
-                  className={styles.ctaSecondary}
-                  onClick={() => navigate('/login')}
-                >
-                  Sign In
-                </button>
-              </>
-            )}
-            
-            {user && (
-              <button 
-                className={styles.ctaPrimary}
-                onClick={() => navigate('/internships')}
-              >
-                Browse All Internships
-              </button>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* Search Section */}
-      <section className={styles.searchSection}>
-        <div className={styles.searchContainer}>
-          <div className={styles.searchHeader}>
-            <h2>Find Your Next Opportunity</h2>
-            <p>Search through hundreds of internship opportunities</p>
-          </div>
-          
-          <div className={styles.searchBar}>
-            <div className={styles.searchInput}>
-              <span className={styles.searchIcon}>🔍</span>
-              <input
-                type="text"
-                placeholder="Search internships, companies, or skills..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <button className={styles.searchButton}>Search</button>
-          </div>
-          
-          <div className={styles.categories}>
-            {categories.map(category => (
-              <button
-                key={category.id}
-                className={`${styles.categoryChip} ${selectedCategory === category.id ? styles.active : ''}`}
-                onClick={() => setSelectedCategory(category.id)}
-              >
-                <span className={styles.categoryIcon}>{category.icon}</span>
-                {category.name}
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Internships */}
+      <UserHeader />
+      <HeroSection />
+      <SearchSection />
+      
       <section className={styles.featuredSection}>
         <div className={styles.sectionHeader}>
           <h2>
             {user ? 'Recommended For You' : 'Featured Internships'}
-            <span className={styles.badge}>{filteredInternships.length}</span>
+            <span className={styles.badge}>{filtered.length}</span>
           </h2>
-          <button 
-            className={styles.viewAllButton}
-            onClick={() => navigate('/internships')}
-          >
+          <button className={styles.viewAllButton} onClick={() => navigate('/internships')}>
             View All
           </button>
         </div>
 
         <div className={styles.internshipsGrid}>
-          {filteredInternships.map(internship => (
-            <div key={internship.id} className={styles.internshipCard}>
-              {user && internship.matchPercentage && (
-                <div className={styles.matchBadge}>
-                  {internship.matchPercentage}% Match
-                </div>
-              )}
-              
-              <div className={styles.cardHeader}>
-                <div className={styles.companyLogo}>{internship.logo}</div>
-                <div className={styles.companyInfo}>
-                  <h3 className={styles.jobTitle}>{internship.title}</h3>
-                  <p className={styles.companyName}>{internship.company}</p>
-                </div>
-                <button 
-                  className={styles.bookmarkButton}
-                  onClick={() => handleBookmarkClick(internship)}
-                >
-                  🔖
-                </button>
-              </div>
-
-              <div className={styles.jobDetails}>
-                <div className={styles.detailItem}>
-                  <span className={styles.detailIcon}>📍</span>
-                  {internship.location}
-                </div>
-                <div className={styles.detailItem}>
-                  <span className={styles.detailIcon}>💰</span>
-                  {internship.stipend}
-                </div>
-                <div className={styles.detailItem}>
-                  <span className={styles.detailIcon}>⏱️</span>
-                  {internship.duration}
-                </div>
-                <div className={styles.detailItem}>
-                  <span className={styles.detailIcon}>📅</span>
-                  Due {formatDateToDDMMYYYY(internship.deadline)}
-                </div>
-              </div>
-
-              <p className={styles.jobDescription}>{internship.description}</p>
-
-              <div className={styles.cardActions}>
-                <button 
-                  className={styles.applyButton}
-                  onClick={() => handleApplyClick(internship)}
-                >
-                  {user ? 'Apply Now' : 'Sign Up to Apply'}
-                </button>
-                <button 
-                  className={styles.detailsButton}
-                  onClick={() => navigate(`/internships/${internship.id}`)}
-                >
-                  View Details
-                </button>
-              </div>
-            </div>
+          {filtered.map(internship => (
+            <InternshipCard key={internship.id} internship={internship} />
           ))}
         </div>
       </section>
 
-      {/* Quick Stats */}
-      <section className={styles.statsSection}>
-        <div className={styles.statsGrid}>
-          <div className={styles.statCard}>
-            <div className={styles.statIcon}>🎯</div>
-            <div className={styles.statContent}>
-              <h3>500+</h3>
-              <p>Active Internships</p>
-            </div>
-          </div>
-          
-          <div className={styles.statCard}>
-            <div className={styles.statIcon}>👥</div>
-            <div className={styles.statContent}>
-              <h3>5,000+</h3>
-              <p>NUS Students</p>
-            </div>
-          </div>
-          <div className={styles.statCard}>
-            <div className={styles.statIcon}>✅</div>
-            <div className={styles.statContent}>
-              <h3>95%</h3>
-              <p>Success Rate</p>
-            </div>
-          </div>
-        </div>
-      </section>
+      <StatsSection />
 
-      {/* Call to Action */}
       {!user && (
         <section className={styles.ctaSection}>
           <div className={styles.ctaContent}>
             <h2>Ready to Start Your Internship Journey?</h2>
-            <p>Join thousands of NUS students who have found their dream internships through InterNUShip</p>
+            <p>Join thousands of NUS students who found their dream internships</p>
             <div className={styles.ctaButtons}>
-              <button 
-                className={styles.ctaPrimary}
-                onClick={() => navigate('/signup')}
-              >
+              <button className={styles.ctaPrimary} onClick={() => navigate('/signup')}>
                 Create Account
-              </button>
-              <button 
-                className={styles.ctaSecondary}
-                onClick={() => navigate('/internships')}
-              >
-                Browse as Guest
               </button>
             </div>
           </div>

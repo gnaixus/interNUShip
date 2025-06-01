@@ -9,7 +9,6 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Get the redirect path from location state, default to home
   const from = location.state?.from?.pathname || '/home';
   
   const [formData, setFormData] = useState({
@@ -20,12 +19,11 @@ export default function Login() {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
+
 
   // Redirect if already logged in
   useEffect(() => {
     if (user && !loading) {
-      console.log('User already logged in, redirecting to:', from);
       navigate(from, { replace: true });
     }
   }, [user, loading, navigate, from]);
@@ -36,13 +34,11 @@ export default function Login() {
     if (!formData.email) {
       newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
+      newErrors.email = 'Invalid email format';
     }
     
     if (!formData.password) {
       newErrors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
     }
     
     setErrors(newErrors);
@@ -51,26 +47,16 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (!validateForm()) return;
     
     setIsSubmitting(true);
     setErrors({});
     
     try {
-      console.log('Attempting login...');
       await login(formData.email, formData.password);
-      
-      console.log('Login successful, redirecting to:', from);
-      // Success! The useEffect will handle the redirect
-      
     } catch (error) {
-      console.error('Login failed:', error);
-      
       if (error.response?.status === 401) {
         setErrors({ general: 'Invalid email or password' });
-      } else if (error.response?.data?.detail) {
-        setErrors({ general: error.response.data.detail });
       } else {
         setErrors({ general: 'Login failed. Please try again.' });
       }
@@ -84,11 +70,8 @@ export default function Login() {
     setFormData(prev => ({ ...prev, [name]: value }));
     
     // Clear errors when user starts typing
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
-    if (errors.general) {
-      setErrors(prev => ({ ...prev, general: '' }));
+    if (errors[name] || errors.general) {
+      setErrors({});
     }
   };
 
@@ -97,15 +80,11 @@ export default function Login() {
     navigate('/home');
   };
 
-  // Show loading spinner while checking authentication
   if (loading) {
     return (
       <div className={authStyles.authContainer}>
         <div className={authStyles.authCard}>
-          <div style={{ textAlign: 'center', padding: '40px' }}>
-            <div className="spinner" style={{ margin: '0 auto 16px' }}></div>
-            <p>Loading...</p>
-          </div>
+          <div className={styles.loading}>Loading...</div>
         </div>
       </div>
     );
@@ -118,9 +97,7 @@ export default function Login() {
         <p className={styles.loginSubtitle}>Sign in to your InterNUShip account</p>
         
         {errors.general && (
-          <div className={styles.errorMessage}>
-            {errors.general}
-          </div>
+          <div className={styles.error}>{errors.general}</div>
         )}
         
         <form onSubmit={handleSubmit} className={styles.loginForm}>
@@ -136,7 +113,7 @@ export default function Login() {
               placeholder="Enter your email"
               required
             />
-            {errors.email && <span className={styles.errorMessage}>{errors.email}</span>}
+            {errors.email && <span className={styles.error}>{errors.email}</span>}
           </div>
 
           {/* Password */}
@@ -148,7 +125,7 @@ export default function Login() {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                className={`${styles.input} ${styles.passwordInput}`}
+                className={styles.input}
                 placeholder="Enter your password"
                 required
               />
@@ -158,24 +135,22 @@ export default function Login() {
                 onClick={() => setShowPassword(!showPassword)}
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
-                {showPassword ? '👁️‍🗨️' : '👁️'}
+                {showPassword ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
+                    <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
+                    <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
+                    <line x1="2" y1="2" x2="22" y2="22"/>
+                  </svg>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                )}
               </button>
             </div>
-            {errors.password && <span className={styles.errorMessage}>{errors.password}</span>}
-          </div>
-
-          {/* Remember Me & Forgot Password */}
-          <div className={styles.rememberForgot}>
-            <label className={styles.rememberMe}>
-              <div 
-                className={`${styles.checkbox} ${rememberMe ? styles.checked : ''}`}
-                onClick={() => setRememberMe(!rememberMe)}
-              />
-              Remember me
-            </label>
-            <a href="/forgot-password" className={styles.forgotPassword}>
-              Forgot password?
-            </a>
+            {errors.password && <span className={styles.error}>{errors.password}</span>}
           </div>
 
           <button 
@@ -187,24 +162,10 @@ export default function Login() {
           </button>
         </form>
 
-        <div className={styles.divider}>or</div>
-
-        {/* Social Login */}
-        <div className={styles.socialLogin}>
-          <button className={`${styles.socialButton} ${styles.google}`}>
-            <span>G</span>
-            Continue with Google
-          </button>
-          <button className={`${styles.socialButton} ${styles.github}`}>
-            <span>⚡</span>
-            Continue with GitHub
-          </button>
-        </div>
-
         {/* Guest Login */}
         <button 
           onClick={handleGuestLogin}
-          className={styles.guestLogin}
+          className={styles.guestButton}
         >
           Continue as Guest
         </button>
