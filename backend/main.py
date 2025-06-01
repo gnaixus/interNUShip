@@ -6,18 +6,14 @@ from pydantic import BaseModel, EmailStr, validator
 from datetime import date
 from typing import Optional
 
-# Import our modules
 from database import engine, get_db
 from models import User, Base
 from auth import get_password_hash, create_access_token, verify_password, get_current_user
 
-# Create FastAPI app
 app = FastAPI(title="User Authentication API", version="1.0.0")
 
-# Create tables
 Base.metadata.create_all(bind=engine)
 
-# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000", "http://localhost:3001", "http://127.0.0.1:3000"],
@@ -26,7 +22,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Pydantic models
 class UserCreate(BaseModel):
     full_name: str
     username: str
@@ -86,7 +81,6 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
-# Routes
 @app.get("/")
 async def root():
     return {"message": "FastAPI User Authentication API"}

@@ -5,7 +5,6 @@ import styles from '../../styles/Signup.module.css';
 import authStyles from '../../styles/Auth.module.css';
 import axios from 'axios';
 
-// Memoized Field component to prevent unnecessary re-renders
 const FormField = React.memo(({ name, type = 'text', placeholder, children, hint, value, onChange, error }) => (
   <div className={authStyles.inputGroup}>
     <label className={authStyles.inputLabel}>
@@ -13,7 +12,7 @@ const FormField = React.memo(({ name, type = 'text', placeholder, children, hint
     </label>
     <div style={{ position: 'relative' }}>
       <input
-        key={name} // Stable key
+        key={name} 
         type={type}
         name={name}
         value={value}
@@ -31,7 +30,7 @@ const FormField = React.memo(({ name, type = 'text', placeholder, children, hint
   </div>
 ));
 
-// Memoized Status Indicator
+
 const StatusIndicator = React.memo(({ status }) => {
   if (!status) return null;
   
@@ -60,10 +59,9 @@ export default function Signup() {
   const [emailStatus, setEmailStatus] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Refs to maintain focus and prevent re-creation
+  
   const timeoutRefs = useRef({});
 
-  // Stable debounce function
   const debounce = useCallback((func, delay, key) => {
     return (...args) => {
       clearTimeout(timeoutRefs.current[key]);
@@ -71,7 +69,6 @@ export default function Signup() {
     };
   }, []);
 
-  // Memoized API check functions
   const checkUsername = useCallback(async (username) => {
     if (!username || username.length < 3) {
       setUsernameStatus(null);
@@ -104,7 +101,6 @@ export default function Signup() {
     }
   }, []);
 
-  // Debounced check functions
   const debouncedUsernameCheck = useMemo(
     () => debounce(checkUsername, 1000, 'username'),
     [debounce, checkUsername]
@@ -115,17 +111,13 @@ export default function Signup() {
     [debounce, checkEmail]
   );
 
-  // Optimized handleChange with immediate state updates
   const handleChange = useCallback((e) => {
     const { name, value } = e.target;
     
-    // Update form data immediately for smooth typing
     setFormData(prev => ({ ...prev, [name]: value }));
     
-    // Clear errors immediately without batching
     setErrors(prev => prev[name] ? { ...prev, [name]: '' } : prev);
     
-    // Only trigger API checks when conditions are met
     if (name === 'username') {
       if (value.length >= 3) {
         debouncedUsernameCheck(value);
@@ -143,7 +135,6 @@ export default function Signup() {
     }
   }, [debouncedUsernameCheck, debouncedEmailCheck]);
 
-  // Memoized validation function
   const validateForm = useCallback(() => {
     const newErrors = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -195,18 +186,15 @@ export default function Signup() {
     }
   }, [validateForm, usernameStatus, emailStatus, signup, formData, navigate]);
 
-  // Memoized toggle function
   const togglePassword = useCallback(() => {
     setShowPassword(prev => !prev);
   }, []);
 
-  // Memoized progress calculation
   const progress = useMemo(() => 
     Object.values(formData).filter(v => v.trim()).length / 6 * 100,
     [formData]
   );
 
-  // Memoized password toggle button
   const passwordToggleButton = useMemo(() => (
     <button
       type="button"

@@ -20,8 +20,6 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-
-  // Redirect if already logged in
   useEffect(() => {
     if (user && !loading) {
       navigate(from, { replace: true });
@@ -69,7 +67,7 @@ export default function Login() {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     
-    // Clear errors when user starts typing
+    
     if (errors[name] || errors.general) {
       setErrors({});
     }
