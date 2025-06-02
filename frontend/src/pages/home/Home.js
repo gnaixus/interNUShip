@@ -10,6 +10,7 @@ const Home = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
+   // TODO: Replace with real API data in milestone 2
   const internships = [
     { id: 1, title: 'Software Engineering Intern', company: 'TechCorp Singapore', location: 'Singapore', 
       stipend: 'S$1,200/month', duration: '3 months', category: 'technology', match: 92, logo: '💻',
@@ -45,6 +46,7 @@ const Home = () => {
     { path: '/about', label: 'About', icon: '🏢' }
   ];
 
+  // Handle different actions - probably could make this cleaner later
   const handleAction = (action, internship = null) => {
     if (action === 'logout') { logout(); navigate('/login'); }
     else if (action === 'apply') user ? navigate(`/apply/${internship.id}`) : navigate('/signup');
@@ -52,6 +54,7 @@ const Home = () => {
     else if (action === 'details') navigate(`/internships/${internship.id}`);
   };
 
+  // Filter internships based on search and category
   const filtered = internships.filter(i => 
     (selectedCategory === 'all' || i.category === selectedCategory) &&
     (i.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -60,14 +63,15 @@ const Home = () => {
 
   return (
     <div className={styles.homeContainer}>
-      {/* Header */}
+      {/* Main header with user info and navigation */}
       <div className={styles.userHeader}>
         <div className={styles.headerLeft}>
           <div className={styles.userInfo}>
             {user && <span>👋 {user.full_name || user.email}</span>}
             {isGuest && <span>🔍 Browsing as Guest</span>}
           </div>
-          
+
+          {/* Navigation menu */}
           <ul className={styles.navItems}>
             {navItems.map(item => (
               <li key={item.path}>
@@ -100,11 +104,12 @@ const Home = () => {
             <button className={styles.signupBtn} onClick={() => navigate('/signup')}>Sign Up</button>
           )}
           
+          {/* Mobile menu toggle - not implemented yet */}
           <button className={styles.mobileNavToggle}>☰</button>
         </div>
       </div>
 
-      {/* Hero */}
+      {/* Hero section*/}
       <section className={styles.heroSection}>
         <h1 className={styles.heroTitle}>
           {user ? `Welcome back, ${user.full_name || user.email}!` : 
@@ -115,6 +120,7 @@ const Home = () => {
            'Connect with top companies and land your ideal internship.'}
         </p>
         
+        {/* Show stats only for logged in users */}
         {user && (
           <div className={styles.userStats}>
             <div className={styles.statItem}>
@@ -133,7 +139,7 @@ const Home = () => {
         )}
       </section>
 
-      {/* Search */}
+      {/* Search functionality to narrow down on keywords */}
       <section className={styles.searchSection}>
         <h2>Find Your Next Opportunity</h2>
         <div className={styles.searchBar}>
@@ -148,6 +154,7 @@ const Home = () => {
           </div>
         </div>
         
+        {/* Category filter buttons for different work expertise */}
         <div className={styles.categories}>
           {categories.map(cat => (
             <button
@@ -161,7 +168,7 @@ const Home = () => {
         </div>
       </section>
       
-      {/* Featured */}
+      {/* Internship listings for user to view */}
       <section className={styles.featuredSection}>
         <div className={styles.sectionHeader}>
           <h2>
@@ -188,7 +195,7 @@ const Home = () => {
                   🔖
                 </button>
               </div>
-
+              {/* Job details grid */}
               <div className={styles.jobDetails}>
                 <div className={styles.detailItem}>
                   <span>📍</span> {internship.location}
@@ -206,6 +213,7 @@ const Home = () => {
 
               <p className={styles.jobDescription}>{internship.description}</p>
 
+              {/* Action buttons for users*/}
               <div className={styles.cardActions}>
                 <button className={styles.applyButton} onClick={() => handleAction('apply', internship)}>
                   {user ? 'Apply Now' : 'Sign Up to Apply'}
@@ -219,7 +227,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Stats */}
+      {/* Platform statistics (fake for now) */}
       <section className={styles.statsSection}>
         <div className={styles.statsGrid}>
           <div className={styles.statCard}>
@@ -246,7 +254,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* CTA */}
+      {/* Call to action for non-users to signup*/}
       {!user && (
         <section className={styles.ctaSection}>
           <div className={styles.ctaContent}>
@@ -263,3 +271,5 @@ const Home = () => {
 };
 
 export default Home;
+
+// end of milestone 1
