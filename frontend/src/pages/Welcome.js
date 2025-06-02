@@ -1,4 +1,3 @@
-// frontend/src/pages/Welcome.js
 import { useNavigate } from 'react-router-dom';
 import authStyles from '../auth/Auth.module.css';
 

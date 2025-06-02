@@ -1,4 +1,4 @@
-// src/utils/dateHelpers.js
+
 
 /**
  * Converts a date from YYYY-MM-DD format to DD/MM/YYYY format
@@ -10,7 +10,6 @@ export const formatDateToDDMMYYYY = (dateString) => {
   
   const date = new Date(dateString);
   
-  // Check if date is valid
   if (isNaN(date.getTime())) return '';
   
   const day = date.getDate().toString().padStart(2, '0');
@@ -33,7 +32,6 @@ export const formatDateToYYYYMMDD = (dateString) => {
   
   const [day, month, year] = parts;
   
-  // Validate the parts
   if (!day || !month || !year) return '';
   if (day.length !== 2 || month.length !== 2 || year.length !== 4) return '';
   

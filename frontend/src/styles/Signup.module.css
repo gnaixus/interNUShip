@@ -179,7 +179,6 @@
   to { transform: rotate(360deg); }
 }
 
-/* Mobile responsive */
 @media (max-width: 640px) {
   .checking, .available, .taken {
     font-size: 12px;

@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      // Use /me endpoint instead of verify-token
+    
       axios.get("http://localhost:8000/me", {
         headers: { Authorization: `Bearer ${token}` }
       })
@@ -39,7 +39,6 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      // FastAPI expects form data for OAuth2PasswordRequestForm
       const formData = new FormData();
       formData.append('username', email);
       formData.append('password', password);
@@ -52,7 +51,6 @@ export const AuthProvider = ({ children }) => {
       
       localStorage.setItem("token", res.data.access_token);
       
-      // Get user data after login
       const userRes = await axios.get("http://localhost:8000/me", {
         headers: { Authorization: `Bearer ${res.data.access_token}` }
       });
@@ -71,7 +69,6 @@ export const AuthProvider = ({ children }) => {
     try {
       console.log('Attempting signup with data:', userData);
       
-      // Convert camelCase to snake_case for backend
       const signupData = {
         full_name: userData.fullName || userData.full_name,
         username: userData.username,
@@ -99,14 +96,11 @@ export const AuthProvider = ({ children }) => {
         console.error('Error response:', error.response.data);
         console.error('Error status:', error.response.status);
         
-        // Handle validation errors from backend
         if (error.response.data?.detail) {
           if (Array.isArray(error.response.data.detail)) {
-            // Pydantic validation errors
             const errorMessages = error.response.data.detail.map(err => err.msg).join(', ');
             throw new Error(errorMessages);
           } else {
-            // Single error message
             throw new Error(error.response.data.detail);
           }
         }
@@ -133,7 +127,6 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  // Helper function to check if user is authenticated
   const isAuthenticated = !!user;
 
   return (

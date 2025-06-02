@@ -212,7 +212,6 @@
   to { transform: rotate(360deg); }
 }
 
-/* Mobile responsive */
 @media (max-width: 640px) {
   .loginCard {
     padding: 32px 24px;
