@@ -5,6 +5,7 @@ import styles from '../../styles/Signup.module.css';
 import authStyles from '../../styles/Auth.module.css';
 import axios from 'axios';
 
+
 const FormField = React.memo(({ name, type = 'text', placeholder, children, hint, value, onChange, error }) => (
   <div className={authStyles.inputGroup}>
     <label className={authStyles.inputLabel}>
@@ -30,7 +31,7 @@ const FormField = React.memo(({ name, type = 'text', placeholder, children, hint
   </div>
 ));
 
-
+// Status indicator to check availability of email and username
 const StatusIndicator = React.memo(({ status }) => {
   if (!status) return null;
   
@@ -48,6 +49,7 @@ export default function Signup() {
   const { signup } = useAuth();
   const navigate = useNavigate();
   
+  //Form components
   const [formData, setFormData] = useState({
     fullName: '', username: '', email: '', confirmEmail: '', 
     password: '', confirmPassword: ''
@@ -62,6 +64,7 @@ export default function Signup() {
   
   const timeoutRefs = useRef({});
 
+  //Debounce function to avoid spamming API
   const debounce = useCallback((func, delay, key) => {
     return (...args) => {
       clearTimeout(timeoutRefs.current[key]);
@@ -116,8 +119,10 @@ export default function Signup() {
     
     setFormData(prev => ({ ...prev, [name]: value }));
     
+    //Clear error sign when user starts typing again
     setErrors(prev => prev[name] ? { ...prev, [name]: '' } : prev);
     
+    // Check for availability
     if (name === 'username') {
       if (value.length >= 3) {
         debouncedUsernameCheck(value);
@@ -164,6 +169,8 @@ export default function Signup() {
 
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
+
+    //Don't submit form if validation fails or still checking availability
     if (!validateForm() || usernameStatus === 'checking' || emailStatus === 'checking') return;
 
     setIsSubmitting(true);
@@ -190,6 +197,7 @@ export default function Signup() {
     setShowPassword(prev => !prev);
   }, []);
 
+  //Progress percentage of form completion
   const progress = useMemo(() => 
     Object.values(formData).filter(v => v.trim()).length / 6 * 100,
     [formData]
@@ -202,7 +210,9 @@ export default function Signup() {
       onClick={togglePassword}
       aria-label={showPassword ? "Hide password" : "Show password"}
     >
+      
       {showPassword ? (
+        // eye slash icon
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
           <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
@@ -210,6 +220,7 @@ export default function Signup() {
           <line x1="2" y1="2" x2="22" y2="22"/>
         </svg>
       ) : (
+        // regular eye icon
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
           <circle cx="12" cy="12" r="3"/>
@@ -316,3 +327,5 @@ export default function Signup() {
     </div>
   );
 }
+
+//milestone 1

@@ -12,8 +12,10 @@ from auth import get_password_hash, create_access_token, verify_password, get_cu
 
 app = FastAPI(title="User Authentication API", version="1.0.0")
 
+#Creating database tables
 Base.metadata.create_all(bind=engine)
 
+#CORS setup for frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000", "http://localhost:3001", "http://127.0.0.1:3000"],
@@ -176,3 +178,5 @@ async def get_current_user_info(current_user: User = Depends(get_current_user)):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+
+#MS1

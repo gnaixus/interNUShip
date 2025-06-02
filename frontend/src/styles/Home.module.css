@@ -110,7 +110,7 @@
 .signupBtn:hover { transform: translateY(-1px); }
 .logoutBtn:hover { background: rgba(239, 68, 68, 0.2); }
 
-/* Hero */
+/* Hero section*/
 .heroSection {
   padding: 80px 24px 60px;
   text-align: center;
@@ -502,7 +502,7 @@
   margin: 0;
 }
 
-/* CTA */
+/* Call to action */
 .ctaSection {
   padding: 80px 24px;
   text-align: center;
@@ -546,91 +546,6 @@
   transform: translateY(-2px);
 }
 
-/* Mobile Navigation - Hidden by default */
-.mobileNavToggle {
-  display: none;
-}
-
-/* Mobile */
-@media (max-width: 768px) {
-  .headerLeft {
-    gap: 16px;
-  }
-  
-  .navItems {
-    display: none;
-  }
-  
-  .mobileNavToggle {
-    display: block;
-    background: transparent;
-    border: none;
-    color: #e2e8f0;
-    font-size: 20px;
-    cursor: pointer;
-    padding: 8px;
-  }
-  
-  .heroSection {
-    padding: 60px 16px 40px;
-  }
-  
-  .heroTitle {
-    font-size: 28px;
-  }
-  
-  .userStats {
-    gap: 24px;
-  }
-  
-  .searchSection {
-    padding: 40px 16px;
-  }
-  
-  .categories {
-    gap: 8px;
-  }
-  
-  .categoryChip {
-    padding: 8px 16px;
-    font-size: 13px;
-  }
-  
-  .featuredSection {
-    padding: 60px 16px;
-  }
-  
-  .sectionHeader {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .internshipsGrid {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-  
-  .internshipCard {
-    min-height: auto;
-  }
-  
-  .jobDetails {
-    grid-template-columns: 1fr;
-  }
-  
-  .cardActions {
-    flex-direction: column;
-  }
-  
-  .statsGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .ctaSection {
-    padding: 60px 16px;
-  }
-}
-
 @media (max-width: 480px) {
   .internshipCard {
     padding: 20px;
@@ -646,3 +561,5 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* milestone 1 */

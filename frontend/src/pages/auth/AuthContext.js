@@ -16,10 +16,11 @@ export const AuthProvider = ({ children }) => {
   const [isGuest, setIsGuest] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  //Check if user is already logged in on app start but probably not since local host
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-    
+    //Verify token with backend
       axios.get("http://localhost:8000/me", {
         headers: { Authorization: `Bearer ${token}` }
       })
@@ -28,6 +29,7 @@ export const AuthProvider = ({ children }) => {
         console.log('User loaded:', res.data);
       })
       .catch(() => {
+        //Token expired or invalid
         localStorage.removeItem("token");
         setUser(null);
       })
@@ -51,6 +53,7 @@ export const AuthProvider = ({ children }) => {
       
       localStorage.setItem("token", res.data.access_token);
       
+      //Fetch user details after successful login to home page
       const userRes = await axios.get("http://localhost:8000/me", {
         headers: { Authorization: `Bearer ${res.data.access_token}` }
       });
@@ -68,7 +71,7 @@ export const AuthProvider = ({ children }) => {
   const signup = async (userData) => {
     try {
       console.log('Attempting signup with data:', userData);
-      
+      //turn frontend field names to backend expected format
       const signupData = {
         full_name: userData.fullName || userData.full_name,
         username: userData.username,
@@ -144,3 +147,5 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
+
+//Milestone 1 final

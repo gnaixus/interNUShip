@@ -122,11 +122,6 @@ ol {
   background: linear-gradient(135deg, #8b5cf6, #db2777);
 }
 
-/* Firefox scrollbar */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: #a78bfa #1e293b;
-}
 
 /* Navigation */
 .navbar {
@@ -376,7 +371,7 @@ ol {
   100% { transform: rotate(360deg); }
 }
 
-/* Glass morphism */
+/* Glass morphism thing*/
 .glass {
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);

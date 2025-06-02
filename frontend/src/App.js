@@ -6,7 +6,7 @@ import Signup from './pages/auth/Signup';
 import Home from './pages/home/Home';
 import './styles/App.css';
 
-// Protected Route Component
+//Protected Route Component
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
   
@@ -31,7 +31,7 @@ const ProtectedRoute = ({ children }) => {
   return user ? children : <Navigate to="/login" replace />;
 };
 
-// Public Route Component (redirects to home if already logged in)
+//Public Route Component (redirects to home if already logged in but probably not for ms1 since local host)
 const PublicRoute = ({ children }) => {
   const { user, loading } = useAuth();
   
@@ -56,7 +56,7 @@ const PublicRoute = ({ children }) => {
   return user ? <Navigate to="/home" replace /> : children;
 };
 
-// App Content Component (needs to be inside AuthProvider)
+//App Content Component (needs to be inside AuthProvider)
 const AppContent = () => {
   return (
     <Routes>
@@ -73,11 +73,11 @@ const AppContent = () => {
         </PublicRoute>
       } />
       
-      {/* Home route - accessible to everyone */}
+      {/* Home route is accessible to everyone */}
       <Route path="/home" element={<Home />} />
       <Route path="/" element={<Navigate to="/home" replace />} />
       
-      {/* Protected routes - require authentication */}
+      {/* Protected routes will require authentication */}
       <Route path="/profile" element={
         <ProtectedRoute>
           <div style={{ padding: '50px', textAlign: 'center', color: '#f8fafc' }}>
@@ -159,3 +159,5 @@ function App() {
 }
 
 export default App;
+
+//Mileston 1 final

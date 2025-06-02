@@ -9,6 +9,7 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   
+  // Redirect to where user was trying to go which should be home page
   const from = location.state?.from?.pathname || '/home';
   
   const [formData, setFormData] = useState({
@@ -20,6 +21,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Redirect if already logged in
   useEffect(() => {
     if (user && !loading) {
       navigate(from, { replace: true });
@@ -53,6 +55,7 @@ export default function Login() {
     try {
       await login(formData.email, formData.password);
     } catch (error) {
+      // Check for specific error types from email or password
       if (error.response?.status === 401) {
         setErrors({ general: 'Invalid email or password' });
       } else {
@@ -67,7 +70,7 @@ export default function Login() {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     
-    
+    // Clear errors when user starts typing 
     if (errors[name] || errors.general) {
       setErrors({});
     }
@@ -99,7 +102,7 @@ export default function Login() {
         )}
         
         <form onSubmit={handleSubmit} className={styles.loginForm}>
-          {/* Email */}
+          {/* Email field*/}
           <div className={styles.formGroup}>
             <label className={styles.label}>Email Address</label>
             <input
@@ -114,7 +117,7 @@ export default function Login() {
             {errors.email && <span className={styles.error}>{errors.email}</span>}
           </div>
 
-          {/* Password */}
+          {/* Password field*/}
           <div className={styles.formGroup}>
             <label className={styles.label}>Password</label>
             <div className={styles.passwordContainer}>
@@ -134,13 +137,14 @@ export default function Login() {
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (
+                  //A cool eye with slash 
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
                     <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
                     <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
                     <line x1="2" y1="2" x2="22" y2="22"/>
                   </svg>
-                ) : (
+                ) : (// regular eye icon
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                     <circle cx="12" cy="12" r="3"/>
@@ -176,3 +180,5 @@ export default function Login() {
     </div>
   );
 }
+
+//milestone 1 
