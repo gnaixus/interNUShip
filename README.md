@@ -32,22 +32,29 @@ As a student who doesn't want to repeatedly enter the same personal information,
 Features
 
 USER AUTHENTICATION & PROFILE SETUP
+
 [Proposed] Allow users to create and authenticate their profiles by inputting relevant information such as their degree, coursework, skills, and experiences, enabling personalized internship recommendations. The system will include secure registration, login functionality, and comprehensive profile management.
 
 INTERNSHIP LISTING AGGREGATION
+
 [Proposed] Fetch internship listings from various platforms (company portals, LinkedIn, and job boards) via API and web scraping, centralizing opportunities for easy access and comparison. The system will normalize data from different sources and maintain up-to-date listings.
 
 SMART MATCHING ALGORITHM
-[Proposed] Recommend internships based on the student's degree, skills, and preferences, using TF-IDF and cosine similarity with keywords to match against employers' requirements, providing personalized, targeted internship suggestions.
+
+Proposed] Recommend internships based on the student's degree, skills, and preferences, using TF-IDF and cosine similarity with keywords to match against employers' requirements, providing personalized, targeted internship suggestions.
 
 APPLICATION TRACKER
-[Proposed] Allow students to track internship application deadlines, monitor post-application statuses, keep track of next steps such as interview dates, and track outcomes (accepted, rejected, pending), providing a comprehensive overview of the application process.
+
+comprehensive overview of the application process.
 
 BOOKMARK LISTINGS
+
 [Additional Features] Enable users to save internship listings to their bookmarks, allowing for quick and easy access later without needing to search again.
 
 POST CREATION & RECOMMENDATIONS
+
 [Additional Features] Allow students to create posts about their internship experiences and share insights, helping others make informed decisions and facilitating a community of recommendations and advice.
 
 AUTO-FILL PERSONAL INFORMATION
+
 [Additional Features] Automatically populate similar fields with previously entered personal information (e.g., name, degree, skills), so students don't need to repeatedly enter the same data when applying for multiple internships.
