@@ -52,7 +52,7 @@ export default function Signup() {
   //Form components
   const [formData, setFormData] = useState({
     fullName: '', username: '', email: '', confirmEmail: '', 
-    password: '', confirmPassword: ''
+    password: '', confirmPassword: '', dob: ''
   });
   
   const [errors, setErrors] = useState({});
@@ -278,7 +278,16 @@ export default function Signup() {
             onChange={handleChange}
             error={errors.confirmEmail}
           />
-          
+
+          <FormField 
+            name="dob" 
+            type="date" 
+            placeholder="Enter your date of birth"
+            value={formData.dob}
+            onChange={handleChange}
+            error={errors.dob}
+          />
+
           <FormField 
             name="password" 
             type={showPassword ? 'text' : 'password'} 
