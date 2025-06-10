@@ -1,16 +1,21 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File 
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr, validator
 from datetime import date
-from typing import Optional
+from typing import Optional, List, Dict, Any
+import os
+import uuid
 
-from database import engine, get_db
-from models import User, Base
+from database import engine, get_db, SessionLocal, Base
+from models import User, Candidate
 from auth import get_password_hash, create_access_token, verify_password, get_current_user
+from parser import parse_resume, logging
 
 app = FastAPI(title="User Authentication API", version="1.0.0")
+logger = logging.getLogger("uvicorn.error")
 
 #Creating database tables
 Base.metadata.create_all(bind=engine)
@@ -78,6 +83,16 @@ class UserResponse(BaseModel):
     
     class Config:
         from_attributes = True
+
+class CandidateResponse(BaseModel):
+    id: int
+    name: str
+    email: str
+    phone: str
+    skills: List[str]
+    degree: List[str]
+    experience: int
+    designation: str
 
 class Token(BaseModel):
     access_token: str
@@ -175,8 +190,106 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
 async def get_current_user_info(current_user: User = Depends(get_current_user)):
     return UserResponse.from_orm(current_user)
 
+@app.post("/upload-resume", response_model=Dict[str, Any])  # More specific type hint
+async def upload_resume(
+    resume: UploadFile = File(...), 
+    db: Session = Depends(get_db)
+):
+    """Upload and parse resume file"""
+    filepath = None  # Initialize filepath early
+    try:
+        allowed_extensions = {'.pdf', '.doc', '.docx', '.txt'}
+        file_extension = os.path.splitext(resume.filename)[1].lower()
+        
+        if file_extension not in allowed_extensions:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Invalid file type '{file_extension}'. Allowed types: PDF, DOC, DOCX, TXT"
+            )
+        
+        content = await resume.read()
+        if len(content) > 10 * 1024 * 1024:  # 10MB
+            raise HTTPException(status_code=400, detail="File too large. Maximum size allowed: 10MB")
+
+        os.makedirs("uploads", exist_ok=True)
+        unique_filename = f"{uuid.uuid4()}_{resume.filename}"
+        filepath = os.path.join("uploads", unique_filename)
+
+        with open(filepath, "wb") as f:
+            f.write(content)
+
+        parsed = parse_resume(filepath)
+        if not parsed or not parsed.get('email'):
+            raise HTTPException(status_code=400, detail="Failed to parse resume - no valid email found")
+
+        existing_candidate = db.query(Candidate).filter(
+            Candidate.email == parsed.get('email').lower()
+        ).first()
+
+        if existing_candidate:
+            existing_candidate.name = parsed.get('name') or existing_candidate.name
+            existing_candidate.phone = parsed.get('phone') or existing_candidate.phone
+            existing_candidate.experience = parsed.get('experience', existing_candidate.experience)
+            existing_candidate.designation = parsed.get('designation') or existing_candidate.designation
+            
+            if parsed.get('skills'):
+                existing_candidate.set_skills(parsed.get('skills'))
+            if parsed.get('degree'):
+                existing_candidate.set_degree(parsed.get('degree'))
+            
+            db.commit()
+            db.refresh(existing_candidate)
+            candidate_id = existing_candidate.id
+            logger.info(f"Updated existing candidate: {existing_candidate.email}")
+        else:
+            cand = Candidate(
+                name=parsed.get('name'),
+                email=parsed.get('email').lower(),
+                phone=parsed.get('phone'),
+                experience=parsed.get('experience', 0),
+                designation=parsed.get('designation')
+            )
+            cand.set_skills(parsed.get('skills', []))
+            cand.set_degree(parsed.get('degree', []))
+            
+            db.add(cand)
+            db.commit()
+            db.refresh(cand)
+            candidate_id = cand.id
+            logger.info(f"Created new candidate: {cand.email}")
+
+        final_candidate = db.query(Candidate).filter(Candidate.id == candidate_id).first()
+
+        return {
+            'status': 'success',
+            'message': 'Resume processed successfully',
+            'candidate_id': candidate_id,
+            'data': {
+                'name': final_candidate.name,
+                'email': final_candidate.email,
+                'phone': final_candidate.phone,
+                'skills': final_candidate.get_skills(),
+                'degree': final_candidate.get_degree(),
+                'experience': final_candidate.experience,
+                'designation': final_candidate.designation
+            }
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error processing resume: {str(e)}")
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Error processing resume file")
+    finally:
+        if filepath and os.path.exists(filepath):
+            try:
+                os.remove(filepath)
+            except Exception as e:
+                logger.warning(f"Failed to clean up file {filepath}: {str(e)}")
+        db.close()
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
-
-#MS1
+    logger.info("Starting FastAPI application...")
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True, log_level="info")

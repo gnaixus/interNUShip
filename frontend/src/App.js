@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './pages/auth/AuthContext';
 import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
 import Home from './pages/home/Home';
+import ResumeUpload from './pages/resume/ResumeUpload';
 import './styles/App.css';
 
 //Protected Route Component
@@ -76,6 +77,13 @@ const AppContent = () => {
       {/* Home route is accessible to everyone */}
       <Route path="/home" element={<Home />} />
       <Route path="/" element={<Navigate to="/home" replace />} />
+
+      {/* Resume Upload Route (optional: protect it) */}
+      <Route path="/resume-upload" element={
+        <ProtectedRoute>
+          <ResumeUpload />
+        </ProtectedRoute>
+      } />
       
       {/* Protected routes will require authentication */}
       <Route path="/profile" element={
