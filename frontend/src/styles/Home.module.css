@@ -38,6 +38,15 @@
   color: #e2e8f0;
 }
 
+.mobileNavToggle {
+  display: none;
+  background: none;
+  border: none;
+  color: #f8fafc;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
 /* Navigation */
 .navItems {
   display: flex;
@@ -110,10 +119,12 @@
 .signupBtn:hover { transform: translateY(-1px); }
 .logoutBtn:hover { background: rgba(239, 68, 68, 0.2); }
 
-/* Hero section*/
+/* Hero section */
 .heroSection {
   padding: 80px 24px 60px;
   text-align: center;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .heroTitle {
@@ -139,6 +150,7 @@
   justify-content: center;
   gap: 40px;
   margin-top: 32px;
+  flex-wrap: wrap;
 }
 
 .statItem {
@@ -214,36 +226,82 @@
   color: #94a3b8;
 }
 
+/* Filter Controls */
+.filterControls {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 1rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 .categories {
   display: flex;
-  gap: 12px;
+  gap: 0.75rem;
   flex-wrap: wrap;
   justify-content: center;
 }
 
 .categoryChip {
-  background: rgba(51, 65, 85, 0.6);
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  color: #e2e8f0;
-  padding: 12px 20px;
-  border-radius: 25px;
-  font-size: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.75rem 1.25rem;
+  border-radius: 2rem;
+  font-size: 0.875rem;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.5rem;
 }
 
 .categoryChip:hover {
-  background: rgba(167, 139, 250, 0.15);
-  border-color: rgba(167, 139, 250, 0.4);
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .categoryChip.active {
-  background: linear-gradient(135deg, #a78bfa, #ec4899);
-  border-color: transparent;
+  background: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%);
   color: white;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.additionalFilters {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  align-items: center;
+}
+
+.filterSelect {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  min-width: 150px;
+  backdrop-filter: blur(10px);
+}
+
+.filterSelect:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+}
+
+.filterSelect option {
+  background: #1e293b;
+  color: #f8fafc;
 }
 
 /* Featured Section */
@@ -257,27 +315,27 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 40px;
+  margin-bottom: 2rem;
   flex-wrap: wrap;
   gap: 16px;
 }
 
 .sectionHeader h2 {
-  font-size: 28px;
-  font-weight: 700;
   color: #f8fafc;
+  font-size: 1.75rem;
+  font-weight: 600;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 1rem;
 }
 
 .badge {
-  background: linear-gradient(135deg, #a78bfa, #ec4899);
-  color: white;
-  padding: 4px 12px;
-  border-radius: 16px;
-  font-size: 14px;
-  font-weight: 600;
+  background: rgba(139, 92, 246, 0.2);
+  color: #c4b5fd;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
 .viewAllButton {
@@ -296,29 +354,33 @@
   color: white;
 }
 
+.viewOptions {
+  color: #94a3b8;
+  font-size: 0.875rem;
+}
+
 .internshipsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-  gap: 24px;
-  align-items: start;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+  align-items: stretch;
 }
 
-/* Cards */
+/* Internship Cards */
 .internshipCard {
-  background: rgba(30, 41, 59, 0.8);
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  padding: 24px;
-  transition: transform 0.3s ease;
+  border-radius: 1.5rem;
+  padding: 2rem;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
   position: relative;
-  height: fit-content;
-  min-height: 320px;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-}
-
-.internshipCard:hover {
-  transform: translateY(-4px);
+  min-height: 480px;
+  height: 100%;
 }
 
 .internshipCard::before {
@@ -328,136 +390,222 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #a78bfa, #ec4899, #06b6d4);
+  background: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%);
+}
+
+.internshipCard:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .matchBadge {
   position: absolute;
-  top: 16px;
-  right: 16px;
-  background: linear-gradient(135deg, #10b981, #059669);
+  top: 1.5rem;
+  right: 1.5rem;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 12px;
+  padding: 0.5rem 0.875rem;
+  border-radius: 1rem;
+  font-size: 0.8rem;
   font-weight: 600;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  z-index: 2;
 }
 
 .cardHeader {
   display: flex;
   align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  min-height: 80px;
 }
 
 .companyLogo {
-  width: 48px;
-  height: 48px;
-  background: rgba(167, 139, 250, 0.2);
-  border-radius: 12px;
+  font-size: 2rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  padding: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  width: 60px;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
   flex-shrink: 0;
 }
 
 .companyInfo {
   flex: 1;
+  min-height: 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .jobTitle {
-  font-size: 18px;
-  font-weight: 600;
   color: #f8fafc;
-  margin-bottom: 4px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.6rem;
 }
 
 .companyName {
   color: #94a3b8;
-  font-size: 14px;
+  font-size: 0.875rem;
   margin: 0;
+  line-height: 1.2;
 }
 
 .bookmarkButton {
-  background: rgba(51, 65, 85, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #94a3b8;
-  padding: 8px;
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #f59e0b;
+  padding: 0.5rem;
+  border-radius: 0.75rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 16px;
+  font-size: 1.1rem;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .bookmarkButton:hover {
-  background: rgba(167, 139, 250, 0.2);
-  color: #a78bfa;
+  background: rgba(245, 158, 11, 0.2);
+  transform: scale(1.1);
 }
 
 .jobDetails {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-bottom: 16px;
+  gap: 0.75rem;
+  margin: 1rem 0;
+  min-height: 80px;
 }
 
 .detailItem {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: #94a3b8;
+  gap: 0.5rem;
+  color: #cbd5e1;
+  font-size: 0.875rem;
+  min-height: 24px;
+}
+
+.detailItem span {
+  opacity: 0.7;
+  width: 16px;
+  display: inline-block;
+  text-align: center;
 }
 
 .jobDescription {
   color: #e2e8f0;
-  margin-bottom: 20px;
-  font-size: 14px;
-  flex-grow: 1;
-  line-height: 1.5;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  margin: 1rem 0;
+  flex: 1;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 4rem;
+}
+
+.skillsTags {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+  min-height: 40px;
+  align-items: flex-start;
+  align-content: flex-start;
+}
+
+.skillTag {
+  background: rgba(139, 92, 246, 0.2);
+  color: #c4b5fd;
+  padding: 0.375rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  white-space: nowrap;
+  height: fit-content;
 }
 
 .cardActions {
   display: flex;
-  gap: 12px;
+  gap: 1rem;
   margin-top: auto;
+  padding-top: 1rem;
 }
 
 .applyButton {
-  flex: 1;
-  background: linear-gradient(135deg, #a78bfa, #ec4899);
+  flex: 2;
+  background: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%);
   color: white;
   border: none;
-  padding: 12px 16px;
-  border-radius: 8px;
+  padding: 0.875rem 1.5rem;
+  border-radius: 0.75rem;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.3s ease;
-  font-size: 14px;
+  transition: all 0.3s ease;
+  min-height: 44px;
+  font-size: 0.875rem;
 }
 
 .applyButton:hover {
   transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
 }
 
 .detailsButton {
-  background: rgba(51, 65, 85, 0.8);
-  color: #e2e8f0;
+  flex: 1;
+  background: rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 12px 16px;
-  border-radius: 8px;
-  font-weight: 600;
+  padding: 0.875rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 14px;
+  min-height: 44px;
+  font-size: 0.875rem;
 }
 
 .detailsButton:hover {
-  background: rgba(51, 65, 85, 1);
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
 }
 
-/* Stats */
+/* No Results */
+.noResults {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #94a3b8;
+}
+
+.noResults h3 {
+  color: #f8fafc;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.noResults p {
+  font-size: 1rem;
+  margin-bottom: 2rem;
+}
+
+/* Stats Section */
 .statsSection {
   padding: 60px 24px;
   background: rgba(30, 41, 59, 0.4);
@@ -502,7 +650,7 @@
   margin: 0;
 }
 
-/* Call to action */
+/* Call to Action */
 .ctaSection {
   padding: 80px 24px;
   text-align: center;
@@ -546,20 +694,420 @@
   transform: translateY(-2px);
 }
 
-@media (max-width: 480px) {
-  .internshipCard {
-    padding: 20px;
-    min-height: auto;
+/* Applications Page Specific Styles */
+.applicationsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.applicationCard {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1.5rem;
+  padding: 2rem;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  min-height: 500px;
+  position: relative;
+}
+
+.applicationCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.applicationCard .cardHeader {
+  margin-top: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.applicationCard .cardActions {
+  display: flex;
+  gap: 1rem;
+  margin-top: auto;
+  padding-top: 1rem;
+}
+
+.statusBadge {
+  padding: 0.5rem 1rem;
+  border-radius: 1.5rem;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: fit-content;
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+}
+
+.tabsContainer {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+  justify-content: center;
+}
+
+.interviewInfo {
+  background: rgba(59, 130, 246, 0.2);
+  padding: 1rem;
+  border-radius: 1rem;
+  margin: 1rem 0;
+  color: #93c5fd;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 500;
+}
+
+.interviewInfo::before {
+  content: '🎯';
+  font-size: 1.2rem;
+}
+
+.nextStep {
+  margin: 1rem 0;
+  font-size: 1rem;
+  color: #e2e8f0;
+  font-weight: 500;
+}
+
+.nextStep strong {
+  color: #f8fafc;
+}
+
+.applicationNotes {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1rem;
+  border-radius: 1rem;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+  color: #cbd5e1;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  line-height: 1.5;
+}
+
+.applicationNotes strong {
+  color: #f8fafc;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.documents {
+  margin: 1rem 0;
+  color: #e2e8f0;
+}
+
+.documents strong {
+  color: #f8fafc;
+  display: block;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.documentTag {
+  background: rgba(139, 92, 246, 0.2);
+  color: #c4b5fd;
+  padding: 0.5rem 1rem;
+  border-radius: 1rem;
+  font-size: 0.8rem;
+  margin-right: 0.75rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  display: inline-block;
+  font-weight: 500;
+}
+
+.editButton, .withdrawButton {
+  background: #6b7280;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 1rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  flex: 1;
+}
+
+.editButton:hover {
+  background: #4b5563;
+  transform: translateY(-1px);
+}
+
+.withdrawButton {
+  background: #ef4444;
+}
+
+.withdrawButton:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+}
+
+.upcomingSection {
+  margin: 3rem 0;
+  padding: 2rem;
+  background: rgba(30, 41, 59, 0.6);
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.upcomingSection h2 {
+  color: #f8fafc;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.upcomingDeadlines {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.deadlineCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(55, 65, 81, 0.8);
+  padding: 1.5rem;
+  border-radius: 1rem;
+  border-left: 4px solid #f59e0b;
+  transition: all 0.3s ease;
+}
+
+.deadlineCard:hover {
+  background: rgba(55, 65, 81, 1);
+  transform: translateX(4px);
+}
+
+.deadlineInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.deadlineInfo .companyName {
+  font-weight: 600;
+  color: #f8fafc;
+  font-size: 1rem;
+}
+
+.deadlineInfo .jobTitle {
+  color: #94a3b8;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.deadlineTime {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.daysLeft {
+  font-weight: 600;
+  color: #f59e0b;
+  font-size: 1rem;
+}
+
+.deadlineDate {
+  color: #94a3b8;
+  font-size: 0.875rem;
+}
+
+.tipsSection {
+  margin: 3rem 0;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 2rem;
+}
+
+.tipsSection h2 {
+  color: #f8fafc;
+  margin-bottom: 2rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: center;
+  justify-content: center;
+}
+
+.tipsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.tipCard {
+  background: rgba(55, 65, 81, 0.6);
+  padding: 2rem;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.tipCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  background: rgba(55, 65, 81, 0.8);
+}
+
+.tipIcon {
+  font-size: 3rem;
+  margin-bottom: 1.5rem;
+  background: rgba(167, 139, 250, 0.2);
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.tipCard h3 {
+  color: #f8fafc;
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.tipCard p {
+  color: #94a3b8;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .headerLeft {
+    gap: 16px;
+  }
+  
+  .navItems {
+    display: none;
+  }
+  
+  .mobileNavToggle {
+    display: block;
+  }
+  
+  .userStats {
+    gap: 20px;
+    justify-content: center;
+  }
+  
+  .tabsContainer {
+    justify-content: flex-start;
   }
   
   .internshipsGrid {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 1.5rem;
+  }
+  
+  .applicationsGrid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .filterControls {
+    padding: 1rem;
+  }
+  
+  .categories {
+    justify-content: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .categoryChip {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
+  
+  .additionalFilters {
+    justify-content: flex-start;
+  }
+  
+  .filterSelect {
+    min-width: 120px;
+  }
+  
+  .cardActions {
+    flex-direction: column;
+  }
+  
+  .jobDetails {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
   }
   
   .statsGrid {
     grid-template-columns: 1fr;
   }
+  
+  .tipsGrid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .upcomingSection {
+    margin: 2rem 1rem;
+    padding: 1.5rem;
+  }
+  
+  .deadlineCard {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .deadlineTime {
+    text-align: left;
+  }
+  
+  .tipsSection {
+    padding: 0 1rem;
+  }
+  
+  .applicationCard {
+    min-height: 400px;
+    padding: 1.5rem;
+  }
+  
+  .applicationCard .cardActions {
+    gap: 0.75rem;
+  }
+  
+  .editButton, .withdrawButton {
+    padding: 0.625rem 1rem;
+    font-size: 0.8rem;
+  }
 }
-
-/* milestone 1 */
