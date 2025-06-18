@@ -229,13 +229,14 @@ async def upload_resume(
         if existing_candidate:
             existing_candidate.name = parsed.get('name') or existing_candidate.name
             existing_candidate.phone = parsed.get('phone') or existing_candidate.phone
-            existing_candidate.experience = parsed.get('experience', existing_candidate.experience)
             existing_candidate.designation = parsed.get('designation') or existing_candidate.designation
             
             if parsed.get('skills'):
                 existing_candidate.set_skills(parsed.get('skills'))
             if parsed.get('degree'):
                 existing_candidate.set_degree(parsed.get('degree'))
+            if parsed.get("experience"):
+                existing_candidate.set_experience(parsed.get("experience"))
             
             db.commit()
             db.refresh(existing_candidate)
@@ -246,11 +247,11 @@ async def upload_resume(
                 name=parsed.get('name'),
                 email=parsed.get('email').lower(),
                 phone=parsed.get('phone'),
-                experience=parsed.get('experience', 0),
                 designation=parsed.get('designation')
             )
             cand.set_skills(parsed.get('skills', []))
             cand.set_degree(parsed.get('degree', []))
+            cand.set_experience(parsed.get("experience", []))
             
             db.add(cand)
             db.commit()
@@ -270,7 +271,7 @@ async def upload_resume(
                 'phone': final_candidate.phone,
                 'skills': final_candidate.get_skills(),
                 'degree': final_candidate.get_degree(),
-                'experience': final_candidate.experience,
+                'experience': final_candidate.get_experience(),
                 'designation': final_candidate.designation
             }
         }

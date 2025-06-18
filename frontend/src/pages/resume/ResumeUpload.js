@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export default function ResumeUpload({ onParse }) {
+export default function ResumeUpload({ onParse = () => {} }) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleUpload = async (e) => {

@@ -5,6 +5,7 @@ import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
 import Home from './pages/home/Home';
 import ResumeUpload from './pages/resume/ResumeUpload';
+import ApplicationForm from './pages/resume/ApplicationForm';
 import './styles/App.css';
 
 //Protected Route Component
@@ -30,6 +31,11 @@ const ProtectedRoute = ({ children }) => {
   }
   
   return user ? children : <Navigate to="/login" replace />;
+};
+
+const handleParsedResume = (parsedData) => {
+  console.log('Parsed resume data:', parsedData);
+  // you can also set state here to display parsed data in UI
 };
 
 //Public Route Component (redirects to home if already logged in but probably not for ms1 since local host)
@@ -81,7 +87,7 @@ const AppContent = () => {
       {/* Resume Upload Route (optional: protect it) */}
       <Route path="/resume-upload" element={
         <ProtectedRoute>
-          <ResumeUpload />
+          <ResumeUpload onParse={handleParsedResume}/>
         </ProtectedRoute>
       } />
       
@@ -165,6 +171,7 @@ function App() {
     </div>
   );
 }
+
 
 export default App;
 

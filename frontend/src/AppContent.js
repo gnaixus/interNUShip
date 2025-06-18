@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import ResumeUpload from './ResumeUpload';
 
-export default function ApplicationForm() {
+export default function AppContent() {
   const [parsedData, setParsedData] = useState(null);
 
   return (
-    <div style={{ padding: '2rem' }}>
-      <h2>Upload Resume</h2>
+    <div>
+      <h1>Welcome to Your App</h1>
+
       <ResumeUpload onParse={(data) => setParsedData(data.data)} />
 
       {parsedData && (

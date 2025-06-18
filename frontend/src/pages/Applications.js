@@ -224,7 +224,7 @@ const Applications = () => {
           </div>
 
           <ul className={styles.navItems}>
-            {navItems.map(item => (
+            {navigationItems.map(item => (
               <li key={item.path}>
                 <button
                   className={`${styles.navLink} ${location.pathname === item.path ? styles.active : ''}`}
@@ -240,7 +240,7 @@ const Applications = () => {
 
         <div className={styles.headerRight}>
           <button className={styles.profileBtn} onClick={() => navigate('/profile')}>Profile</button>
-          <button className={styles.logoutBtn} onClick={() => handleAction('logout')}>Logout</button>
+          <button className={styles.logoutBtn} onClick={() => handleUserAction('logout')}>Logout</button>
           <button className={styles.mobileNavToggle}>☰</button>
         </div>
       </div>
@@ -255,19 +255,19 @@ const Applications = () => {
         {/* Quick Stats */}
         <div className={styles.userStats}>
           <div className={styles.statItem}>
-            <span className={styles.statNumber}>{stats.total}</span>
+            <span className={styles.statNumber}>{applicationStats.totalApplications}</span>
             <span className={styles.statLabel}>Total Applied</span>
           </div>
           <div className={styles.statItem}>
-            <span className={styles.statNumber}>{stats.interviews}</span>
+            <span className={styles.statNumber}>{applicationStats.scheduledInterviews}</span>
             <span className={styles.statLabel}>Interviews</span>
           </div>
           <div className={styles.statItem}>
-            <span className={styles.statNumber}>{stats.accepted}</span>
+            <span className={styles.statNumber}>{applicationStats.successfulApplications}</span>
             <span className={styles.statLabel}>Accepted</span>
           </div>
           <div className={styles.statItem}>
-            <span className={styles.statNumber}>{stats.successRate}%</span>
+            <span className={styles.statNumber}>{applicationStats.successRate}%</span>
             <span className={styles.statLabel}>Success Rate</span>
           </div>
         </div>
@@ -276,21 +276,21 @@ const Applications = () => {
       {/* Tabs and Controls */}
       <section className={styles.searchSection}>
         <div className={styles.tabsContainer}>
-          {tabs.map(tab => (
+
+          {filterTabs.map(tab => (
             <button
               key={tab.id}
-              className={`${styles.categoryChip} ${activeTab === tab.id ? styles.active : ''}`}
-              onClick={() => setActiveTab(tab.id)}
+              className={`${styles.categoryChip} ${currentTab === tab.id ? styles.active : ''}`}
+              onClick={() => setCurrentTab(tab.id)}
             >
               {tab.label} <span className={styles.badge}>{tab.count}</span>
             </button>
           ))}
-        </div>
 
         <div className={styles.additionalFilters}>
           <select 
-            value={sortBy} 
-            onChange={(e) => setSortBy(e.target.value)}
+            value={sortOption} 
+            onChange={(e) => setSortOption(e.target.value)}
             className={styles.filterSelect}
           >
             <option value="applied">Recently Applied</option>
@@ -304,8 +304,8 @@ const Applications = () => {
       <section className={styles.featuredSection}>
         <div className={styles.sectionHeader}>
           <h2>
-            {activeTab === 'all' ? 'All Applications' : tabs.find(tab => tab.id === activeTab)?.label}
-            <span className={styles.badge}>{filteredApplications.length}</span>
+            {currentTab === 'all' ? 'All Applications' : filterTabs.find(tab => tab.id === currentTab)?.label}
+            <span className={styles.badge}>{filteredApplications.length}</span> 
           </h2>
         </div>
 
@@ -313,9 +313,9 @@ const Applications = () => {
           <div className={styles.noResults}>
             <h3>No applications found</h3>
             <p>
-              {activeTab === 'all' 
+              {currentTab === 'all' 
                 ? "You haven't applied to any internships yet." 
-                : `No applications in ${activeTab} status.`}
+                : `No applications in ${currentTab} status.`}
             </p>
             <button className={styles.ctaPrimary} onClick={() => navigate('/internships')}>
               Browse Internships
@@ -327,55 +327,55 @@ const Applications = () => {
               <div key={application.id} className={styles.applicationCard}>
                 <div 
                   className={styles.statusBadge}
-                  style={{ backgroundColor: statusConfig[application.status].color }}
+                  style={{ backgroundColor: statusConfiguration[application.applicationStatus].color }}
                 >
-                  {statusConfig[application.status].icon} {statusConfig[application.status].label}
+                  {statusConfiguration[application.applicationStatus].icon} {statusConfiguration[application.applicationStatus].label}
                 </div>
                 
                 <div className={styles.cardHeader}>
-                  <div className={styles.companyLogo}>{application.logo}</div>
+                  <div className={styles.companyLogo}>{application.companyLogo}</div>
                   <div className={styles.companyInfo}>
-                    <h3 className={styles.jobTitle}>{application.title}</h3>
-                    <p className={styles.companyName}>{application.company}</p>
+                    <h3 className={styles.jobTitle}>{application.jobTitle}</h3>
+                    <p className={styles.companyName}>{application.companyName}</p>
                   </div>
                 </div>
 
                 <div className={styles.jobDetails}>
                   <div className={styles.detailItem}>
-                    <span>📅</span> Applied: {new Date(application.appliedDate).toLocaleDateString()}
+                    <span>📅</span> Applied: {new Date(application.dateApplied).toLocaleDateString()}
                   </div>
                   <div className={styles.detailItem}>
-                    <span>⏰</span> Deadline: {application.deadline}
+                    <span>⏰</span> Deadline: {application.applicationDeadline}
                   </div>
                   <div className={styles.detailItem}>
-                    <span>📍</span> {application.location}
+                    <span>📍</span> {application.workLocation}
                   </div>
                   <div className={styles.detailItem}>
-                    <span>💰</span> {application.stipend}
+                    <span>💰</span> {application.monthlySalary}
                   </div>
                 </div>
 
-                {application.interviewDate && (
+                {application.upcomingInterview && (
                   <div className={styles.interviewInfo}>
-                    Interview: {new Date(application.interviewDate).toLocaleDateString()}
+                    Interview: {new Date(application.upcomingInterview).toLocaleDateString()}
                   </div>
                 )}
 
                 <div className={styles.nextStep}>
-                  <strong>Next Step:</strong> {application.nextStep}
+                  <strong>Next Step:</strong> {application.currentStep}
                 </div>
 
-                {application.notes && (
+                {application.personalNotes && (
                   <div className={styles.applicationNotes}>
                     <strong>Notes:</strong>
-                    {application.notes}
+                    {application.personalNotes}
                   </div>
                 )}
 
                 <div className={styles.documents}>
                   <strong>Documents:</strong>
                   <div>
-                    {application.documents.map(doc => (
+                    {application.submittedDocuments.map(doc => (
                       <span key={doc} className={styles.documentTag}>{doc}</span>
                     ))}
                   </div>
@@ -384,20 +384,20 @@ const Applications = () => {
                 <div className={styles.cardActions}>
                   <button 
                     className={styles.detailsButton} 
-                    onClick={() => handleAction('details', application)}
+                    onClick={() => handleUserAction('viewDetails', application)}
                   >
                     View Details
                   </button>
                   <button 
                     className={styles.editButton} 
-                    onClick={() => handleAction('edit', application)}
+                    onClick={() => handleUserAction('edit', application)}
                   >
                     Edit Notes
                   </button>
-                  {(application.status === 'pending' || application.status === 'interview') && (
+                  {(application.applicationStatus === 'pending' || application.applicationStatus === 'interview') && (
                     <button 
                       className={styles.withdrawButton} 
-                      onClick={() => handleAction('withdraw', application)}
+                      onClick={() => handleUserAction('withdraw', application)}
                     >
                       Withdraw
                     </button>
@@ -410,38 +410,39 @@ const Applications = () => {
       </section>
 
       {/* Upcoming Deadlines Section */}
-      {applications.filter(app => {
-        const deadlineDate = new Date(app.deadline.split('/').reverse().join('-'));
+      {userApplications.filter(app => {
+        const deadlineDate = new Date(app.applicationDeadline.split('/').reverse().join('-'));
         const today = new Date();
         const daysUntil = Math.ceil((deadlineDate - today) / (1000 * 60 * 60 * 24));
-        return daysUntil <= 7 && daysUntil > 0 && (app.status === 'pending' || app.status === 'interview');
+        return daysUntil <= 7 && daysUntil > 0 && 
+         (app.applicationStatus === 'pending' || app.applicationStatus === 'interview');
       }).length > 0 && (
         <section className={styles.upcomingSection}>
           <h2>🚨 Upcoming Deadlines</h2>
           <div className={styles.upcomingDeadlines}>
-            {applications
+            {userApplications
               .filter(app => {
-                const deadlineDate = new Date(app.deadline.split('/').reverse().join('-'));
-                const today = new Date();
-                const daysUntil = Math.ceil((deadlineDate - today) / (1000 * 60 * 60 * 24));
-                return daysUntil <= 7 && daysUntil > 0 && (app.status === 'pending' || app.status === 'interview');
+              const deadlineDate = new Date(app.applicationDeadline.split('/').reverse().join('-'));
+              const today = new Date();
+              const daysUntil = Math.ceil((deadlineDate - today) / (1000 * 60 * 60 * 24));
+              return daysUntil <= 7 && daysUntil > 0 &&
+                (app.applicationStatus === 'pending' || app.applicationStatus === 'interview');
               })
-              .map(application => {
-                const deadlineDate = new Date(application.deadline.split('/').reverse().join('-'));
+              .map(app => {
+                const deadlineDate = new Date(app.applicationDeadline.split('/').reverse().join('-'));
                 const today = new Date();
                 const daysUntil = Math.ceil((deadlineDate - today) / (1000 * 60 * 60 * 24));
-                
                 return (
-                  <div key={application.id} className={styles.deadlineCard}>
+                  <div key={app.id} className={styles.deadlineCard}>
                     <div className={styles.deadlineInfo}>
-                      <span className={styles.companyName}>{application.company}</span>
-                      <span className={styles.jobTitle}>{application.title}</span>
+                      <span className={styles.companyName}>{app.companyName}</span>
+                      <span className={styles.jobTitle}>{app.jobTitle}</span>
                     </div>
                     <div className={styles.deadlineTime}>
                       <span className={styles.daysLeft}>
-                        {daysUntil === 1 ? '2 days left' : `${daysUntil} days left`}
+                        {daysUntil === 1 ? '1 day left' : `${daysUntil} days left`}
                       </span>
-                      <span className={styles.deadlineDate}>{application.deadline}</span>
+                      <span className={styles.deadlineDate}>{app.applicationDeadline}</span>
                     </div>
                   </div>
                 );
@@ -472,6 +473,7 @@ const Applications = () => {
         </div>
       </section>
     </div>
+  
   );
 };
 
