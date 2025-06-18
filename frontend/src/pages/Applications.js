@@ -239,8 +239,12 @@ const Applications = () => {
         </div>
 
         <div className={styles.headerRight}>
-          <button className={styles.profileBtn} onClick={() => navigate('/profile')}>Profile</button>
-          <button className={styles.logoutBtn} onClick={() => handleUserAction('logout')}>Logout</button>
+          <button className={styles.profileBtn} onClick={() => navigate('/profile')}>
+            Profile
+          </button>
+          <button className={styles.logoutBtn} onClick={() => handleUserAction('logout')}>
+            Logout
+          </button>
           <button className={styles.mobileNavToggle}>☰</button>
         </div>
       </div>
@@ -276,7 +280,6 @@ const Applications = () => {
       {/* Tabs and Controls */}
       <section className={styles.searchSection}>
         <div className={styles.tabsContainer}>
-
           {filterTabs.map(tab => (
             <button
               key={tab.id}
@@ -286,6 +289,7 @@ const Applications = () => {
               {tab.label} <span className={styles.badge}>{tab.count}</span>
             </button>
           ))}
+        </div>
 
         <div className={styles.additionalFilters}>
           <select 
@@ -305,20 +309,20 @@ const Applications = () => {
         <div className={styles.sectionHeader}>
           <h2>
             {currentTab === 'all' ? 'All Applications' : filterTabs.find(tab => tab.id === currentTab)?.label}
-            <span className={styles.badge}>{filteredApplications.length}</span> 
+            <span className={styles.badge}>{filteredApplications.length}</span>
           </h2>
         </div>
 
         {filteredApplications.length === 0 ? (
           <div className={styles.noResults}>
-            <h3>No applications found</h3>
+            <h3>Nothing here yet!</h3>
             <p>
               {currentTab === 'all' 
-                ? "You haven't applied to any internships yet." 
-                : `No applications in ${currentTab} status.`}
+                ? "Ready to start your internship journey? Browse opportunities and apply to roles that excite you!" 
+                : `No applications in this category yet. Keep applying - you've got this! 💪`}
             </p>
             <button className={styles.ctaPrimary} onClick={() => navigate('/internships')}>
-              Browse Internships
+              Explore Opportunities
             </button>
           </div>
         ) : (
@@ -390,14 +394,14 @@ const Applications = () => {
                   </button>
                   <button 
                     className={styles.editButton} 
-                    onClick={() => handleUserAction('edit', application)}
+                    onClick={() => handleUserAction('editNotes', application)}
                   >
                     Edit Notes
                   </button>
                   {(application.applicationStatus === 'pending' || application.applicationStatus === 'interview') && (
                     <button 
                       className={styles.withdrawButton} 
-                      onClick={() => handleUserAction('withdraw', application)}
+                      onClick={() => handleUserAction('withdrawApplication', application)}
                     >
                       Withdraw
                     </button>
@@ -422,11 +426,11 @@ const Applications = () => {
           <div className={styles.upcomingDeadlines}>
             {userApplications
               .filter(app => {
-              const deadlineDate = new Date(app.applicationDeadline.split('/').reverse().join('-'));
-              const today = new Date();
-              const daysUntil = Math.ceil((deadlineDate - today) / (1000 * 60 * 60 * 24));
-              return daysUntil <= 7 && daysUntil > 0 &&
-                (app.applicationStatus === 'pending' || app.applicationStatus === 'interview');
+                const deadlineDate = new Date(app.applicationDeadline.split('/').reverse().join('-'));
+                const today = new Date();
+                const daysUntil = Math.ceil((deadlineDate - today) / (1000 * 60 * 60 * 24));
+                return daysUntil <= 7 && daysUntil > 0 &&
+                  (app.applicationStatus === 'pending' || app.applicationStatus === 'interview');
               })
               .map(app => {
                 const deadlineDate = new Date(app.applicationDeadline.split('/').reverse().join('-'));
@@ -473,7 +477,6 @@ const Applications = () => {
         </div>
       </section>
     </div>
-  
   );
 };
 

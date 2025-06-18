@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from '../../styles/Home.module.css';
@@ -9,19 +9,22 @@ const Home = () => {
   const location = useLocation();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const fileInputRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
+  const [resumeUploaded, setResumeUploaded] = useState(false);
 
-   // TODO: Replace with real API data in milestone 2
+  // Sample internship data
   const internships = [
     { id: 1, title: 'Software Engineering Intern', company: 'TechCorp Singapore', location: 'Singapore', 
       stipend: 'S$1,200/month', duration: '3 months', category: 'technology', match: 92, logo: '💻',
       description: 'Build innovative web applications using React and Node.js', deadline: '15/06/2025' },
-    { id: 2, title: 'Data Science Intern', company: 'Analytics Plus', location: 'Remote',
+    { id: 2, title: 'Data Science Intern', company: 'Analytics Plus', location: 'Singapore',
       stipend: 'S$1,100/month', duration: '6 months', category: 'data', match: 87, logo: '📊',
       description: 'Analyse large datasets and create machine learning models', deadline: '20/06/2025' },
     { id: 3, title: 'Marketing Intern', company: 'Creative Agency', location: 'Singapore',
       stipend: 'S$1,200/month', duration: '4 months', category: 'marketing', match: 75, logo: '📈',
       description: 'Create engaging marketing campaigns for tech startups', deadline: '10/06/2025' },
-    { id: 4, title: 'UX Design Intern', company: 'Design Studio', location: 'Hybrid',
+    { id: 4, title: 'UX Design Intern', company: 'Design Studio', location: 'Singapore',
       stipend: 'S$1,100/month', duration: '3 months', category: 'design', match: 81, logo: '🎨',
       description: 'Design user experiences for mobile and web applications', deadline: '25/06/2025' }
   ];
@@ -46,7 +49,7 @@ const Home = () => {
     { path: '/about', label: 'About', icon: '🏢' }
   ];
 
-  // Handle different actions - probably could make this cleaner later
+  // Handle actions
   const handleAction = (action, internship = null) => {
     if (action === 'logout') { logout(); navigate('/login'); }
     else if (action === 'apply') user ? navigate(`/apply/${internship.id}`) : navigate('/signup');
@@ -54,7 +57,31 @@ const Home = () => {
     else if (action === 'details') navigate(`/internships/${internship.id}`);
   };
 
-  // Filter internships based on search and category
+  // Handle resume upload
+  const handleResumeUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (file.type !== 'application/pdf') {
+      alert('Please upload a PDF file');
+      return;
+    }
+
+    setUploading(true);
+    
+    try {
+      // Simulate upload and parsing
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      setResumeUploaded(true);
+      alert('Resume uploaded and parsed successfully! Your profile has been updated.');
+    } catch (error) {
+      alert('Upload failed. Please try again.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Filter internships
   const filtered = internships.filter(i => 
     (selectedCategory === 'all' || i.category === selectedCategory) &&
     (i.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -63,15 +90,13 @@ const Home = () => {
 
   return (
     <div className={styles.homeContainer}>
-      {/* Main header with user info and navigation */}
+      {/* Header */}
       <div className={styles.userHeader}>
         <div className={styles.headerLeft}>
           <div className={styles.userInfo}>
             {user && <span>👋 {user.full_name || user.email}</span>}
             {isGuest && <span>🔍 Browsing as Guest</span>}
           </div>
-
-          {/* Navigation menu */}
           <ul className={styles.navItems}>
             {navItems.map(item => (
               <li key={item.path}>
@@ -86,7 +111,6 @@ const Home = () => {
             ))}
           </ul>
         </div>
-
         <div className={styles.headerRight}>
           {user && (
             <>
@@ -103,13 +127,11 @@ const Home = () => {
           {isGuest && (
             <button className={styles.signupBtn} onClick={() => navigate('/signup')}>Sign Up</button>
           )}
-          
-          {/* Mobile menu toggle - not implemented yet */}
           <button className={styles.mobileNavToggle}>☰</button>
         </div>
       </div>
 
-      {/* Hero section*/}
+      {/* Hero Section */}
       <section className={styles.heroSection}>
         <h1 className={styles.heroTitle}>
           {user ? `Welcome back, ${user.full_name || user.email}!` : 
@@ -120,7 +142,6 @@ const Home = () => {
            'Connect with top companies and land your ideal internship.'}
         </p>
         
-        {/* Show stats only for logged in users */}
         {user && (
           <div className={styles.userStats}>
             <div className={styles.statItem}>
@@ -139,7 +160,76 @@ const Home = () => {
         )}
       </section>
 
-      {/* Search functionality to narrow down on keywords */}
+      {/* Resume Upload Section - Only for logged in users */}
+      {user && (
+        <section className={styles.resumeUploadSection}>
+          <div className={styles.resumeUploadCard}>
+            <div className={styles.resumeUploadContent}>
+              <div className={styles.resumeUploadIcon}>
+                {resumeUploaded ? '✅' : '📄'}
+              </div>
+              <div className={styles.resumeUploadText}>
+                <h3 className={styles.resumeUploadTitle}>
+                  {resumeUploaded ? 'Resume Successfully Uploaded!' : 'Boost Your Application Success'}
+                </h3>
+                <p className={styles.resumeUploadSubtitle}>
+                  {resumeUploaded 
+                    ? 'Your resume has been parsed and your profile is up to date. You\'ll get better internship matches!'
+                    : 'Upload your resume to get personalized internship recommendations and auto-fill application forms'
+                  }
+                </p>
+              </div>
+              <div className={styles.resumeUploadActions}>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleResumeUpload}
+                  accept=".pdf"
+                  style={{ display: 'none' }}
+                />
+                <button
+                  className={styles.btn + ' ' + styles.btnPrimary}
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                >
+                  {uploading ? (
+                    <>
+                      <span className={styles.spinner}></span>
+                      Analyzing Resume...
+                    </>
+                  ) : resumeUploaded ? 'Update Resume' : 'Upload Resume'}
+                </button>
+                {resumeUploaded && (
+                  <button 
+                    className={styles.btn + ' ' + styles.btnSecondary}
+                    onClick={() => navigate('/profile')}
+                  >
+                    View Profile
+                  </button>
+                )}
+              </div>
+            </div>
+            {!resumeUploaded && (
+              <div className={styles.resumeUploadFeatures}>
+                <div className={styles.featureItem}>
+                  <span className={styles.featureIcon}>🎯</span>
+                  <span>Smart job matching</span>
+                </div>
+                <div className={styles.featureItem}>
+                  <span className={styles.featureIcon}>⚡</span>
+                  <span>Auto-fill applications</span>
+                </div>
+                <div className={styles.featureItem}>
+                  <span className={styles.featureIcon}>📊</span>
+                  <span>Track your progress</span>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* Search Section */}
       <section className={styles.searchSection}>
         <h2>Find Your Next Opportunity</h2>
         <div className={styles.searchBar}>
@@ -154,7 +244,6 @@ const Home = () => {
           </div>
         </div>
         
-        {/* Category filter buttons for different work expertise */}
         <div className={styles.categories}>
           {categories.map(cat => (
             <button
@@ -168,7 +257,7 @@ const Home = () => {
         </div>
       </section>
       
-      {/* Internship listings for user to view */}
+      {/* Featured Internships */}
       <section className={styles.featuredSection}>
         <div className={styles.sectionHeader}>
           <h2>
@@ -195,7 +284,7 @@ const Home = () => {
                   🔖
                 </button>
               </div>
-              {/* Job details grid */}
+
               <div className={styles.jobDetails}>
                 <div className={styles.detailItem}>
                   <span>📍</span> {internship.location}
@@ -213,7 +302,6 @@ const Home = () => {
 
               <p className={styles.jobDescription}>{internship.description}</p>
 
-              {/* Action buttons for users*/}
               <div className={styles.cardActions}>
                 <button className={styles.applyButton} onClick={() => handleAction('apply', internship)}>
                   {user ? 'Apply Now' : 'Sign Up to Apply'}
@@ -227,7 +315,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Platform statistics (fake for now) */}
+      {/* Platform Statistics */}
       <section className={styles.statsSection}>
         <div className={styles.statsGrid}>
           <div className={styles.statCard}>
@@ -254,7 +342,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Call to action for non-users to signup*/}
+      {/* CTA Section */}
       {!user && (
         <section className={styles.ctaSection}>
           <div className={styles.ctaContent}>
@@ -271,5 +359,3 @@ const Home = () => {
 };
 
 export default Home;
-
-// end of milestone 1

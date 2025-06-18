@@ -4,6 +4,9 @@ import { AuthProvider, useAuth } from './pages/auth/AuthContext';
 import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
 import Home from './pages/home/Home';
+import Browse from './pages/Browse';
+import Applications from './pages/Applications';
+import Profile from './pages/Profile';
 import ResumeUpload from './pages/resume/ResumeUpload';
 import ApplicationForm from './pages/resume/ApplicationForm';
 import './styles/App.css';
@@ -33,12 +36,7 @@ const ProtectedRoute = ({ children }) => {
   return user ? children : <Navigate to="/login" replace />;
 };
 
-const handleParsedResume = (parsedData) => {
-  console.log('Parsed resume data:', parsedData);
-  // you can also set state here to display parsed data in UI
-};
-
-//Public Route Component (redirects to home if already logged in but probably not for ms1 since local host)
+//Public Route Component (redirects to home if already logged in)
 const PublicRoute = ({ children }) => {
   const { user, loading } = useAuth();
   
@@ -65,6 +63,12 @@ const PublicRoute = ({ children }) => {
 
 //App Content Component (needs to be inside AuthProvider)
 const AppContent = () => {
+  
+  const handleParsedResume = (parsedData) => {
+    console.log('Parsed resume data:', parsedData);
+    // You can also set state here to display parsed data in UI
+  };
+
   return (
     <Routes>
       {/* Public routes - redirect to home if logged in */}
@@ -84,46 +88,44 @@ const AppContent = () => {
       <Route path="/home" element={<Home />} />
       <Route path="/" element={<Navigate to="/home" replace />} />
 
-      {/* Resume Upload Route (optional: protect it) */}
-      <Route path="/resume-upload" element={
-        <ProtectedRoute>
-          <ResumeUpload onParse={handleParsedResume}/>
-        </ProtectedRoute>
-      } />
+      {/* Browse page - accessible to everyone (guests can browse) */}
+      <Route path="/internships" element={<Browse />} />
       
-      {/* Protected routes will require authentication */}
-      <Route path="/profile" element={
-        <ProtectedRoute>
-          <div style={{ padding: '50px', textAlign: 'center', color: '#f8fafc' }}>
-            <h1>Profile Page</h1>
-            <p>Coming soon...</p>
-          </div>
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/internships" element={
-        <ProtectedRoute>
-          <div style={{ padding: '50px', textAlign: 'center', color: '#f8fafc' }}>
-            <h1>Internships Page</h1>
-            <p>Coming soon...</p>
-          </div>
-        </ProtectedRoute>
-      } />
-      
+      {/* Applications page - protected route (requires authentication) */}
       <Route path="/applications" element={
         <ProtectedRoute>
-          <div style={{ padding: '50px', textAlign: 'center', color: '#f8fafc' }}>
-            <h1>Application Tracker</h1>
-            <p>Coming soon...</p>
-          </div>
+          <Applications />
+        </ProtectedRoute>
+      } />
+
+      {/* Resume Upload Route - protected */}
+      <Route path="/resume-upload" element={
+        <ProtectedRoute>
+          <ResumeUpload onParse={handleParsedResume} />
+        </ProtectedRoute>
+      } />
+
+      {/* Application Form Route - protected */}
+      <Route path="/apply/:id" element={
+        <ProtectedRoute>
+          <ApplicationForm />
         </ProtectedRoute>
       } />
       
+      {/* Profile page - protected route */}
+      <Route path="/profile" element={
+        <ProtectedRoute>
+          <Profile />
+        </ProtectedRoute>
+      } />
+      
+      {/* Bookmarks page - protected route */}
       <Route path="/bookmarks" element={
         <ProtectedRoute>
           <div style={{ padding: '50px', textAlign: 'center', color: '#f8fafc' }}>
-            <h1>Bookmarks Page</h1>
-            <p>Coming soon...</p>
+            <h1>🔖 Your Bookmarks</h1>
+            <p>Save your favorite internships here for quick access!</p>
+            <p style={{ marginTop: '2rem', opacity: 0.7 }}>Coming soon in Milestone 2...</p>
           </div>
         </ProtectedRoute>
       } />
@@ -132,16 +134,6 @@ const AppContent = () => {
         <ProtectedRoute>
           <div style={{ padding: '50px', textAlign: 'center', color: '#f8fafc' }}>
             <h1>Community Page</h1>
-            <p>Coming soon...</p>
-          </div>
-        </ProtectedRoute>
-      } />
-      
-      {/* Apply routes */}
-      <Route path="/apply/:id" element={
-        <ProtectedRoute>
-          <div style={{ padding: '50px', textAlign: 'center', color: '#f8fafc' }}>
-            <h1>Application Form</h1>
             <p>Coming soon...</p>
           </div>
         </ProtectedRoute>
@@ -172,7 +164,4 @@ function App() {
   );
 }
 
-
 export default App;
-
-//Mileston 1 final
