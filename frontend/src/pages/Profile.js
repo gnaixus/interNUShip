@@ -10,6 +10,9 @@ const Profile = () => {
   const fileInputRef = useRef(null);
 
   // Profile state
+
+  const [draftSaved, setDraftSaved] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [profileData, setProfileData] = useState({
@@ -54,6 +57,21 @@ const Profile = () => {
     navigate('/login');
   };
 
+  const saveDraft = () => {
+    // Simulate draft save
+    setDraftSaved(true);
+    setTimeout(() => setDraftSaved(false), 2000); // reset after 2s
+  };
+
+  const handleSubmit = () => {
+    setIsSubmitting(true);
+    // Simulate form submit
+    setTimeout(() => {
+      alert('Application submitted!');
+      setIsSubmitting(false);
+    }, 2000);
+  };
+
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -62,9 +80,8 @@ const Profile = () => {
       alert('Please upload a PDF file');
       return;
     }
-
     setUploading(true);
-    
+
     // Simulate upload process
     try {
       // In a real app, you'd upload to your backend here
@@ -356,6 +373,27 @@ const Profile = () => {
                 <span className={styles.statNumber}>25%</span>
                 <span className={styles.statLabel}>Success Rate</span>
               </div>
+
+          {/* Action Buttons */}
+          <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+            <button
+              type="button"
+              onClick={saveDraft}
+              className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+              disabled={draftSaved}
+            >
+              {draftSaved ? 'Draft Saved!' : 'Save Draft'}
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-400 transition-colors"
+            >
+              {isSubmitting ? 'Submitting...' : 'Submit Application'}
+            </button>
+
+              </div>
             </div>
           </div>
         </div>
@@ -363,5 +401,6 @@ const Profile = () => {
     </div>
   );
 };
+
 
 export default Profile;
