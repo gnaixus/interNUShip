@@ -2,11 +2,15 @@ import React, { useState, useRef } from 'react';
 import { useAuth } from './auth/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from '../styles/Home.module.css';
+import { Upload, Edit3, Save, X, Plus, Trash2, FileText, User, Mail, Phone, MapPin, GraduationCap, Briefcase, Award } from 'lucide-react';
+import { processPDFResume } from './resume/pdf.js'
 
 const Profile = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [parsing, setParsing] = useState(false);
+  const [newSkill, setNewSkill] = useState('')
   const fileInputRef = useRef(null);
 
   // Profile state
@@ -14,6 +18,9 @@ const Profile = () => {
   const [draftSaved, setDraftSaved] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const toggleEdit = () => {
+  setIsEditing(!isEditing);
+};
   const [uploading, setUploading] = useState(false);
   const [profileData, setProfileData] = useState({
     name: user?.full_name || 'John Doe',
@@ -81,25 +88,80 @@ const Profile = () => {
       return;
     }
     setUploading(true);
+    setParsing(true)
 
-    // Simulate upload process
+  //   // Simulate upload process
+  //   try {
+  //     // In a real app, you'd upload to your backend here
+  //     await new Promise(resolve => setTimeout(resolve, 2000));
+      
+  //     setProfileData(prev => ({
+  //       ...prev,
+  //       resumeUploaded: true,
+  //       lastUpdated: new Date().toLocaleDateString()
+  //     }));
+      
+  //     alert('Resume uploaded successfully!');
+  //   } catch (error) {
+  //     alert('Upload failed. Please try again.');
+  //   } finally {
+  //     setUploading(false);
+  //   }
+  // };
+
     try {
-      // In a real app, you'd upload to your backend here
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      setProfileData(prev => ({
-        ...prev,
-        resumeUploaded: true,
-        lastUpdated: new Date().toLocaleDateString()
-      }));
-      
-      alert('Resume uploaded successfully!');
-    } catch (error) {
-      alert('Upload failed. Please try again.');
-    } finally {
-      setUploading(false);
-    }
-  };
+          // Process PDF using the imported module
+          console.log('Processing PDF resume...');
+          const result = await processPDFResume(file);
+          
+          if (!result.success) {
+            throw new Error(result.error);
+          }
+          
+          const parsedData = result.data;
+          console.log('Parsed data:', parsedData);
+          console.log('Extracted text preview:', result.extractedText);
+          
+          // Merge parsed data with existing profile data
+          setProfileData(prev => ({
+            ...prev,
+            // Only update fields if parsed data is not empty
+            name: parsedData.name && parsedData.name.trim() ? parsedData.name : prev.name,
+            email: parsedData.email && parsedData.email.trim() ? parsedData.email : prev.email,
+            phone: parsedData.phone && parsedData.phone.trim() ? parsedData.phone : prev.phone,
+            location: parsedData.location && parsedData.location.trim() ? parsedData.location : prev.location,
+            skills: parsedData.skills && parsedData.skills.length > 0 ? parsedData.skills : prev.skills,
+            experience: parsedData.experience && parsedData.experience.length > 0 ? parsedData.experience : prev.experience,
+            education: parsedData.education && parsedData.education.length > 0 ? parsedData.education : prev.education,
+            resumeUploaded: true,
+            lastUpdated: new Date().toLocaleDateString()
+          }));
+
+          // Show success message and enter edit mode
+          const updatedFields = [];
+          if (parsedData.name) updatedFields.push('name');
+          if (parsedData.email) updatedFields.push('email');
+          if (parsedData.phone) updatedFields.push('phone');
+          if (parsedData.location) updatedFields.push('location');
+          if (parsedData.skills.length > 0) updatedFields.push('skills');
+          if (parsedData.experience.length > 0) updatedFields.push('experience');
+          if (parsedData.education.length > 0) updatedFields.push('education');
+          
+          if (updatedFields.length > 0) {
+            alert(`Resume parsed successfully! Updated: ${updatedFields.join(', ')}. Please review and edit the information.`);
+            setIsEditing(true);
+          } else {
+            alert('Resume uploaded but no information could be extracted. Please check if the PDF contains readable text.');
+          }
+          
+        } catch (error) {
+          console.error('Error processing resume:', error);
+          alert(`Failed to parse resume: ${error.message}. Please ensure the PDF contains readable text.`);
+        } finally {
+          setUploading(false);
+          setParsing(false);
+        }
+      };
 
   const handleSaveProfile = () => {
     setIsEditing(false);
@@ -110,21 +172,133 @@ const Profile = () => {
     alert('Profile updated successfully!');
   };
 
-  const addSkill = (newSkill) => {
-    if (newSkill && !profileData.skills.includes(newSkill)) {
+  const updateField = (field, value) => {
       setProfileData(prev => ({
         ...prev,
-        skills: [...prev.skills, newSkill]
+        [field]: value
       }));
-    }
-  };
+    };
 
-  const removeSkill = (skillToRemove) => {
-    setProfileData(prev => ({
-      ...prev,
-      skills: prev.skills.filter(skill => skill !== skillToRemove)
-    }));
-  };
+    const addSkill = () => {
+      if (newSkill && !profileData.skills.includes(newSkill)) {
+        setProfileData(prev => ({
+          ...prev,
+          skills: [...prev.skills, newSkill]
+        }));
+        setNewSkill('');
+      }
+    };
+
+    const removeSkill = (skillToRemove) => {
+      setProfileData(prev => ({
+        ...prev,
+        skills: prev.skills.filter(skill => skill !== skillToRemove)
+      }));
+    };
+
+    const addExperience = () => {
+      const newExp = {
+        id: Date.now(),
+        title: 'New Position',
+        company: 'Company Name',
+        duration: 'Start - End',
+        description: 'Job description...'
+      };
+      setProfileData(prev => ({
+        ...prev,
+        experience: [...prev.experience, newExp]
+      }));
+    };
+
+    const updateExperience = (id, field, value) => {
+      setProfileData(prev => ({
+        ...prev,
+        experience: prev.experience.map(exp => 
+          exp.id === id ? { ...exp, [field]: value } : exp
+        )
+      }));
+    };
+
+    const removeExperience = (id) => {
+      setProfileData(prev => ({
+        ...prev,
+        experience: prev.experience.filter(exp => exp.id !== id)
+      }));
+    };
+
+    const addEducation = () => {
+      const newEdu = {
+        id: Date.now(),
+        institution: 'University Name',
+        degree: 'Degree',
+        period: 'Start - End',
+        gpa: ''
+      };
+      setProfileData(prev => ({
+        ...prev,
+        education: [...prev.education, newEdu]
+      }));
+    };
+
+    const updateEducation = (id, field, value) => {
+      setProfileData(prev => ({
+        ...prev,
+        education: prev.education.map(edu => 
+          edu.id === id ? { ...edu, [field]: value } : edu
+        )
+      }));
+    };
+
+    const removeEducation = (id) => {
+      setProfileData(prev => ({
+        ...prev,
+        education: prev.education.filter(edu => edu.id !== id)
+      }));
+    };
+
+    const EditableField = ({ value, onChange, multiline = false, placeholder = "" }) => {
+      if (!isEditing) {
+        return <span className="text-gray-800">{value}</span>;
+      }
+      
+      if (multiline) {
+        return (
+          <textarea
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={placeholder}
+            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            rows={3}
+          />
+        );
+      }
+      
+      return (
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      );
+    };
+
+  // const addSkill = (newSkill) => {
+  //   if (newSkill && !profileData.skills.includes(newSkill)) {
+  //     setProfileData(prev => ({
+  //       ...prev,
+  //       skills: [...prev.skills, newSkill]
+  //     }));
+  //   }
+  // };
+
+  // const removeSkill = (skillToRemove) => {
+  //   setProfileData(prev => ({
+  //     ...prev,
+  //     skills: prev.skills.filter(skill => skill !== skillToRemove)
+  //   }));
+  // };
 
   return (
     <div className={styles.homeContainer}>
@@ -333,25 +507,87 @@ const Profile = () => {
               </div>
             ))}
           </div>
-
-          {/* Experience Section */}
-          <div className={styles.profileCard}>
-            <h3 className={styles.cardTitle}>Experience</h3>
-            {profileData.experience.map((exp, index) => (
-              <div key={index} className={styles.experienceItem}>
-                <div className={styles.experienceIcon}>💼</div>
-                <div className={styles.experienceDetails}>
-                  <h4 className={styles.experienceTitle}>{exp.title}</h4>
-                  <p className={styles.experienceCompany}>{exp.company}</p>
-                  <p className={styles.experienceDuration}>{exp.duration}</p>
-                  <p className={styles.experienceDescription}>{exp.description}</p>
+          {/* Experience */}
+          <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+                <Briefcase className="text-blue-600" size={20} />
+                Experience
+              </h2>
+              {isEditing && (
+                <button
+                  onClick={addExperience}
+                  className="flex items-center gap-2 px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm"
+                >
+                  <Plus size={14} />
+                  Add Experience
+                </button>
+              )}
+            </div>
+            {profileData.experience.map((exp) => (
+              <div key={exp.id} className="border-l-4 border-blue-500 pl-4 mb-4 last:mb-0">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <div className="mb-2">
+                      <EditableField
+                        value={exp.title}
+                        onChange={(value) => updateExperience(exp.id, 'title', value)}
+                        placeholder="Job title"
+                      />
+                    </div>
+                    <div className="mb-2">
+                      <EditableField
+                        value={exp.company}
+                        onChange={(value) => updateExperience(exp.id, 'company', value)}
+                        placeholder="Company name"
+                      />
+                    </div>
+                    <div className="mb-2">
+                      <EditableField
+                        value={exp.duration}
+                        onChange={(value) => updateExperience(exp.id, 'duration', value)}
+                        placeholder="Duration"
+                      />
+                    </div>
+                    <div>
+                      <EditableField
+                        value={exp.description}
+                        onChange={(value) => updateExperience(exp.id, 'description', value)}
+                        placeholder="Job description"
+                        multiline
+                      />
+                    </div>
+                  </div>
+                  {isEditing && (
+                    <button
+                      onClick={() => removeExperience(exp.id)}
+                      className="text-red-500 hover:text-red-700 ml-2"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
-            <button className={styles.btn + ' ' + styles.btnSecondary}>
-              + Add Experience
-            </button>
           </div>
+              {/* Experience Section
+              <div className={styles.profileCard}>
+                <h3 className={styles.cardTitle}>Experience</h3>
+                {profileData.experience.map((exp, index) => (
+                  <div key={index} className={styles.experienceItem}>
+                    <div className={styles.experienceIcon}>💼</div>
+                    <div className={styles.experienceDetails}>
+                      <h4 className={styles.experienceTitle}>{exp.title}</h4>
+                      <p className={styles.experienceCompany}>{exp.company}</p>
+                      <p className={styles.experienceDuration}>{exp.duration}</p>
+                      <p className={styles.experienceDescription}>{exp.description}</p>
+                    </div>
+                  </div>
+                ))}
+                <button className={styles.btn + ' ' + styles.btnSecondary}>
+                  + Add Experience
+                </button>
+              </div> */}
 
           {/* Application Stats */}
           <div className={styles.profileCard}>
@@ -391,6 +627,13 @@ const Profile = () => {
               className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-400 transition-colors"
             >
               {isSubmitting ? 'Submitting...' : 'Submit Application'}
+            </button>
+
+            <button 
+              onClick={() => setIsEditing(!isEditing)}
+              className="edit-toggle-btn"
+            >
+              {isEditing ? 'Save' : 'Edit Profile'}
             </button>
 
               </div>

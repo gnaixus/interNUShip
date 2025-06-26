@@ -145,8 +145,6 @@ const AppContent = () => {
           <p>Coming soon...</p>
         </div>
       } />
-      
-      {/* Catch all route */}
       <Route path="*" element={<Navigate to="/home" replace />} />
     </Routes>
   );
