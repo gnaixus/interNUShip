@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from './auth/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from '../styles/Home.module.css';
+import DataService from '../services/dataService';
 
 const Applications = () => {
   const { user, isGuest, logout } = useAuth();
@@ -11,85 +12,42 @@ const Applications = () => {
   // State for filtering and sorting applications
   const [currentTab, setCurrentTab] = useState('all');
   const [sortOption, setSortOption] = useState('applied');
+  
+  // State for dynamic data
+  const [userApplications, setUserApplications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Redirect users who aren't logged in
-  React.useEffect(() => {
+  useEffect(() => {
     if (!user && !isGuest) {
       navigate('/login');
     }
   }, [user, isGuest, navigate]);
 
-  // Sample application data - in production this would come from an API
-  const userApplications = [
-    {
-      id: 1,
-      internshipId: 1,
-      jobTitle: 'Software Engineering Intern',
-      companyName: 'TechCorp Singapore',
-      companyLogo: '💻',
-      applicationStatus: 'pending',
-      dateApplied: '2025-05-15',
-      applicationDeadline: '15/06/2025',
-      currentStep: 'Waiting for HR to review application',
-      monthlySalary: 'S$1,200/month',
-      internshipDuration: '3 months',
-      workLocation: 'Singapore',
-      upcomingInterview: null,
-      personalNotes: 'Applied through university career portal. Really excited about this one - they work on projects I use daily!',
-      submittedDocuments: ['Resume', 'Cover Letter']
-    },
-    {
-      id: 2,
-      internshipId: 5,
-      jobTitle: 'Backend Developer Intern',
-      companyName: 'CloudTech Solutions',
-      companyLogo: '⚙️',
-      applicationStatus: 'interview',
-      dateApplied: '2025-05-10',
-      applicationDeadline: '18/06/2025',
-      currentStep: 'Technical interview scheduled for next week',
-      monthlySalary: 'S$1,300/month',
-      internshipDuration: '4 months',
-      workLocation: 'Singapore',
-      upcomingInterview: '2025-06-20',
-      personalNotes: 'Had a great phone screening with the team lead. She mentioned they were impressed with my Python side projects, especially the web scraper I built for my course!',
-      submittedDocuments: ['Resume', 'Cover Letter', 'GitHub Portfolio']
-    },
-    {
-      id: 3,
-      internshipId: 2,
-      jobTitle: 'Data Science Intern',
-      companyName: 'Analytics Plus',
-      companyLogo: '📊',
-      applicationStatus: 'accepted',
-      dateApplied: '2025-05-05',
-      applicationDeadline: '20/06/2025',
-      currentStep: 'Submit final onboarding documents',
-      monthlySalary: 'S$1,100/month',
-      internshipDuration: '6 months',
-      workLocation: 'Singapore',
-      upcomingInterview: '2025-05-25',
-      personalNotes: 'YES! Got the offer! 🎉 They loved my final year project on customer behavior analysis. Need to submit health forms and sign contract by June 1st.',
-      submittedDocuments: ['Resume', 'Cover Letter', 'Academic Transcript', 'Reference Letter']
-    },
-    {
-      id: 4,
-      internshipId: 3,
-      jobTitle: 'Marketing Intern',
-      companyName: 'Creative Agency',
-      companyLogo: '📈',
-      applicationStatus: 'rejected',
-      dateApplied: '2025-04-28',
-      applicationDeadline: '10/06/2025',
-      currentStep: 'Application closed',
-      monthlySalary: 'S$1,200/month',
-      internshipDuration: '4 months',
-      workLocation: 'Singapore',
-      upcomingInterview: null,
-      personalNotes: 'Didn\'t get this one - they went with someone who had more TikTok marketing experience. But great practice for interviews! The feedback was actually helpful.',
-      submittedDocuments: ['Resume', 'Cover Letter', 'Portfolio']
-    }
-  ];
+  // Load applications data
+  useEffect(() => {
+    const loadApplications = async () => {
+      if (!user) return;
+      
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await DataService.getUserApplications(user.id);
+        if (response.success) {
+          setUserApplications(response.data);
+        }
+      } catch (err) {
+        console.error('Error loading applications:', err);
+        setError('Failed to load applications. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadApplications();
+  }, [user]);
 
   // Navigation items for the header
   const navigationItems = [
@@ -110,14 +68,14 @@ const Applications = () => {
   // Tab options for filtering applications
   const filterTabs = [
     { id: 'all', label: 'All My Applications', count: userApplications.length },
-    { id: 'pending', label: 'Under Review', count: userApplications.filter(app => app.applicationStatus === 'pending').length },
-    { id: 'interview', label: 'Interview Stage', count: userApplications.filter(app => app.applicationStatus === 'interview').length },
-    { id: 'accepted', label: 'Got the Job! 🎉', count: userApplications.filter(app => app.applicationStatus === 'accepted').length },
-    { id: 'rejected', label: 'Not This Time', count: userApplications.filter(app => app.applicationStatus === 'rejected').length }
+    { id: 'pending', label: 'Under Review', count: userApplications.filter(app => app.status === 'pending').length },
+    { id: 'interview', label: 'Interview Stage', count: userApplications.filter(app => app.status === 'interview').length },
+    { id: 'accepted', label: 'Got the Job! 🎉', count: userApplications.filter(app => app.status === 'accepted').length },
+    { id: 'rejected', label: 'Not This Time', count: userApplications.filter(app => app.status === 'rejected').length }
   ];
 
   // Handle various user interactions
-  const handleUserAction = (actionType, applicationData = null) => {
+  const handleUserAction = async (actionType, applicationData = null) => {
     switch (actionType) {
       case 'logout':
         logout();
@@ -127,12 +85,32 @@ const Applications = () => {
         navigate(`/internships/${applicationData.internshipId}`);
         break;
       case 'editNotes':
-        navigate(`/applications/${applicationData.id}/edit`);
+        const newNotes = prompt('Edit your notes:', applicationData.notes);
+        if (newNotes !== null) {
+          // In real app, this would update via API
+          const updatedApplications = userApplications.map(app => 
+            app.id === applicationData.id ? { ...app, notes: newNotes } : app
+          );
+          setUserApplications(updatedApplications);
+          alert('Notes updated!');
+        }
         break;
       case 'withdrawApplication':
         if (window.confirm('Are you sure you want to withdraw this application?')) {
-          // TODO: Implement withdrawal logic
-          alert('Application withdrawn');
+          try {
+            // Simulate withdrawal API call
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            const updatedApplications = userApplications.map(app => 
+              app.id === applicationData.id 
+                ? { ...app, status: 'withdrawn', currentStep: 'Application withdrawn' }
+                : app
+            );
+            setUserApplications(updatedApplications);
+            alert('Application withdrawn successfully');
+          } catch (error) {
+            alert('Failed to withdraw application. Please try again.');
+          }
         }
         break;
       default:
@@ -147,7 +125,7 @@ const Applications = () => {
     // Apply status filter
     if (currentTab !== 'all') {
       filteredResults = filteredResults.filter(application => 
-        application.applicationStatus === currentTab
+        application.status === currentTab
       );
     }
 
@@ -155,14 +133,14 @@ const Applications = () => {
     filteredResults.sort((applicationA, applicationB) => {
       switch (sortOption) {
         case 'applied':
-          return new Date(applicationB.dateApplied) - new Date(applicationA.dateApplied);
+          return new Date(applicationB.submittedAt) - new Date(applicationA.submittedAt);
         case 'deadline':
-          const deadlineA = new Date(applicationA.applicationDeadline.split('/').reverse().join('-'));
-          const deadlineB = new Date(applicationB.applicationDeadline.split('/').reverse().join('-'));
+          const deadlineA = new Date(applicationA.internship?.deadline?.split('/').reverse().join('-') || '2025-12-31');
+          const deadlineB = new Date(applicationB.internship?.deadline?.split('/').reverse().join('-') || '2025-12-31');
           return deadlineA - deadlineB;
         case 'status':
-          const statusPriority = { 'accepted': 0, 'interview': 1, 'pending': 2, 'rejected': 3 };
-          return statusPriority[applicationA.applicationStatus] - statusPriority[applicationB.applicationStatus];
+          const statusPriority = { 'accepted': 0, 'interview': 1, 'pending': 2, 'rejected': 3, 'withdrawn': 4 };
+          return statusPriority[applicationA.status] - statusPriority[applicationB.status];
         default:
           return 0;
       }
@@ -176,11 +154,11 @@ const Applications = () => {
   // Calculate quick statistics for the dashboard
   const applicationStats = {
     totalApplications: userApplications.length,
-    pendingReviews: userApplications.filter(app => app.applicationStatus === 'pending').length,
-    scheduledInterviews: userApplications.filter(app => app.applicationStatus === 'interview').length,
-    successfulApplications: userApplications.filter(app => app.applicationStatus === 'accepted').length,
+    pendingReviews: userApplications.filter(app => app.status === 'pending').length,
+    scheduledInterviews: userApplications.filter(app => app.status === 'interview').length,
+    successfulApplications: userApplications.filter(app => app.status === 'accepted').length,
     successRate: userApplications.length > 0 ? 
-      Math.round((userApplications.filter(app => app.applicationStatus === 'accepted').length / userApplications.length) * 100) : 0
+      Math.round((userApplications.filter(app => app.status === 'accepted').length / userApplications.length) * 100) : 0
   };
 
   // Show login prompt for non-authenticated users
@@ -210,6 +188,50 @@ const Applications = () => {
             Login to Continue
           </button>
         </section>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className={styles.homeContainer}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          color: 'var(--text-primary)'
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <div className="spinner" style={{ margin: '0 auto 16px' }}></div>
+            <p>Loading your applications...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.homeContainer}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          color: 'var(--text-primary)'
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <h2>Oops! Something went wrong</h2>
+            <p>{error}</p>
+            <button 
+              className={styles.ctaPrimary} 
+              onClick={() => window.location.reload()}
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -331,55 +353,55 @@ const Applications = () => {
               <div key={application.id} className={styles.applicationCard}>
                 <div 
                   className={styles.statusBadge}
-                  style={{ backgroundColor: statusConfiguration[application.applicationStatus].color }}
+                  style={{ backgroundColor: statusConfiguration[application.status]?.color || '#6b7280' }}
                 >
-                  {statusConfiguration[application.applicationStatus].icon} {statusConfiguration[application.applicationStatus].label}
+                  {statusConfiguration[application.status]?.icon || '📋'} {statusConfiguration[application.status]?.label || application.status}
                 </div>
                 
                 <div className={styles.cardHeader}>
-                  <div className={styles.companyLogo}>{application.companyLogo}</div>
+                  <div className={styles.companyLogo}>{application.internship?.logo || '🏢'}</div>
                   <div className={styles.companyInfo}>
-                    <h3 className={styles.jobTitle}>{application.jobTitle}</h3>
-                    <p className={styles.companyName}>{application.companyName}</p>
+                    <h3 className={styles.jobTitle}>{application.internship?.title || 'Unknown Position'}</h3>
+                    <p className={styles.companyName}>{application.internship?.company || 'Unknown Company'}</p>
                   </div>
                 </div>
 
                 <div className={styles.jobDetails}>
                   <div className={styles.detailItem}>
-                    <span>📅</span> Applied: {new Date(application.dateApplied).toLocaleDateString()}
+                    <span>📅</span> Applied: {new Date(application.submittedAt).toLocaleDateString()}
                   </div>
                   <div className={styles.detailItem}>
-                    <span>⏰</span> Deadline: {application.applicationDeadline}
+                    <span>⏰</span> Deadline: {application.internship?.deadline || 'N/A'}
                   </div>
                   <div className={styles.detailItem}>
-                    <span>📍</span> {application.workLocation}
+                    <span>📍</span> {application.internship?.location || 'Remote'}
                   </div>
                   <div className={styles.detailItem}>
-                    <span>💰</span> {application.monthlySalary}
+                    <span>💰</span> {application.internship?.stipend || 'Not specified'}
                   </div>
                 </div>
 
-                {application.upcomingInterview && (
+                {application.nextStep && (
                   <div className={styles.interviewInfo}>
-                    Interview: {new Date(application.upcomingInterview).toLocaleDateString()}
+                    {application.nextStep}
                   </div>
                 )}
 
                 <div className={styles.nextStep}>
-                  <strong>Next Step:</strong> {application.currentStep}
+                  <strong>Status:</strong> {application.status}
                 </div>
 
-                {application.personalNotes && (
+                {application.notes && (
                   <div className={styles.applicationNotes}>
                     <strong>Notes:</strong>
-                    {application.personalNotes}
+                    {application.notes}
                   </div>
                 )}
 
                 <div className={styles.documents}>
                   <strong>Documents:</strong>
                   <div>
-                    {application.submittedDocuments.map(doc => (
+                    {application.documents && application.documents.map(doc => (
                       <span key={doc} className={styles.documentTag}>{doc}</span>
                     ))}
                   </div>
@@ -398,7 +420,7 @@ const Applications = () => {
                   >
                     Edit Notes
                   </button>
-                  {(application.applicationStatus === 'pending' || application.applicationStatus === 'interview') && (
+                  {(application.status === 'pending' || application.status === 'interview') && (
                     <button 
                       className={styles.withdrawButton} 
                       onClick={() => handleUserAction('withdrawApplication', application)}
@@ -412,48 +434,6 @@ const Applications = () => {
           </div>
         )}
       </section>
-
-      {/* Upcoming Deadlines Section */}
-      {userApplications.filter(app => {
-        const deadlineDate = new Date(app.applicationDeadline.split('/').reverse().join('-'));
-        const today = new Date();
-        const daysUntil = Math.ceil((deadlineDate - today) / (1000 * 60 * 60 * 24));
-        return daysUntil <= 7 && daysUntil > 0 && 
-         (app.applicationStatus === 'pending' || app.applicationStatus === 'interview');
-      }).length > 0 && (
-        <section className={styles.upcomingSection}>
-          <h2>🚨 Upcoming Deadlines</h2>
-          <div className={styles.upcomingDeadlines}>
-            {userApplications
-              .filter(app => {
-                const deadlineDate = new Date(app.applicationDeadline.split('/').reverse().join('-'));
-                const today = new Date();
-                const daysUntil = Math.ceil((deadlineDate - today) / (1000 * 60 * 60 * 24));
-                return daysUntil <= 7 && daysUntil > 0 &&
-                  (app.applicationStatus === 'pending' || app.applicationStatus === 'interview');
-              })
-              .map(app => {
-                const deadlineDate = new Date(app.applicationDeadline.split('/').reverse().join('-'));
-                const today = new Date();
-                const daysUntil = Math.ceil((deadlineDate - today) / (1000 * 60 * 60 * 24));
-                return (
-                  <div key={app.id} className={styles.deadlineCard}>
-                    <div className={styles.deadlineInfo}>
-                      <span className={styles.companyName}>{app.companyName}</span>
-                      <span className={styles.jobTitle}>{app.jobTitle}</span>
-                    </div>
-                    <div className={styles.deadlineTime}>
-                      <span className={styles.daysLeft}>
-                        {daysUntil === 1 ? '1 day left' : `${daysUntil} days left`}
-                      </span>
-                      <span className={styles.deadlineDate}>{app.applicationDeadline}</span>
-                    </div>
-                  </div>
-                );
-              })}
-          </div>
-        </section>
-      )}
 
       {/* Tips Section */}
       <section className={styles.tipsSection}>

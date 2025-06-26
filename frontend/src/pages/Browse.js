@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from './auth/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from '../styles/Home.module.css';
+import DataService from '../services/dataService';
 
 const Browse = () => {
   const { user, isGuest, logout } = useAuth();
@@ -11,53 +12,51 @@ const Browse = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('match'); // match, published, deadline
 
+  // State for dynamic data
+  const [allInternships, setAllInternships] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const allInternships = [
-    { id: 1, title: 'Software Engineering Intern', company: 'TechCorp Singapore', location: 'Singapore', 
-      stipend: 'S$1,200/month', duration: '3 months', category: 'technology', match: 92, logo: '💻',
-      description: 'Build innovative web applications using React and Node.js', deadline: '15/06/2025', 
-      postedDate: '01/05/2025', skills: ['React', 'Node.js', 'JavaScript'] },
-    { id: 2, title: 'Data Science Intern', company: 'Analytics Plus', location: 'Singapore',
-      stipend: 'S$1,100/month', duration: '6 months', category: 'data', match: 87, logo: '📊',
-      description: 'Analyse large datasets and create machine learning models', deadline: '20/06/2025',
-      postedDate: '03/05/2025', skills: ['Python', 'ML', 'SQL'] },
-    { id: 3, title: 'Marketing Intern', company: 'Creative Agency', location: 'Singapore',
-      stipend: 'S$1,200/month', duration: '4 months', category: 'marketing', match: 75, logo: '📈',
-      description: 'Create engaging marketing campaigns for tech startups', deadline: '10/06/2025',
-      postedDate: '28/04/2025', skills: ['Content Creation', 'Social Media', 'Analytics'] },
-    { id: 4, title: 'UX Design Intern', company: 'Design Studio', location: 'Singapore',
-      stipend: 'S$1,100/month', duration: '3 months', category: 'design', match: 81, logo: '🎨',
-      description: 'Design user experiences for mobile and web applications', deadline: '25/06/2025',
-      postedDate: '05/05/2025', skills: ['Figma', 'UI/UX', 'Prototyping'] },
-    { id: 5, title: 'Backend Developer Intern', company: 'CloudTech Solutions', location: 'Singapore',
-      stipend: 'S$1,300/month', duration: '4 months', category: 'technology', match: 89, logo: '⚙️',
-      description: 'Develop scalable backend systems and APIs', deadline: '18/06/2025',
-      postedDate: '02/05/2025', skills: ['Python', 'FastAPI', 'PostgreSQL'] },
-    { id: 6, title: 'Product Management Intern', company: 'StartupXYZ', location: 'Singapore',
-      stipend: 'S$1,000/month', duration: '5 months', category: 'business', match: 78, logo: '📋',
-      description: 'Work with product teams to define and launch new features', deadline: '30/06/2025',
-      postedDate: '10/05/2025', skills: ['Product Strategy', 'Analytics', 'Communication'] },
-    { id: 7, title: 'Mobile App Developer Intern', company: 'MobileTech', location: 'Singapore',
-      stipend: 'S$1,150/month', duration: '3 months', category: 'technology', match: 85, logo: '📱',
-      description: 'Develop iOS and Android applications using React Native', deadline: '22/06/2025',
-      postedDate: '08/05/2025', skills: ['React Native', 'JavaScript', 'Mobile Development'] },
-    { id: 8, title: 'Financial Analyst Intern', company: 'InvestCorp', location: 'Singapore',
-      stipend: 'S$1,400/month', duration: '6 months', category: 'finance', match: 82, logo: '💰',
-      description: 'Conduct financial analysis and market research', deadline: '12/06/2025',
-      postedDate: '15/04/2025', skills: ['Excel', 'Financial Modeling', 'Research'] }
-  ];
+  // Load data on component mount
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Load categories
+        const categoriesResponse = await DataService.getCategories();
+        if (categoriesResponse.success) {
+          setCategories(categoriesResponse.data);
+        }
 
-  const categories = [
-    { id: 'all', name: 'All', icon: '🌟' },
-    { id: 'technology', name: 'Tech', icon: '💻' },
-    { id: 'data', name: 'Data', icon: '📊' },
-    { id: 'marketing', name: 'Marketing', icon: '📈' },
-    { id: 'design', name: 'Design', icon: '🎨' },
-    { id: 'business', name: 'Business', icon: '📋' },
-    { id: 'finance', name: 'Finance', icon: '💰' }
-  ];
+        // Load all internships with user profile for matching
+        const userProfile = user ? {
+          skills: ['React', 'JavaScript', 'Python', 'Node.js'],
+          preferredCategories: ['technology', 'data'],
+          location: 'Singapore',
+          experienceLevel: 'beginner'
+        } : null;
 
+        const internshipsResponse = await DataService.getAllInternships({
+          sortBy: sortBy,
+          userProfile: userProfile
+        });
+        
+        if (internshipsResponse.success) {
+          setAllInternships(internshipsResponse.data);
+        }
+      } catch (err) {
+        console.error('Error loading data:', err);
+        setError('Failed to load internships. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    loadData();
+  }, [user, sortBy]);
 
   const navItems = user ? [
     { path: '/home', label: 'Home', icon: '🏠' },
@@ -71,11 +70,36 @@ const Browse = () => {
     { path: '/about', label: 'About', icon: '🏢' }
   ];
 
-  const handleAction = (action, internship = null) => {
-    if (action === 'logout') { logout(); navigate('/login'); }
-    else if (action === 'apply') user ? navigate(`/apply/${internship.id}`) : navigate('/signup');
-    else if (action === 'bookmark') user ? alert(`Bookmarked: ${internship.title}`) : navigate('/signup');
-    else if (action === 'details') navigate(`/internships/${internship.id}`);
+  const handleAction = async (action, internship = null) => {
+    if (action === 'logout') { 
+      logout(); 
+      navigate('/login'); 
+    }
+    else if (action === 'apply') {
+      if (user) {
+        navigate(`/apply/${internship.id}`);
+      } else {
+        navigate('/signup');
+      }
+    }
+    else if (action === 'bookmark') {
+      if (user) {
+        try {
+          const response = await DataService.bookmarkInternship(user.id, internship.id, 'Saved from browse page');
+          if (response.success) {
+            alert(`Bookmarked: ${internship.title}`);
+          }
+        } catch (error) {
+          console.error('Error bookmarking:', error);
+          alert('Failed to bookmark internship');
+        }
+      } else {
+        navigate('/signup');
+      }
+    }
+    else if (action === 'details') {
+      navigate(`/internships/${internship.id}`);
+    }
   };
 
   // Enhanced filtering and sorting
@@ -106,6 +130,50 @@ const Browse = () => {
   };
 
   const filteredInternships = getFilteredAndSortedInternships();
+
+  if (loading) {
+    return (
+      <div className={styles.homeContainer}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          color: 'var(--text-primary)'
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <div className="spinner" style={{ margin: '0 auto 16px' }}></div>
+            <p>Loading internship opportunities...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.homeContainer}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          color: 'var(--text-primary)'
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <h2>Oops! Something went wrong</h2>
+            <p>{error}</p>
+            <button 
+              className={styles.ctaPrimary} 
+              onClick={() => window.location.reload()}
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.homeContainer}>
@@ -158,6 +226,20 @@ const Browse = () => {
         <p className={styles.heroSubtitle}>
           Discover opportunities from top companies across Singapore
         </p>
+        
+        {/* Show data source info */}
+        <div style={{ 
+          marginTop: '1rem', 
+          fontSize: '0.9rem', 
+          color: 'var(--text-muted)',
+          display: 'flex',
+          justifyContent: 'center',
+          gap: '1rem',
+          flexWrap: 'wrap'
+        }}>
+          <span>📊 Data from LinkedIn, Indeed, JobsBank & more</span>
+          <span>🔄 Updated daily</span>
+        </div>
       </section>
 
       {/* Enhanced Search and Filter Section */}
@@ -185,11 +267,12 @@ const Browse = () => {
                 onClick={() => setSelectedCategory(cat.id)}
               >
                 {cat.icon} {cat.name}
+                {cat.count > 0 && <span className={styles.badge}>{cat.count}</span>}
               </button>
             ))}
           </div>
 
-          {/* Sort options only */}
+          {/* Sort options */}
           <div className={styles.additionalFilters}>
             <select 
               value={sortBy} 
@@ -220,6 +303,15 @@ const Browse = () => {
           <div className={styles.noResults}>
             <h3>No internships found</h3>
             <p>Try adjusting your search criteria or filters</p>
+            <button 
+              className={styles.ctaPrimary} 
+              onClick={() => {
+                setSearchTerm('');
+                setSelectedCategory('all');
+              }}
+            >
+              Clear Filters
+            </button>
           </div>
         ) : (
           <div className={styles.internshipsGrid}>
@@ -257,9 +349,30 @@ const Browse = () => {
 
                 {/* Skills tags */}
                 <div className={styles.skillsTags}>
-                  {internship.skills.map(skill => (
+                  {internship.skills.slice(0, 4).map(skill => (
                     <span key={skill} className={styles.skillTag}>{skill}</span>
                   ))}
+                  {internship.skills.length > 4 && (
+                    <span className={styles.skillTag}>+{internship.skills.length - 4} more</span>
+                  )}
+                </div>
+
+                {/* Additional info */}
+                <div style={{
+                  margin: '1rem 0',
+                  padding: '0.75rem',
+                  backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                  borderRadius: '0.5rem',
+                  fontSize: '0.8rem',
+                  color: 'var(--text-muted)'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>📈 {internship.applicationCount} applications</span>
+                    <span>🏢 {internship.companySize}</span>
+                  </div>
+                  <div style={{ marginTop: '0.5rem' }}>
+                    <span>📂 Source: {internship.source}</span>
+                  </div>
                 </div>
 
                 <div className={styles.cardActions}>

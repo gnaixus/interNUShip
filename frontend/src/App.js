@@ -7,6 +7,8 @@ import Home from './pages/home/Home';
 import Browse from './pages/Browse';
 import Applications from './pages/Applications';
 import Profile from './pages/Profile';
+import Bookmarks from './pages/Bookmarks';
+import About from './pages/About';
 import ResumeUpload from './pages/resume/ResumeUpload';
 import ApplicationForm from './pages/resume/ApplicationForm';
 import './styles/App.css';
@@ -91,10 +93,20 @@ const AppContent = () => {
       {/* Browse page - accessible to everyone (guests can browse) */}
       <Route path="/internships" element={<Browse />} />
       
+      {/* About page - accessible to everyone */}
+      <Route path="/about" element={<About />} />
+      
       {/* Applications page - protected route (requires authentication) */}
       <Route path="/applications" element={
         <ProtectedRoute>
           <Applications />
+        </ProtectedRoute>
+      } />
+
+      {/* Bookmarks page - protected route */}
+      <Route path="/bookmarks" element={
+        <ProtectedRoute>
+          <Bookmarks />
         </ProtectedRoute>
       } />
 
@@ -119,32 +131,39 @@ const AppContent = () => {
         </ProtectedRoute>
       } />
       
-      {/* Bookmarks page - protected route */}
-      <Route path="/bookmarks" element={
-        <ProtectedRoute>
-          <div style={{ padding: '50px', textAlign: 'center', color: '#f8fafc' }}>
-            <h1>🔖 Your Bookmarks</h1>
-            <p>Save your favorite internships here for quick access!</p>
-            <p style={{ marginTop: '2rem', opacity: 0.7 }}>Coming soon in Milestone 2...</p>
-          </div>
-        </ProtectedRoute>
-      } />
-      
+      {/* Community page - placeholder for future development */}
       <Route path="/community" element={
         <ProtectedRoute>
-          <div style={{ padding: '50px', textAlign: 'center', color: '#f8fafc' }}>
-            <h1>Community Page</h1>
-            <p>Coming soon...</p>
+          <div style={{ 
+            padding: '50px', 
+            textAlign: 'center', 
+            color: '#f8fafc',
+            background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #374151 100%)',
+            minHeight: '100vh'
+          }}>
+            <h1>👥 Community Page</h1>
+            <p>Connect with fellow students and share internship experiences!</p>
+            <p style={{ marginTop: '2rem', opacity: 0.7 }}>Coming soon in Milestone 3...</p>
           </div>
         </ProtectedRoute>
       } />
       
+      {/* Internship details page - placeholder */}
       <Route path="/internships/:id" element={
-        <div style={{ padding: '50px', textAlign: 'center', color: '#f8fafc' }}>
-          <h1>Internship Details</h1>
-          <p>Coming soon...</p>
+        <div style={{ 
+          padding: '50px', 
+          textAlign: 'center', 
+          color: '#f8fafc',
+          background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #374151 100%)',
+          minHeight: '100vh'
+        }}>
+          <h1>📋 Internship Details</h1>
+          <p>Detailed view of internship opportunities</p>
+          <p style={{ marginTop: '2rem', opacity: 0.7 }}>Coming soon in Milestone 2...</p>
         </div>
       } />
+      
+      {/* Catch all route - redirect to home */}
       <Route path="*" element={<Navigate to="/home" replace />} />
     </Routes>
   );

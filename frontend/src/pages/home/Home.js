@@ -1,7 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from '../../styles/Home.module.css';
+import DataService from '../../services/dataService';
 
 const Home = () => {
   const { user, isGuest, logout } = useAuth();
@@ -13,29 +14,61 @@ const Home = () => {
   const [uploading, setUploading] = useState(false);
   const [resumeUploaded, setResumeUploaded] = useState(false);
 
-  // Sample internship data
-  const internships = [
-    { id: 1, title: 'Software Engineering Intern', company: 'TechCorp Singapore', location: 'Singapore', 
-      stipend: 'S$1,200/month', duration: '3 months', category: 'technology', match: 92, logo: '💻',
-      description: 'Build innovative web applications using React and Node.js', deadline: '15/06/2025' },
-    { id: 2, title: 'Data Science Intern', company: 'Analytics Plus', location: 'Singapore',
-      stipend: 'S$1,100/month', duration: '6 months', category: 'data', match: 87, logo: '📊',
-      description: 'Analyse large datasets and create machine learning models', deadline: '20/06/2025' },
-    { id: 3, title: 'Marketing Intern', company: 'Creative Agency', location: 'Singapore',
-      stipend: 'S$1,200/month', duration: '4 months', category: 'marketing', match: 75, logo: '📈',
-      description: 'Create engaging marketing campaigns for tech startups', deadline: '10/06/2025' },
-    { id: 4, title: 'UX Design Intern', company: 'Design Studio', location: 'Singapore',
-      stipend: 'S$1,100/month', duration: '3 months', category: 'design', match: 81, logo: '🎨',
-      description: 'Design user experiences for mobile and web applications', deadline: '25/06/2025' }
-  ];
+  // State for dynamic data
+  const [internships, setInternships] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [userStats, setUserStats] = useState({
+    matches: 4,
+    applications: 1,
+    bookmarks: 2
+  });
 
-  const categories = [
-    { id: 'all', name: 'All', icon: '🌟' },
-    { id: 'technology', name: 'Tech', icon: '💻' },
-    { id: 'data', name: 'Data', icon: '📊' },
-    { id: 'marketing', name: 'Marketing', icon: '📈' },
-    { id: 'design', name: 'Design', icon: '🎨' }
-  ];
+  // Load data on component mount
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        
+        // Load categories
+        const categoriesResponse = await DataService.getCategories();
+        if (categoriesResponse.success) {
+          setCategories(categoriesResponse.data);
+        }
+
+        // Load featured internships
+        if (user) {
+          // For logged-in users, get personalized recommendations
+          const userProfile = {
+            skills: ['React', 'JavaScript', 'Python', 'Node.js'],
+            preferredCategories: ['technology', 'data'],
+            location: 'Singapore',
+            experienceLevel: 'beginner'
+          };
+          
+          const recommendationsResponse = await DataService.getRecommendations(userProfile, 8);
+          if (recommendationsResponse.success) {
+            setInternships(recommendationsResponse.data);
+          }
+        } else {
+          // For guests, show general popular internships
+          const internshipsResponse = await DataService.getAllInternships({
+            sortBy: 'posted',
+            limit: 8
+          });
+          if (internshipsResponse.success) {
+            setInternships(internshipsResponse.data.slice(0, 8));
+          }
+        }
+      } catch (error) {
+        console.error('Error loading data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [user]);
 
   const navItems = user ? [
     { path: '/home', label: 'Home', icon: '🏠' },
@@ -50,11 +83,38 @@ const Home = () => {
   ];
 
   // Handle actions
-  const handleAction = (action, internship = null) => {
-    if (action === 'logout') { logout(); navigate('/login'); }
-    else if (action === 'apply') user ? navigate(`/apply/${internship.id}`) : navigate('/signup');
-    else if (action === 'bookmark') user ? alert(`Bookmarked: ${internship.title}`) : navigate('/signup');
-    else if (action === 'details') navigate(`/internships/${internship.id}`);
+  const handleAction = async (action, internship = null) => {
+    if (action === 'logout') { 
+      logout(); 
+      navigate('/login'); 
+    }
+    else if (action === 'apply') {
+      if (user) {
+        navigate(`/apply/${internship.id}`);
+      } else {
+        navigate('/signup');
+      }
+    }
+    else if (action === 'bookmark') {
+      if (user) {
+        try {
+          const response = await DataService.bookmarkInternship(user.id, internship.id, 'Saved from home page');
+          if (response.success) {
+            alert(`Bookmarked: ${internship.title}`);
+            // Update user stats
+            setUserStats(prev => ({ ...prev, bookmarks: prev.bookmarks + 1 }));
+          }
+        } catch (error) {
+          console.error('Error bookmarking:', error);
+          alert('Failed to bookmark internship');
+        }
+      } else {
+        navigate('/signup');
+      }
+    }
+    else if (action === 'details') {
+      navigate(`/internships/${internship.id}`);
+    }
   };
 
   // Handle resume upload
@@ -81,12 +141,32 @@ const Home = () => {
     }
   };
 
-  // Filter internships
+  // Filter internships based on search and category
   const filtered = internships.filter(i => 
     (selectedCategory === 'all' || i.category === selectedCategory) &&
     (i.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-     i.company.toLowerCase().includes(searchTerm.toLowerCase()))
+     i.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+     i.skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase())))
   );
+
+  if (loading) {
+    return (
+      <div className={styles.homeContainer}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          color: 'var(--text-primary)'
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <div className="spinner" style={{ margin: '0 auto 16px' }}></div>
+            <p>Loading internship opportunities...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.homeContainer}>
@@ -145,15 +225,15 @@ const Home = () => {
         {user && (
           <div className={styles.userStats}>
             <div className={styles.statItem}>
-              <span className={styles.statNumber}>4</span>
+              <span className={styles.statNumber}>{userStats.matches}</span>
               <span className={styles.statLabel}>New Matches</span>
             </div>
             <div className={styles.statItem}>
-              <span className={styles.statNumber}>1</span>
+              <span className={styles.statNumber}>{userStats.applications}</span>
               <span className={styles.statLabel}>Applications</span>
             </div>
             <div className={styles.statItem}>
-              <span className={styles.statNumber}>2</span>
+              <span className={styles.statNumber}>{userStats.bookmarks}</span>
               <span className={styles.statLabel}>Bookmarks</span>
             </div>
           </div>
@@ -237,7 +317,7 @@ const Home = () => {
             <span className={styles.searchIcon}>🔍</span>
             <input
               type="text"
-              placeholder="Search internships or companies..."
+              placeholder="Search internships, companies, or skills..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -252,6 +332,7 @@ const Home = () => {
               onClick={() => setSelectedCategory(cat.id)}
             >
               {cat.icon} {cat.name}
+              {cat.count > 0 && <span className={styles.badge}>{cat.count}</span>}
             </button>
           ))}
         </div>
@@ -302,6 +383,16 @@ const Home = () => {
 
               <p className={styles.jobDescription}>{internship.description}</p>
 
+              {/* Skills tags */}
+              <div className={styles.skillsTags}>
+                {internship.skills.slice(0, 4).map(skill => (
+                  <span key={skill} className={styles.skillTag}>{skill}</span>
+                ))}
+                {internship.skills.length > 4 && (
+                  <span className={styles.skillTag}>+{internship.skills.length - 4} more</span>
+                )}
+              </div>
+
               <div className={styles.cardActions}>
                 <button className={styles.applyButton} onClick={() => handleAction('apply', internship)}>
                   {user ? 'Apply Now' : 'Sign Up to Apply'}
@@ -313,6 +404,13 @@ const Home = () => {
             </div>
           ))}
         </div>
+
+        {filtered.length === 0 && (
+          <div className={styles.noResults}>
+            <h3>No internships found</h3>
+            <p>Try adjusting your search terms or category filters</p>
+          </div>
+        )}
       </section>
 
       {/* Platform Statistics */}
@@ -321,7 +419,7 @@ const Home = () => {
           <div className={styles.statCard}>
             <div className={styles.statIcon}>🎯</div>
             <div className={styles.statContent}>
-              <h3>500+</h3>
+              <h3>{internships.length}+</h3>
               <p>Active Internships</p>
             </div>
           </div>
@@ -337,6 +435,13 @@ const Home = () => {
             <div className={styles.statContent}>
               <h3>95%</h3>
               <p>Success Rate</p>
+            </div>
+          </div>
+          <div className={styles.statCard}>
+            <div className={styles.statIcon}>🏢</div>
+            <div className={styles.statContent}>
+              <h3>150+</h3>
+              <p>Partner Companies</p>
             </div>
           </div>
         </div>
