@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useAuth } from './auth/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
-import styles from '../styles/Home.module.css';
+import styles from '../styles/Profile.module.css';
 import { Upload, Edit3, Save, X, Plus, Trash2, FileText, User, Mail, Phone, MapPin, GraduationCap, Briefcase, Award } from 'lucide-react';
 import { processPDFResume } from './resume/pdf.js'
 
@@ -54,7 +54,8 @@ const Profile = () => {
     { path: '/home', label: 'Home', icon: '🏠' },
     { path: '/internships', label: 'Browse', icon: '🔍' },
     { path: '/applications', label: 'Applications', icon: '📝' },
-    { path: '/bookmarks', label: 'Bookmarks', icon: '🔖' }
+    { path: '/bookmarks', label: 'Bookmarks', icon: '🔖' },
+    { path: '/about', label: 'About', icon: '🏢' }
   ];
 
   const handleLogout = () => {

@@ -62,12 +62,13 @@ const Browse = () => {
     { path: '/home', label: 'Home', icon: '🏠' },
     { path: '/internships', label: 'Browse', icon: '🔍' },
     { path: '/applications', label: 'Applications', icon: '📝' },
-    { path: '/bookmarks', label: 'Bookmarks', icon: '🔖' }
+   { path: '/bookmarks', label: 'Bookmarks', icon: '🔖' },
+    { path: '/about', label: 'About', icon: '🏢' }  // Added About page
   ] : [
     { path: '/home', label: 'Home', icon: '🏠' },
     { path: '/internships', label: 'Browse', icon: '🔍' },
     { path: '/how-it-works', label: 'How It Works', icon: '❓' },
-    { path: '/about', label: 'About', icon: '🏢' }
+   { path: '/about', label: 'About', icon: '🏢' }
   ];
 
   const handleAction = async (action, internship = null) => {
@@ -134,15 +135,9 @@ const Browse = () => {
   if (loading) {
     return (
       <div className={styles.homeContainer}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100vh',
-          color: 'var(--text-primary)'
-        }}>
-          <div style={{ textAlign: 'center' }}>
-            <div className="spinner" style={{ margin: '0 auto 16px' }}></div>
+        <div className={styles.loadingContainer}>
+          <div className={styles.loadingContent}>
+            <div className={styles.spinner}></div>
             <p>Loading internship opportunities...</p>
           </div>
         </div>
@@ -153,14 +148,8 @@ const Browse = () => {
   if (error) {
     return (
       <div className={styles.homeContainer}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100vh',
-          color: 'var(--text-primary)'
-        }}>
-          <div style={{ textAlign: 'center' }}>
+        <div className={styles.loadingContainer}>
+          <div className={styles.loadingContent}>
             <h2>Oops! Something went wrong</h2>
             <p>{error}</p>
             <button 
@@ -228,20 +217,12 @@ const Browse = () => {
         </p>
         
         {/* Show data source info */}
-        <div style={{ 
-          marginTop: '1rem', 
-          fontSize: '0.9rem', 
-          color: 'var(--text-muted)',
-          display: 'flex',
-          justifyContent: 'center',
-          gap: '1rem',
-          flexWrap: 'wrap'
-        }}>
+        <div className={styles.dataSourceInfo}>
           <span>📊 Data from LinkedIn, Indeed, JobsBank & more</span>
           <span>🔄 Updated daily</span>
         </div>
       </section>
-      
+
       {/* Enhanced Search and Filter Section */}
       <section className={styles.searchSection}>
         <div className={styles.searchBar}>
@@ -317,19 +298,30 @@ const Browse = () => {
           <div className={styles.internshipsGrid}>
             {filteredInternships.map(internship => (
               <div key={internship.id} className={styles.internshipCard}>
-                {user && <div className={styles.matchBadge}>{internship.match}% Match</div>}
+                {/* Top-right elements (match badge and bookmark) */}
+                {user && (
+                  <div className={styles.cardTopRight}>
+                    <div className={styles.matchBadge}>{internship.match}% Match</div>
+                    <button 
+                      className={styles.bookmarkButton} 
+                      onClick={() => handleAction('bookmark', internship)}
+                      aria-label="Bookmark this internship"
+                    >
+                      🔖
+                    </button>
+                  </div>
+                )}
                 
+                {/* Card header with company info */}
                 <div className={styles.cardHeader}>
                   <div className={styles.companyLogo}>{internship.logo}</div>
                   <div className={styles.companyInfo}>
                     <h3 className={styles.jobTitle}>{internship.title}</h3>
                     <p className={styles.companyName}>{internship.company}</p>
                   </div>
-                  <button className={styles.bookmarkButton} onClick={() => handleAction('bookmark', internship)}>
-                    🔖
-                  </button>
                 </div>
 
+                {/* Job details grid */}
                 <div className={styles.jobDetails}>
                   <div className={styles.detailItem}>
                     <span>📍</span> {internship.location}
@@ -345,6 +337,7 @@ const Browse = () => {
                   </div>
                 </div>
 
+                {/* Job description */}
                 <p className={styles.jobDescription}>{internship.description}</p>
 
                 {/* Skills tags */}
@@ -358,28 +351,29 @@ const Browse = () => {
                 </div>
 
                 {/* Additional info */}
-                <div style={{
-                  margin: '1rem 0',
-                  padding: '0.75rem',
-                  backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                  borderRadius: '0.5rem',
-                  fontSize: '0.8rem',
-                  color: 'var(--text-muted)'
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div className={styles.additionalInfo}>
+                  <div className={styles.infoRow}>
                     <span>📈 {internship.applicationCount} applications</span>
                     <span>🏢 {internship.companySize}</span>
                   </div>
-                  <div style={{ marginTop: '0.5rem' }}>
+                  <div className={styles.sourceInfo}>
                     <span>📂 Source: {internship.source}</span>
                   </div>
                 </div>
 
+                {/* Action buttons */}
                 <div className={styles.cardActions}>
-                  <button className={styles.applyButton} onClick={() => handleAction('apply', internship)}>
+                  <button 
+                    className={styles.applyButton} 
+                    data-guest={!user ? "true" : "false"}
+                    onClick={() => handleAction('apply', internship)}
+                  >
                     {user ? 'Apply Now' : 'Sign Up to Apply'}
                   </button>
-                  <button className={styles.detailsButton} onClick={() => handleAction('details', internship)}>
+                  <button 
+                    className={styles.detailsButton} 
+                    onClick={() => handleAction('details', internship)}
+                  >
                     Details
                   </button>
                 </div>

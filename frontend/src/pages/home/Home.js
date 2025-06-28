@@ -38,12 +38,15 @@ const Home = () => {
 
         // Load featured internships
         if (user) {
-          // For logged-in users, get personalized recommendations
+          // For logged-in users, use personalized recommendations
           const userProfile = {
-            skills: ['React', 'JavaScript', 'Python', 'Node.js'],
-            preferredCategories: ['technology', 'data'],
-            location: 'Singapore',
-            experienceLevel: 'beginner'
+            id: user.id,
+            skills: user.skills || ['React', 'JavaScript', 'Python', 'Node.js'],
+            experience: user.experience || [],
+            education: user.education || [],
+            location: user.location || 'Singapore',
+            preferredCategories: user.preferredCategories || ['technology', 'data'],
+            experienceLevel: user.experienceLevel || 'beginner'
           };
           
           const recommendationsResponse = await DataService.getRecommendations(userProfile, 8);
@@ -70,19 +73,21 @@ const Home = () => {
     loadData();
   }, [user]);
 
+  // Navigation items
   const navItems = user ? [
     { path: '/home', label: 'Home', icon: '🏠' },
     { path: '/internships', label: 'Browse', icon: '🔍' },
     { path: '/applications', label: 'Applications', icon: '📝' },
-    { path: '/bookmarks', label: 'Bookmarks', icon: '🔖' }
-  ] : [
-    { path: '/home', label: 'Home', icon: '🏠' },
+   { path: '/bookmarks', label: 'Bookmarks', icon: '🔖' },
+    { path: '/about', label: 'About', icon: '🏢' }  
+] : [
+   { path: '/home', label: 'Home', icon: '🏠' },
     { path: '/internships', label: 'Browse', icon: '🔍' },
-    { path: '/how-it-works', label: 'How It Works', icon: '❓' },
-    { path: '/about', label: 'About', icon: '🏢' }
-  ];
+   { path: '/how-it-works', label: 'How It Works', icon: '❓' },
+   { path: '/about', label: 'About', icon: '🏢' }
+];
 
-  // Handle actions
+  // Handle various actions
   const handleAction = async (action, internship = null) => {
     if (action === 'logout') { 
       logout(); 
@@ -101,7 +106,6 @@ const Home = () => {
           const response = await DataService.bookmarkInternship(user.id, internship.id, 'Saved from home page');
           if (response.success) {
             alert(`Bookmarked: ${internship.title}`);
-            // Update user stats
             setUserStats(prev => ({ ...prev, bookmarks: prev.bookmarks + 1 }));
           }
         } catch (error) {
@@ -152,16 +156,10 @@ const Home = () => {
   if (loading) {
     return (
       <div className={styles.homeContainer}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100vh',
-          color: 'var(--text-primary)'
-        }}>
-          <div style={{ textAlign: 'center' }}>
-            <div className="spinner" style={{ margin: '0 auto 16px' }}></div>
-            <p>Loading internship opportunities...</p>
+        <div className={styles.loadingContainer}>
+          <div className={styles.loadingContent}>
+            <div className={styles.spinner}></div>
+            <p>Loading AI-powered internship recommendations...</p>
           </div>
         </div>
       </div>
@@ -218,7 +216,7 @@ const Home = () => {
            isGuest ? 'Discover Your Dream Internship' : 'Find Your Perfect Internship at NUS'}
         </h1>
         <p className={styles.heroSubtitle}>
-          {user ? 'Ready to take the next step in your career?' : 
+          {user ? 'AI-powered recommendations tailored just for you' : 
            'Connect with top companies and land your ideal internship.'}
         </p>
         
@@ -246,16 +244,16 @@ const Home = () => {
           <div className={styles.resumeUploadCard}>
             <div className={styles.resumeUploadContent}>
               <div className={styles.resumeUploadIcon}>
-                {resumeUploaded ? '✅' : '📄'}
+                {resumeUploaded ? '✅' : '🤖'}
               </div>
               <div className={styles.resumeUploadText}>
                 <h3 className={styles.resumeUploadTitle}>
-                  {resumeUploaded ? 'Resume Successfully Uploaded!' : 'Boost Your Application Success'}
+                  {resumeUploaded ? 'AI Recommendations Active!' : 'Boost Your AI Matching'}
                 </h3>
                 <p className={styles.resumeUploadSubtitle}>
                   {resumeUploaded 
-                    ? 'Your resume has been parsed and your profile is up to date. You\'ll get better internship matches!'
-                    : 'Upload your resume to get personalized internship recommendations and auto-fill application forms'
+                    ? 'Your resume has been analyzed by our AI algorithm. You\'re getting personalized matches!'
+                    : 'Upload your resume to get AI-powered internship recommendations and auto-fill application forms'
                   }
                 </p>
               </div>
@@ -268,20 +266,30 @@ const Home = () => {
                   style={{ display: 'none' }}
                 />
                 <button
-                  className={styles.btn + ' ' + styles.btnPrimary}
+                  className={styles.modernUploadBtn}
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploading}
                 >
                   {uploading ? (
                     <>
-                      <span className={styles.spinner}></span>
-                      Analyzing Resume...
+                      <span className={styles.uploadSpinner}></span>
+                      <span>Analyzing Resume...</span>
                     </>
-                  ) : resumeUploaded ? 'Update Resume' : 'Upload Resume'}
+                  ) : resumeUploaded ? (
+                    <>
+                      <span className={styles.uploadIcon}>🔄</span>
+                      <span>Update Resume</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className={styles.uploadIcon}>📁</span>
+                      <span>Upload Resume</span>
+                    </>
+                  )}
                 </button>
                 {resumeUploaded && (
                   <button 
-                    className={styles.btn + ' ' + styles.btnSecondary}
+                    className={styles.viewProfileBtn}
                     onClick={() => navigate('/profile')}
                   >
                     View Profile
@@ -293,7 +301,7 @@ const Home = () => {
               <div className={styles.resumeUploadFeatures}>
                 <div className={styles.featureItem}>
                   <span className={styles.featureIcon}>🎯</span>
-                  <span>Smart job matching</span>
+                  <span>AI-powered matching</span>
                 </div>
                 <div className={styles.featureItem}>
                   <span className={styles.featureIcon}>⚡</span>
@@ -326,23 +334,22 @@ const Home = () => {
         
         <div className={styles.categories}>
           {categories.map(cat => (
-            <button
-              key={cat.id}
-              className={`${styles.categoryChip} ${selectedCategory === cat.id ? styles.active : ''}`}
-              onClick={() => setSelectedCategory(cat.id)}
-            >
-              {cat.icon} {cat.name}
-              {cat.count > 0 && <span className={styles.badge}>{cat.count}</span>}
-            </button>
-          ))}
-        </div>
+              <button
+                  key={cat.id}
+                  className={`${styles.categoryChip} ${selectedCategory === cat.id ? styles.active : ''}`}
+                  onClick={() => setSelectedCategory(cat.id)}
+                 >
+                  {cat.icon} {cat.name}
+              </button>
+              ))}
+          </div>
       </section>
       
       {/* Featured Internships */}
       <section className={styles.featuredSection}>
         <div className={styles.sectionHeader}>
           <h2>
-            {user ? 'Recommended For You' : 'Featured Internships'}
+            {user ? '🤖 AI-Powered Recommendations' : 'Featured Internships'}
             <span className={styles.badge}>{filtered.length}</span>
           </h2>
           <button className={styles.viewAllButton} onClick={() => navigate('/internships')}>
@@ -353,19 +360,30 @@ const Home = () => {
         <div className={styles.internshipsGrid}>
           {filtered.map(internship => (
             <div key={internship.id} className={styles.internshipCard}>
-              {user && <div className={styles.matchBadge}>{internship.match}% Match</div>}
+              {/* Top-right elements (match badge and bookmark) */}
+              {user && (
+                <div className={styles.cardTopRight}>
+                  <div className={styles.matchBadge}>{internship.match}% Match</div>
+                  <button 
+                    className={styles.bookmarkButton} 
+                    onClick={() => handleAction('bookmark', internship)}
+                    aria-label="Bookmark this internship"
+                  >
+                    🔖
+                  </button>
+                </div>
+              )}
               
+              {/* Card header with company info */}
               <div className={styles.cardHeader}>
                 <div className={styles.companyLogo}>{internship.logo}</div>
                 <div className={styles.companyInfo}>
                   <h3 className={styles.jobTitle}>{internship.title}</h3>
                   <p className={styles.companyName}>{internship.company}</p>
                 </div>
-                <button className={styles.bookmarkButton} onClick={() => handleAction('bookmark', internship)}>
-                  🔖
-                </button>
               </div>
 
+              {/* Job details grid */}
               <div className={styles.jobDetails}>
                 <div className={styles.detailItem}>
                   <span>📍</span> {internship.location}
@@ -381,6 +399,7 @@ const Home = () => {
                 </div>
               </div>
 
+              {/* Job description */}
               <p className={styles.jobDescription}>{internship.description}</p>
 
               {/* Skills tags */}
@@ -393,11 +412,19 @@ const Home = () => {
                 )}
               </div>
 
+              {/* Action buttons */}
               <div className={styles.cardActions}>
-                <button className={styles.applyButton} onClick={() => handleAction('apply', internship)}>
+                <button 
+                  className={styles.applyButton} 
+                  data-guest={!user ? "true" : "false"}
+                  onClick={() => handleAction('apply', internship)}
+                >
                   {user ? 'Apply Now' : 'Sign Up to Apply'}
                 </button>
-                <button className={styles.detailsButton} onClick={() => handleAction('details', internship)}>
+                <button 
+                  className={styles.detailsButton} 
+                  onClick={() => handleAction('details', internship)}
+                >
                   Details
                 </button>
               </div>
@@ -424,16 +451,16 @@ const Home = () => {
             </div>
           </div>
           <div className={styles.statCard}>
-            <div className={styles.statIcon}>👥</div>
+            <div className={styles.statIcon}>🤖</div>
             <div className={styles.statContent}>
-              <h3>5,000+</h3>
-              <p>NUS Students</p>
+              <h3>95%</h3>
+              <p>AI Match Accuracy</p>
             </div>
           </div>
           <div className={styles.statCard}>
             <div className={styles.statIcon}>✅</div>
             <div className={styles.statContent}>
-              <h3>95%</h3>
+              <h3>87%</h3>
               <p>Success Rate</p>
             </div>
           </div>
@@ -447,14 +474,14 @@ const Home = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* CTA Section for non-users */}
       {!user && (
         <section className={styles.ctaSection}>
           <div className={styles.ctaContent}>
-            <h2>Ready to Start Your Internship Journey?</h2>
-            <p>Join thousands of NUS students who found their dream internships</p>
+            <h2>Ready to Start Your AI-Powered Journey?</h2>
+            <p>Join thousands of NUS students using our smart matching algorithm</p>
             <button className={styles.ctaPrimary} onClick={() => navigate('/signup')}>
-              Create Account
+              Get AI Recommendations
             </button>
           </div>
         </section>

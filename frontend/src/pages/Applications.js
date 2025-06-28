@@ -54,7 +54,8 @@ const Applications = () => {
     { path: '/home', label: 'Home', icon: '🏠' },
     { path: '/internships', label: 'Browse', icon: '🔍' },
     { path: '/applications', label: 'Applications', icon: '📝' },
-    { path: '/bookmarks', label: 'Bookmarks', icon: '🔖' }
+    { path: '/bookmarks', label: 'Bookmarks', icon: '🔖' },
+    { path: '/about', label: 'About', icon: '🏢' }  
   ];
 
   // Configuration for different application statuses
