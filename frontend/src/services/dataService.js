@@ -135,6 +135,42 @@ class DataService {
     };
   }
 
+  // Simulate getting user profile data
+  static async getUserProfile(userId) {
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    // Simulate user profile data - you can customize this data
+    const userProfile = {
+      id: userId,
+      firstName: 'John',
+      lastName: 'Doe', 
+      email: 'john.doe@example.com',
+      phone: '+65 9123 4567',
+      university: 'National University of Singapore',
+      major: 'Computer Science',
+      graduationDate: '2025-12-15',
+      gpa: '3.75',
+      skills: ['JavaScript', 'React', 'Python', 'Node.js', 'SQL'],
+      linkedinUrl: 'https://linkedin.com/in/johndoe',
+      githubUrl: 'https://github.com/johndoe',
+      portfolioUrl: 'https://johndoe.dev',
+      availability: 'full-time',
+      relevantExperience: 'Completed several web development projects including a full-stack e-commerce platform and contributed to open-source React libraries.',
+      bio: 'Passionate computer science student with strong background in web development.',
+      location: 'Singapore',
+      yearOfStudy: '3rd Year',
+      cgpa: 3.75,
+      profileCompleteness: 85,
+      lastUpdated: new Date().toISOString()
+    };
+
+    return {
+      success: true,
+      data: userProfile,
+      message: 'Profile retrieved successfully'
+    };
+  }
+  
   // Simulate platform-specific scraping results
   static async getInternshipsByPlatform(platform) {
     await new Promise(resolve => setTimeout(resolve, 800));

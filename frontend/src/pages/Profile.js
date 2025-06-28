@@ -14,13 +14,9 @@ const Profile = () => {
   const fileInputRef = useRef(null);
 
   // Profile state
-
   const [draftSaved, setDraftSaved] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const toggleEdit = () => {
-  setIsEditing(!isEditing);
-};
   const [uploading, setUploading] = useState(false);
   const [profileData, setProfileData] = useState({
     name: user?.full_name || 'John Doe',
@@ -34,6 +30,7 @@ const Profile = () => {
     skills: ['Python', 'JavaScript', 'React', 'Node.js', 'SQL', 'Machine Learning'],
     experience: [
       {
+        id: 1,
         title: 'Web Development Intern',
         company: 'Tech Startup SG',
         duration: 'Jun 2024 - Aug 2024',
@@ -42,6 +39,7 @@ const Profile = () => {
     ],
     education: [
       {
+        id: 1,
         institution: 'National University of Singapore',
         degree: 'Bachelor of Computer Science',
         period: '2022 - 2026',
@@ -65,14 +63,12 @@ const Profile = () => {
   };
 
   const saveDraft = () => {
-    // Simulate draft save
     setDraftSaved(true);
-    setTimeout(() => setDraftSaved(false), 2000); // reset after 2s
+    setTimeout(() => setDraftSaved(false), 2000);
   };
 
   const handleSubmit = () => {
     setIsSubmitting(true);
-    // Simulate form submit
     setTimeout(() => {
       alert('Application submitted!');
       setIsSubmitting(false);
@@ -88,217 +84,182 @@ const Profile = () => {
       return;
     }
     setUploading(true);
-    setParsing(true)
-
-  //   // Simulate upload process
-  //   try {
-  //     // In a real app, you'd upload to your backend here
-  //     await new Promise(resolve => setTimeout(resolve, 2000));
-      
-  //     setProfileData(prev => ({
-  //       ...prev,
-  //       resumeUploaded: true,
-  //       lastUpdated: new Date().toLocaleDateString()
-  //     }));
-      
-  //     alert('Resume uploaded successfully!');
-  //   } catch (error) {
-  //     alert('Upload failed. Please try again.');
-  //   } finally {
-  //     setUploading(false);
-  //   }
-  // };
+    setParsing(true);
 
     try {
-          // Process PDF using the imported module
-          console.log('Processing PDF resume...');
-          const result = await processPDFResume(file);
-          
-          if (!result.success) {
-            throw new Error(result.error);
-          }
-          
-          const parsedData = result.data;
-          console.log('Parsed data:', parsedData);
-          console.log('Extracted text preview:', result.extractedText);
-          
-          // Merge parsed data with existing profile data
-          setProfileData(prev => ({
-            ...prev,
-            // Only update fields if parsed data is not empty
-            name: parsedData.name && parsedData.name.trim() ? parsedData.name : prev.name,
-            email: parsedData.email && parsedData.email.trim() ? parsedData.email : prev.email,
-            phone: parsedData.phone && parsedData.phone.trim() ? parsedData.phone : prev.phone,
-            location: parsedData.location && parsedData.location.trim() ? parsedData.location : prev.location,
-            skills: parsedData.skills && parsedData.skills.length > 0 ? parsedData.skills : prev.skills,
-            experience: parsedData.experience && parsedData.experience.length > 0 ? parsedData.experience : prev.experience,
-            education: parsedData.education && parsedData.education.length > 0 ? parsedData.education : prev.education,
-            resumeUploaded: true,
-            lastUpdated: new Date().toLocaleDateString()
-          }));
+      console.log('Processing PDF resume...');
+      const result = await processPDFResume(file);
+      
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      
+      const parsedData = result.data;
+      console.log('Parsed data:', parsedData);
+      console.log('Extracted text preview:', result.extractedText);
+      
+      setProfileData(prev => ({
+        ...prev,
+        name: parsedData.name && parsedData.name.trim() ? parsedData.name : prev.name,
+        email: parsedData.email && parsedData.email.trim() ? parsedData.email : prev.email,
+        phone: parsedData.phone && parsedData.phone.trim() ? parsedData.phone : prev.phone,
+        location: parsedData.location && parsedData.location.trim() ? parsedData.location : prev.location,
+        skills: parsedData.skills && parsedData.skills.length > 0 ? parsedData.skills : prev.skills,
+        experience: parsedData.experience && parsedData.experience.length > 0 ? parsedData.experience : prev.experience,
+        education: parsedData.education && parsedData.education.length > 0 ? parsedData.education : prev.education,
+        resumeUploaded: true,
+        lastUpdated: new Date().toLocaleDateString()
+      }));
 
-          // Show success message and enter edit mode
-          const updatedFields = [];
-          if (parsedData.name) updatedFields.push('name');
-          if (parsedData.email) updatedFields.push('email');
-          if (parsedData.phone) updatedFields.push('phone');
-          if (parsedData.location) updatedFields.push('location');
-          if (parsedData.skills.length > 0) updatedFields.push('skills');
-          if (parsedData.experience.length > 0) updatedFields.push('experience');
-          if (parsedData.education.length > 0) updatedFields.push('education');
-          
-          if (updatedFields.length > 0) {
-            alert(`Resume parsed successfully! Updated: ${updatedFields.join(', ')}. Please review and edit the information.`);
-            setIsEditing(true);
-          } else {
-            alert('Resume uploaded but no information could be extracted. Please check if the PDF contains readable text.');
-          }
-          
-        } catch (error) {
-          console.error('Error processing resume:', error);
-          alert(`Failed to parse resume: ${error.message}. Please ensure the PDF contains readable text.`);
-        } finally {
-          setUploading(false);
-          setParsing(false);
-        }
-      };
-
-  const handleSaveProfile = () => {
-    setIsEditing(false);
-    setProfileData(prev => ({
-      ...prev,
-      lastUpdated: new Date().toLocaleDateString()
-    }));
-    alert('Profile updated successfully!');
+      const updatedFields = [];
+      if (parsedData.name) updatedFields.push('name');
+      if (parsedData.email) updatedFields.push('email');
+      if (parsedData.phone) updatedFields.push('phone');
+      if (parsedData.location) updatedFields.push('location');
+      if (parsedData.skills.length > 0) updatedFields.push('skills');
+      if (parsedData.experience.length > 0) updatedFields.push('experience');
+      if (parsedData.education.length > 0) updatedFields.push('education');
+      
+      if (updatedFields.length > 0) {
+        alert(`Resume parsed successfully! Updated: ${updatedFields.join(', ')}. Please review and edit the information.`);
+        setIsEditing(true);
+      } else {
+        alert('Resume uploaded but no information could be extracted. Please check if the PDF contains readable text.');
+      }
+      
+    } catch (error) {
+      console.error('Error processing resume:', error);
+      alert(`Failed to parse resume: ${error.message}. Please ensure the PDF contains readable text.`);
+    } finally {
+      setUploading(false);
+      setParsing(false);
+    }
   };
 
+const handleSaveProfile = () => {
+  setIsEditing(false);
+  const updatedProfile = {
+    ...profileData,  
+    lastUpdated: new Date().toLocaleDateString()
+  };
+  setProfileData(updatedProfile);
+  localStorage.setItem('userProfileData', JSON.stringify(updatedProfile));
+  console.log('Saved profile data to localStorage:', updatedProfile);
+  alert('Profile updated successfully!');
+};
+
   const updateField = (field, value) => {
+    setProfileData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const addSkill = () => {
+    if (newSkill && !profileData.skills.includes(newSkill)) {
       setProfileData(prev => ({
         ...prev,
-        [field]: value
+        skills: [...prev.skills, newSkill]
       }));
-    };
+      setNewSkill('');
+    }
+  };
 
-    const addSkill = () => {
-      if (newSkill && !profileData.skills.includes(newSkill)) {
-        setProfileData(prev => ({
-          ...prev,
-          skills: [...prev.skills, newSkill]
-        }));
-        setNewSkill('');
-      }
-    };
+  const removeSkill = (skillToRemove) => {
+    setProfileData(prev => ({
+      ...prev,
+      skills: prev.skills.filter(skill => skill !== skillToRemove)
+    }));
+  };
 
-    const removeSkill = (skillToRemove) => {
-      setProfileData(prev => ({
-        ...prev,
-        skills: prev.skills.filter(skill => skill !== skillToRemove)
-      }));
+  const addExperience = () => {
+    const newExp = {
+      id: Date.now(),
+      title: 'New Position',
+      company: 'Company Name',
+      duration: 'Start - End',
+      description: 'Job description...'
     };
+    setProfileData(prev => ({
+      ...prev,
+      experience: [...prev.experience, newExp]
+    }));
+  };
 
-    const addExperience = () => {
-      const newExp = {
-        id: Date.now(),
-        title: 'New Position',
-        company: 'Company Name',
-        duration: 'Start - End',
-        description: 'Job description...'
-      };
-      setProfileData(prev => ({
-        ...prev,
-        experience: [...prev.experience, newExp]
-      }));
+  const updateExperience = (id, field, value) => {
+    setProfileData(prev => ({
+      ...prev,
+      experience: prev.experience.map(exp => 
+        exp.id === id ? { ...exp, [field]: value } : exp
+      )
+    }));
+  };
+
+  const removeExperience = (id) => {
+    setProfileData(prev => ({
+      ...prev,
+      experience: prev.experience.filter(exp => exp.id !== id)
+    }));
+  };
+
+  const addEducation = () => {
+    const newEdu = {
+      id: Date.now(),
+      institution: 'University Name',
+      degree: 'Degree',
+      period: 'Start - End',
+      gpa: ''
     };
+    setProfileData(prev => ({
+      ...prev,
+      education: [...prev.education, newEdu]
+    }));
+  };
 
-    const updateExperience = (id, field, value) => {
-      setProfileData(prev => ({
-        ...prev,
-        experience: prev.experience.map(exp => 
-          exp.id === id ? { ...exp, [field]: value } : exp
-        )
-      }));
-    };
+  const updateEducation = (id, field, value) => {
+    setProfileData(prev => ({
+      ...prev,
+      education: prev.education.map(edu => 
+        edu.id === id ? { ...edu, [field]: value } : edu
+      )
+    }));
+  };
 
-    const removeExperience = (id) => {
-      setProfileData(prev => ({
-        ...prev,
-        experience: prev.experience.filter(exp => exp.id !== id)
-      }));
-    };
+  const removeEducation = (id) => {
+    setProfileData(prev => ({
+      ...prev,
+      education: prev.education.filter(edu => edu.id !== id)
+    }));
+  };
 
-    const addEducation = () => {
-      const newEdu = {
-        id: Date.now(),
-        institution: 'University Name',
-        degree: 'Degree',
-        period: 'Start - End',
-        gpa: ''
-      };
-      setProfileData(prev => ({
-        ...prev,
-        education: [...prev.education, newEdu]
-      }));
-    };
-
-    const updateEducation = (id, field, value) => {
-      setProfileData(prev => ({
-        ...prev,
-        education: prev.education.map(edu => 
-          edu.id === id ? { ...edu, [field]: value } : edu
-        )
-      }));
-    };
-
-    const removeEducation = (id) => {
-      setProfileData(prev => ({
-        ...prev,
-        education: prev.education.filter(edu => edu.id !== id)
-      }));
-    };
-
-    const EditableField = ({ value, onChange, multiline = false, placeholder = "" }) => {
-      if (!isEditing) {
-        return <span className="text-gray-800">{value}</span>;
-      }
-      
-      if (multiline) {
-        return (
-          <textarea
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            placeholder={placeholder}
-            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-            rows={3}
-          />
-        );
-      }
-      
+  // Standardized EditableField component using existing CSS module styles
+  const EditableField = ({ value, onChange, multiline = false, placeholder = "", type = "text" }) => {
+    if (!isEditing) {
+      return <span className={styles.contactValue}>{value}</span>;
+    }
+    
+    if (multiline) {
       return (
-        <input
-          type="text"
+        <textarea
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className={styles.editTextarea}
+          rows={3}
         />
       );
-    };
-
-  // const addSkill = (newSkill) => {
-  //   if (newSkill && !profileData.skills.includes(newSkill)) {
-  //     setProfileData(prev => ({
-  //       ...prev,
-  //       skills: [...prev.skills, newSkill]
-  //     }));
-  //   }
-  // };
-
-  // const removeSkill = (skillToRemove) => {
-  //   setProfileData(prev => ({
-  //     ...prev,
-  //     skills: prev.skills.filter(skill => skill !== skillToRemove)
-  //   }));
-  // };
+    }
+    
+    return (
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className={styles.editInput}
+      />
+    );
+  };
 
   return (
     <div className={styles.homeContainer}>
@@ -343,23 +304,67 @@ const Profile = () => {
                 <input
                   type="text"
                   value={profileData.name}
-                  onChange={(e) => setProfileData(prev => ({...prev, name: e.target.value}))}
+                  onChange={(e) => updateField('name', e.target.value)}
                   className={styles.editInput}
+                  placeholder="Full Name"
                 />
               ) : (
                 <h1 className={styles.profileName}>{profileData.name}</h1>
               )}
-              <p className={styles.profileTitle}>{profileData.major} Student at {profileData.university}</p>
-              <p className={styles.profileLocation}>📍 {profileData.location}</p>
+              <p className={styles.profileTitle}>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    value={profileData.major}
+                    onChange={(e) => updateField('major', e.target.value)}
+                    className={styles.editInput}
+                    placeholder="Major"
+                  />
+                ) : (
+                  profileData.major
+                )} Student at {isEditing ? (
+                  <input
+                    type="text"
+                    value={profileData.university}
+                    onChange={(e) => updateField('university', e.target.value)}
+                    className={styles.editInput}
+                    placeholder="University"
+                  />
+                ) : (
+                  profileData.university
+                )}
+              </p>
+              <div className={styles.profileLocation}>
+                <MapPin size={16} />
+                {isEditing ? (
+                  <input
+                    type="text"
+                    value={profileData.location}
+                    onChange={(e) => updateField('location', e.target.value)}
+                    className={styles.editInput}
+                    placeholder="Location"
+                  />
+                ) : (
+                  `📍 ${profileData.location}`
+                )}
+              </div>
             </div>
           </div>
           <div className={styles.profileActions}>
             {isEditing ? (
-              <button className={styles.btn + ' ' + styles.btnPrimary} onClick={handleSaveProfile}>
-                Save Changes
-              </button>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button className={`${styles.btn} ${styles['btn-primary']}`} onClick={handleSaveProfile}>
+                  <Save size={16} style={{ marginRight: '0.5rem' }} />
+                  Save Changes
+                </button>
+                <button className={`${styles.btn} ${styles['btn-secondary']}`} onClick={() => setIsEditing(false)}>
+                  <X size={16} style={{ marginRight: '0.5rem' }} />
+                  Cancel
+                </button>
+              </div>
             ) : (
-              <button className={styles.btn + ' ' + styles.btnSecondary} onClick={() => setIsEditing(true)}>
+              <button className={`${styles.btn} ${styles['btn-secondary']}`} onClick={() => setIsEditing(true)}>
+                <Edit3 size={16} style={{ marginRight: '0.5rem' }} />
                 Edit Profile
               </button>
             )}
@@ -373,44 +378,42 @@ const Profile = () => {
         <div className={styles.profileSidebar}>
           {/* Contact Info Card */}
           <div className={styles.profileCard}>
-            <h3 className={styles.cardTitle}>Contact Information</h3>
+            <h3 className={styles.cardTitle}>
+              <Mail size={20} style={{ color: 'var(--purple-light)' }} />
+              Contact Information
+            </h3>
             <div className={styles.contactItem}>
               <span className={styles.contactIcon}>📧</span>
               <div>
                 <p className={styles.contactLabel}>Email</p>
-                {isEditing ? (
-                  <input
-                    type="email"
-                    value={profileData.email}
-                    onChange={(e) => setProfileData(prev => ({...prev, email: e.target.value}))}
-                    className={styles.editInput}
-                  />
-                ) : (
-                  <p className={styles.contactValue}>{profileData.email}</p>
-                )}
+                <EditableField
+                  value={profileData.email}
+                  onChange={(value) => updateField('email', value)}
+                  placeholder="Email address"
+                  type="email"
+                />
               </div>
             </div>
             <div className={styles.contactItem}>
               <span className={styles.contactIcon}>📱</span>
               <div>
                 <p className={styles.contactLabel}>Phone</p>
-                {isEditing ? (
-                  <input
-                    type="tel"
-                    value={profileData.phone}
-                    onChange={(e) => setProfileData(prev => ({...prev, phone: e.target.value}))}
-                    className={styles.editInput}
-                  />
-                ) : (
-                  <p className={styles.contactValue}>{profileData.phone}</p>
-                )}
+                <EditableField
+                  value={profileData.phone}
+                  onChange={(value) => updateField('phone', value)}
+                  placeholder="Phone number"
+                  type="tel"
+                />
               </div>
             </div>
           </div>
 
           {/* Resume Upload Card */}
           <div className={styles.profileCard}>
-            <h3 className={styles.cardTitle}>Resume</h3>
+            <h3 className={styles.cardTitle}>
+              <FileText size={20} style={{ color: 'var(--purple-light)' }} />
+              Resume
+            </h3>
             <div className={styles.resumeSection}>
               {profileData.resumeUploaded ? (
                 <div className={styles.resumeUploaded}>
@@ -434,10 +437,12 @@ const Profile = () => {
                 style={{ display: 'none' }}
               />
               <button
-                className={styles.btn + ' ' + styles.btnPrimary}
+                className={`${styles.btn} ${styles['btn-primary']}`}
+                style={{ width: '100%' }}
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
               >
+                <Upload size={16} style={{ marginRight: '0.5rem' }} />
                 {uploading ? 'Uploading...' : profileData.resumeUploaded ? 'Update Resume' : 'Upload Resume'}
               </button>
             </div>
@@ -445,7 +450,10 @@ const Profile = () => {
 
           {/* Skills Card */}
           <div className={styles.profileCard}>
-            <h3 className={styles.cardTitle}>Skills</h3>
+            <h3 className={styles.cardTitle}>
+              <Award size={20} style={{ color: 'var(--purple-light)' }} />
+              Skills
+            </h3>
             <div className={styles.skillsContainer}>
               {profileData.skills.map(skill => (
                 <span key={skill} className={styles.skillTag}>
@@ -461,15 +469,24 @@ const Profile = () => {
                 </span>
               ))}
               {isEditing && (
-                <button 
-                  className={styles.addSkillBtn}
-                  onClick={() => {
-                    const newSkill = prompt('Enter a new skill:');
-                    if (newSkill) addSkill(newSkill);
-                  }}
-                >
-                  + Add Skill
-                </button>
+                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem', width: '100%' }}>
+                  <input
+                    type="text"
+                    value={newSkill}
+                    onChange={(e) => setNewSkill(e.target.value)}
+                    placeholder="Add a skill"
+                    className={styles.editInput}
+                    onKeyPress={(e) => e.key === 'Enter' && addSkill()}
+                    style={{ flex: 1 }}
+                  />
+                  <button 
+                    className={`${styles.btn} ${styles['btn-primary']}`}
+                    onClick={addSkill}
+                    style={{ padding: '0.5rem' }}
+                  >
+                    <Plus size={14} />
+                  </button>
+                </div>
               )}
             </div>
           </div>
@@ -479,12 +496,16 @@ const Profile = () => {
         <div className={styles.profileMain}>
           {/* About Section */}
           <div className={styles.profileCard}>
-            <h3 className={styles.cardTitle}>About</h3>
+            <h3 className={styles.cardTitle}>
+              <User size={20} style={{ color: 'var(--purple-light)' }} />
+              About
+            </h3>
             {isEditing ? (
               <textarea
                 value={profileData.bio}
-                onChange={(e) => setProfileData(prev => ({...prev, bio: e.target.value}))}
+                onChange={(e) => updateField('bio', e.target.value)}
                 className={styles.editTextarea}
+                placeholder="Tell us about yourself..."
                 rows={4}
               />
             ) : (
@@ -494,100 +515,163 @@ const Profile = () => {
 
           {/* Education Section */}
           <div className={styles.profileCard}>
-            <h3 className={styles.cardTitle}>Education</h3>
-            {profileData.education.map((edu, index) => (
-              <div key={index} className={styles.educationItem}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h3 className={styles.cardTitle}>
+                <GraduationCap size={20} style={{ color: 'var(--purple-light)' }} />
+                Education
+              </h3>
+              {isEditing && (
+                <button
+                  onClick={addEducation}
+                  className={`${styles.btn} ${styles['btn-primary']}`}
+                  style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
+                >
+                  <Plus size={14} style={{ marginRight: '0.5rem' }} />
+                  Add Education
+                </button>
+              )}
+            </div>
+            {profileData.education.map((edu) => (
+              <div key={edu.id} className={styles.educationItem}>
                 <div className={styles.educationIcon}>🎓</div>
-                <div className={styles.educationDetails}>
-                  <h4 className={styles.educationDegree}>{edu.degree}</h4>
-                  <p className={styles.educationInstitution}>{edu.institution}</p>
-                  <p className={styles.educationPeriod}>{edu.period}</p>
-                  <p className={styles.educationGpa}>GPA: {edu.gpa}</p>
+                <div className={styles.educationDetails} style={{ flex: 1 }}>
+                  {isEditing ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                      <input
+                        type="text"
+                        value={edu.degree}
+                        onChange={(e) => updateEducation(edu.id, 'degree', e.target.value)}
+                        className={styles.editInput}
+                        placeholder="Degree"
+                      />
+                      <input
+                        type="text"
+                        value={edu.institution}
+                        onChange={(e) => updateEducation(edu.id, 'institution', e.target.value)}
+                        className={styles.editInput}
+                        placeholder="Institution"
+                      />
+                      <input
+                        type="text"
+                        value={edu.period}
+                        onChange={(e) => updateEducation(edu.id, 'period', e.target.value)}
+                        className={styles.editInput}
+                        placeholder="Period"
+                      />
+                      <input
+                        type="text"
+                        value={edu.gpa}
+                        onChange={(e) => updateEducation(edu.id, 'gpa', e.target.value)}
+                        className={styles.editInput}
+                        placeholder="GPA"
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      <h4 className={styles.educationDegree}>{edu.degree}</h4>
+                      <p className={styles.educationInstitution}>{edu.institution}</p>
+                      <p className={styles.educationPeriod}>{edu.period}</p>
+                      <p className={styles.educationGpa}>GPA: {edu.gpa}</p>
+                    </>
+                  )}
                 </div>
+                {isEditing && (
+                  <button
+                    onClick={() => removeEducation(edu.id)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: 'var(--danger)',
+                      cursor: 'pointer',
+                      padding: '0.25rem'
+                    }}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                )}
               </div>
             ))}
           </div>
-          {/* Experience */}
-          <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
-                <Briefcase className="text-blue-600" size={20} />
+
+          {/* Experience Section */}
+          <div className={styles.profileCard}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h3 className={styles.cardTitle}>
+                <Briefcase size={20} style={{ color: 'var(--purple-light)' }} />
                 Experience
-              </h2>
+              </h3>
               {isEditing && (
                 <button
                   onClick={addExperience}
-                  className="flex items-center gap-2 px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm"
+                  className={`${styles.btn} ${styles['btn-primary']}`}
+                  style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
                 >
-                  <Plus size={14} />
+                  <Plus size={14} style={{ marginRight: '0.5rem' }} />
                   Add Experience
                 </button>
               )}
             </div>
             {profileData.experience.map((exp) => (
-              <div key={exp.id} className="border-l-4 border-blue-500 pl-4 mb-4 last:mb-0">
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <div className="mb-2">
-                      <EditableField
+              <div key={exp.id} className={styles.experienceItem}>
+                <div className={styles.experienceIcon}>💼</div>
+                <div className={styles.experienceDetails} style={{ flex: 1 }}>
+                  {isEditing ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                      <input
+                        type="text"
                         value={exp.title}
-                        onChange={(value) => updateExperience(exp.id, 'title', value)}
+                        onChange={(e) => updateExperience(exp.id, 'title', e.target.value)}
+                        className={styles.editInput}
                         placeholder="Job title"
                       />
-                    </div>
-                    <div className="mb-2">
-                      <EditableField
+                      <input
+                        type="text"
                         value={exp.company}
-                        onChange={(value) => updateExperience(exp.id, 'company', value)}
+                        onChange={(e) => updateExperience(exp.id, 'company', e.target.value)}
+                        className={styles.editInput}
                         placeholder="Company name"
                       />
-                    </div>
-                    <div className="mb-2">
-                      <EditableField
+                      <input
+                        type="text"
                         value={exp.duration}
-                        onChange={(value) => updateExperience(exp.id, 'duration', value)}
+                        onChange={(e) => updateExperience(exp.id, 'duration', e.target.value)}
+                        className={styles.editInput}
                         placeholder="Duration"
                       />
-                    </div>
-                    <div>
-                      <EditableField
+                      <textarea
                         value={exp.description}
-                        onChange={(value) => updateExperience(exp.id, 'description', value)}
+                        onChange={(e) => updateExperience(exp.id, 'description', e.target.value)}
+                        className={styles.editTextarea}
                         placeholder="Job description"
-                        multiline
+                        rows={3}
                       />
                     </div>
-                  </div>
-                  {isEditing && (
-                    <button
-                      onClick={() => removeExperience(exp.id)}
-                      className="text-red-500 hover:text-red-700 ml-2"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-              {/* Experience Section
-              <div className={styles.profileCard}>
-                <h3 className={styles.cardTitle}>Experience</h3>
-                {profileData.experience.map((exp, index) => (
-                  <div key={index} className={styles.experienceItem}>
-                    <div className={styles.experienceIcon}>💼</div>
-                    <div className={styles.experienceDetails}>
+                  ) : (
+                    <>
                       <h4 className={styles.experienceTitle}>{exp.title}</h4>
                       <p className={styles.experienceCompany}>{exp.company}</p>
                       <p className={styles.experienceDuration}>{exp.duration}</p>
                       <p className={styles.experienceDescription}>{exp.description}</p>
-                    </div>
-                  </div>
-                ))}
-                <button className={styles.btn + ' ' + styles.btnSecondary}>
-                  + Add Experience
-                </button>
-              </div> */}
+                    </>
+                  )}
+                </div>
+                {isEditing && (
+                  <button
+                    onClick={() => removeExperience(exp.id)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: 'var(--danger)',
+                      cursor: 'pointer',
+                      padding: '0.25rem'
+                    }}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
 
           {/* Application Stats */}
           <div className={styles.profileCard}>
@@ -609,34 +693,6 @@ const Profile = () => {
                 <span className={styles.statNumber}>25%</span>
                 <span className={styles.statLabel}>Success Rate</span>
               </div>
-
-          {/* Action Buttons */}
-          <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
-            <button
-              type="button"
-              onClick={saveDraft}
-              className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
-              disabled={draftSaved}
-            >
-              {draftSaved ? 'Draft Saved!' : 'Save Draft'}
-            </button>
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-400 transition-colors"
-            >
-              {isSubmitting ? 'Submitting...' : 'Submit Application'}
-            </button>
-
-            <button 
-              onClick={() => setIsEditing(!isEditing)}
-              className="edit-toggle-btn"
-            >
-              {isEditing ? 'Save' : 'Edit Profile'}
-            </button>
-
-              </div>
             </div>
           </div>
         </div>
@@ -644,6 +700,5 @@ const Profile = () => {
     </div>
   );
 };
-
 
 export default Profile;

@@ -241,7 +241,7 @@ const Browse = () => {
           <span>🔄 Updated daily</span>
         </div>
       </section>
-
+      
       {/* Enhanced Search and Filter Section */}
       <section className={styles.searchSection}>
         <div className={styles.searchBar}>

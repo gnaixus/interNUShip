@@ -63,6 +63,19 @@ const PublicRoute = ({ children }) => {
   return user ? <Navigate to="/home" replace /> : children;
 };
 
+const profileData = {
+  firstName: 'Jie Ying',
+  lastName: 'Tan',
+  email: 'tanjieying16@gmail.com',
+  phone: '+65 9123 4567',
+  university: 'National University of Singapore',
+  major: 'Computer Science',
+  graduationDate: '2026-05-15',
+  gpa: '4.2',
+  skills: ['Python', 'JavaScript', 'React', 'Node.js', 'SQL', 'Machine Learning'],
+  experience: 'Web Development Intern at Tech Startup SG (Jun 2024 - Aug 2024)'
+};
+
 //App Content Component (needs to be inside AuthProvider)
 const AppContent = () => {
   
