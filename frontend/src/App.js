@@ -4,9 +4,16 @@ import { AuthProvider, useAuth } from './pages/auth/AuthContext';
 import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
 import Home from './pages/home/Home';
+import Browse from './pages/Browse';
+import Applications from './pages/Applications';
+import Profile from './pages/Profile';
+import Bookmarks from './pages/Bookmarks';
+import About from './pages/About';
+import ResumeUpload from './pages/resume/ResumeUpload';
+import ApplicationForm from './pages/resume/ApplicationForm';
 import './styles/App.css';
 
-// Protected Route Component
+//Protected Route Component
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
   
@@ -31,7 +38,7 @@ const ProtectedRoute = ({ children }) => {
   return user ? children : <Navigate to="/login" replace />;
 };
 
-// Public Route Component (redirects to home if already logged in)
+//Public Route Component (redirects to home if already logged in)
 const PublicRoute = ({ children }) => {
   const { user, loading } = useAuth();
   
@@ -56,8 +63,27 @@ const PublicRoute = ({ children }) => {
   return user ? <Navigate to="/home" replace /> : children;
 };
 
-// App Content Component (needs to be inside AuthProvider)
+const profileData = {
+  firstName: 'Jie Ying',
+  lastName: 'Tan',
+  email: 'tanjieying16@gmail.com',
+  phone: '+65 9123 4567',
+  university: 'National University of Singapore',
+  major: 'Computer Science',
+  graduationDate: '2026-05-15',
+  gpa: '4.2',
+  skills: ['Python', 'JavaScript', 'React', 'Node.js', 'SQL', 'Machine Learning'],
+  experience: 'Web Development Intern at Tech Startup SG (Jun 2024 - Aug 2024)'
+};
+
+//App Content Component (needs to be inside AuthProvider)
 const AppContent = () => {
+  
+  const handleParsedResume = (parsedData) => {
+    console.log('Parsed resume data:', parsedData);
+    // You can also set state here to display parsed data in UI
+  };
+
   return (
     <Routes>
       {/* Public routes - redirect to home if logged in */}
@@ -73,74 +99,84 @@ const AppContent = () => {
         </PublicRoute>
       } />
       
-      {/* Home route - accessible to everyone */}
+      {/* Home route is accessible to everyone */}
       <Route path="/home" element={<Home />} />
       <Route path="/" element={<Navigate to="/home" replace />} />
+
+      {/* Browse page - accessible to everyone (guests can browse) */}
+      <Route path="/internships" element={<Browse />} />
       
-      {/* Protected routes - require authentication */}
-      <Route path="/profile" element={
-        <ProtectedRoute>
-          <div style={{ padding: '50px', textAlign: 'center', color: '#f8fafc' }}>
-            <h1>Profile Page</h1>
-            <p>Coming soon...</p>
-          </div>
-        </ProtectedRoute>
-      } />
+      {/* About page - accessible to everyone */}
+      <Route path="/about" element={<About />} />
       
-      <Route path="/internships" element={
-        <ProtectedRoute>
-          <div style={{ padding: '50px', textAlign: 'center', color: '#f8fafc' }}>
-            <h1>Internships Page</h1>
-            <p>Coming soon...</p>
-          </div>
-        </ProtectedRoute>
-      } />
-      
+      {/* Applications page - protected route (requires authentication) */}
       <Route path="/applications" element={
         <ProtectedRoute>
-          <div style={{ padding: '50px', textAlign: 'center', color: '#f8fafc' }}>
-            <h1>Application Tracker</h1>
-            <p>Coming soon...</p>
-          </div>
+          <Applications />
         </ProtectedRoute>
       } />
-      
+
+      {/* Bookmarks page - protected route */}
       <Route path="/bookmarks" element={
         <ProtectedRoute>
-          <div style={{ padding: '50px', textAlign: 'center', color: '#f8fafc' }}>
-            <h1>Bookmarks Page</h1>
-            <p>Coming soon...</p>
-          </div>
+          <Bookmarks />
         </ProtectedRoute>
       } />
-      
-      <Route path="/community" element={
+
+      {/* Resume Upload Route - protected */}
+      <Route path="/resume-upload" element={
         <ProtectedRoute>
-          <div style={{ padding: '50px', textAlign: 'center', color: '#f8fafc' }}>
-            <h1>Community Page</h1>
-            <p>Coming soon...</p>
-          </div>
+          <ResumeUpload onParse={handleParsedResume} />
         </ProtectedRoute>
       } />
-      
-      {/* Apply routes */}
+
+      {/* Application Form Route - protected */}
       <Route path="/apply/:id" element={
         <ProtectedRoute>
-          <div style={{ padding: '50px', textAlign: 'center', color: '#f8fafc' }}>
-            <h1>Application Form</h1>
-            <p>Coming soon...</p>
+          <ApplicationForm />
+        </ProtectedRoute>
+      } />
+      
+      {/* Profile page - protected route */}
+      <Route path="/profile" element={
+        <ProtectedRoute>
+          <Profile />
+        </ProtectedRoute>
+      } />
+      
+      {/* Community page - placeholder for future development */}
+      <Route path="/community" element={
+        <ProtectedRoute>
+          <div style={{ 
+            padding: '50px', 
+            textAlign: 'center', 
+            color: '#f8fafc',
+            background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #374151 100%)',
+            minHeight: '100vh'
+          }}>
+            <h1>👥 Community Page</h1>
+            <p>Connect with fellow students and share internship experiences!</p>
+            <p style={{ marginTop: '2rem', opacity: 0.7 }}>Coming soon in Milestone 3...</p>
           </div>
         </ProtectedRoute>
       } />
       
+      {/* Internship details page - placeholder */}
       <Route path="/internships/:id" element={
-        <div style={{ padding: '50px', textAlign: 'center', color: '#f8fafc' }}>
-          <h1>Internship Details</h1>
-          <p>Coming soon...</p>
+        <div style={{ 
+          padding: '50px', 
+          textAlign: 'center', 
+          color: '#f8fafc',
+          background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #374151 100%)',
+          minHeight: '100vh'
+        }}>
+          <h1>📋 Internship Details</h1>
+          <p>Detailed view of internship opportunities</p>
+          <p style={{ marginTop: '2rem', opacity: 0.7 }}>Coming soon in Milestone 2...</p>
         </div>
       } />
       
-      {/* Catch all route */}
+      {/* Catch all route - redirect to home */}
       <Route path="*" element={<Navigate to="/home" replace />} />
     </Routes>
   );

@@ -1,126 +1,43 @@
-/* Signup.module.css - Dark Theme */
-
 .error {
   color: #f87171;
   font-size: 14px;
   font-weight: 500;
   margin-top: 4px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  animation: errorSlide 0.3s ease-out;
-  background: rgba(239, 68, 68, 0.1);
   padding: 8px 12px;
   border-radius: 8px;
   border-left: 3px solid #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+  animation: errorSlide 0.3s ease-out;
 }
 
-.error::before {
-  content: '⚠️';
-  font-size: 12px;
-}
-
-@keyframes errorSlide {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Status indicators for username and email validation */
-.checking {
+.checking, .available, .taken {
   position: absolute;
   right: 16px;
   top: 50%;
   transform: translateY(-50%);
-  color: #fbbf24;
-  font-size: 14px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(245, 158, 11, 0.15);
-  padding: 4px 8px;
-  border-radius: 6px;
-  backdrop-filter: blur(10px);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid;
 }
 
-.checking::before {
-  content: '';
-  width: 12px;
-  height: 12px;
-  border: 2px solid rgba(251, 191, 36, 0.3);
-  border-top: 2px solid #fbbf24;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+.checking {
+  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.2);
 }
 
 .available {
-  position: absolute;
-  right: 16px;
-  top: 50%;
-  transform: translateY(-50%);
   color: #34d399;
-  font-size: 14px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  animation: successSlide 0.4s ease-out;
   background: rgba(16, 185, 129, 0.15);
-  padding: 4px 8px;
-  border-radius: 6px;
-  backdrop-filter: blur(10px);
-}
-
-.available::before {
-  content: '✓';
-  font-weight: bold;
-  color: #10b981;
+  border-color: rgba(16, 185, 129, 0.2);
 }
 
 .taken {
-  position: absolute;
-  right: 16px;
-  top: 50%;
-  transform: translateY(-50%);
   color: #f87171;
-  font-size: 14px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  animation: errorSlide 0.4s ease-out;
   background: rgba(239, 68, 68, 0.15);
-  padding: 4px 8px;
-  border-radius: 6px;
-  backdrop-filter: blur(10px);
-}
-
-.taken::before {
-  content: '✗';
-  font-weight: bold;
-  color: #ef4444;
-}
-
-@keyframes successSlide {
-  from {
-    opacity: 0;
-    transform: translateY(-50%) scale(0.8);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(-50%) scale(1);
-  }
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  border-color: rgba(239, 68, 68, 0.2);
 }
 
 /* Password toggle button */
@@ -129,107 +46,33 @@
   right: 16px;
   top: 50%;
   transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
   background: rgba(51, 65, 85, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
   cursor: pointer;
-  padding: 8px;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-  font-size: 18px;
+  color: #94a3b8;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  backdrop-filter: blur(10px);
+  transition: all 0.2s ease;
 }
 
-.togglePassword:hover {
+.togglePassword:hover:not(:disabled) {
   background: rgba(167, 139, 250, 0.2);
   border-color: rgba(167, 139, 250, 0.3);
+  color: #a78bfa;
   transform: translateY(-50%) scale(1.05);
 }
 
-.togglePassword:focus {
-  outline: none;
-  background: rgba(167, 139, 250, 0.25);
-  border-color: rgba(167, 139, 250, 0.5);
-  box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.2);
-}
-
-/* Password hint */
-.passwordHint {
-  font-size: 13px;
-  color: #94a3b8;
-  margin-top: 4px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(51, 65, 85, 0.5);
-  padding: 6px 10px;
-  border-radius: 6px;
-  border-left: 3px solid #a78bfa;
-}
-
-.passwordHint::before {
-  content: 'ℹ️';
-  font-size: 12px;
-}
-
-/* Enhanced input groups with status */
-.inputGroup:has(.checking) .inputField,
-.inputGroup:has(.available) .inputField,
-.inputGroup:has(.taken) .inputField {
-  padding-right: 140px;
-}
-
-.inputGroup:has(.togglePassword) .inputField {
-  padding-right: 70px;
-}
-
-/* Success state for inputs */
-.inputGroup:has(.available) .inputField {
-  border-color: #10b981;
-  background: rgba(16, 185, 129, 0.1);
-  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.2);
-}
-
-.inputGroup:has(.available) .inputLabel {
-  color: #34d399;
-}
-
-/* Error state for inputs */
-.inputGroup:has(.taken) .inputField,
-.inputGroup:has(.error) .inputField {
-  border-color: #ef4444;
-  background: rgba(239, 68, 68, 0.1);
-  box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.2);
-}
-
-.inputGroup:has(.taken) .inputLabel,
-.inputGroup:has(.error) .inputLabel {
-  color: #f87171;
-}
-
-/* Loading state for inputs */
-.inputGroup:has(.checking) .inputField {
-  border-color: #f59e0b;
-  background: rgba(245, 158, 11, 0.1);
-  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.2);
-}
-
-.inputGroup:has(.checking) .inputLabel {
-  color: #fbbf24;
-}
-
-/* Form progress indicator */
+/* Form progress */
 .formProgress {
   height: 6px;
   background: rgba(51, 65, 85, 0.8);
   border-radius: 3px;
   margin-bottom: 24px;
   overflow: hidden;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .formProgressBar {
@@ -237,61 +80,21 @@
   background: linear-gradient(135deg, #a78bfa 0%, #ec4899 50%, #06b6d4 100%);
   border-radius: 3px;
   transition: width 0.5s ease;
-  position: relative;
-  overflow: hidden;
 }
 
-.formProgressBar::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-  animation: shimmer 2s infinite;
+/* Hint text */
+.hint {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 6px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border-left: 2px solid #a78bfa;
+  background: rgba(51, 65, 85, 0.3);
 }
 
-@keyframes shimmer {
-  0% { left: -100%; }
-  100% { left: 100%; }
-}
-
-/* Strength meter for password */
-.passwordStrength {
-  display: flex;
-  gap: 4px;
-  margin-top: 8px;
-}
-
-.strengthBar {
-  height: 4px;
-  flex: 1;
-  background: rgba(51, 65, 85, 0.8);
-  border-radius: 2px;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.strengthBar.weak {
-  background: #ef4444;
-  box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
-}
-
-.strengthBar.medium {
-  background: #f59e0b;
-  box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
-}
-
-.strengthBar.strong {
-  background: #10b981;
-  box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
-}
-
-/* Modern checkbox styling */
+/* Checkbox */
 .checkbox {
-  position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -313,7 +116,6 @@
 .checkbox input {
   position: absolute;
   opacity: 0;
-  cursor: pointer;
 }
 
 .checkmark {
@@ -322,12 +124,10 @@
   background: rgba(51, 65, 85, 0.8);
   border: 2px solid #64748b;
   border-radius: 6px;
-  transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
-  overflow: hidden;
+  transition: all 0.3s ease;
 }
 
 .checkbox:hover .checkmark {
@@ -338,7 +138,6 @@
 .checkbox input:checked + .checkmark {
   background: linear-gradient(135deg, #a78bfa, #ec4899);
   border-color: #a78bfa;
-  transform: scale(1.05);
 }
 
 .checkbox input:checked + .checkmark::after {
@@ -346,77 +145,52 @@
   color: white;
   font-size: 12px;
   font-weight: bold;
-  animation: checkPop 0.3s ease;
 }
 
-@keyframes checkPop {
-  0% { transform: scale(0); opacity: 0; }
-  50% { transform: scale(1.2); }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-/* Success message styling */
-.successMessage {
-  background: linear-gradient(135deg, #10b981, #059669);
-  color: white;
-  padding: 16px 20px;
-  border-radius: 12px;
-  text-align: center;
-  font-weight: 600;
-  margin-bottom: 24px;
-  animation: successSlide 0.5s ease-out;
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  box-shadow: 0 8px 32px rgba(16, 185, 129, 0.2);
-}
-
-/* Loading animation for form submission */
+/* Loading animation */
 .loading {
   position: relative;
   pointer-events: none;
 }
 
-.loading::before {
+.loading::after {
   content: '';
   position: absolute;
+  width: 16px;
+  height: 16px;
+  margin: auto;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
   top: 0;
   left: 0;
-  right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: inherit;
-  z-index: 1;
+  right: 0;
 }
 
-/* Glow effects for focused elements */
-.inputField:focus,
-.checkbox:focus-within {
-  box-shadow: 
-    0 0 0 4px rgba(167, 139, 250, 0.2),
-    0 0 20px rgba(167, 139, 250, 0.1);
+/* Animations */
+@keyframes errorSlide {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* Mobile responsive adjustments */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 @media (max-width: 640px) {
-  .inputGroup:has(.checking) .inputField,
-  .inputGroup:has(.available) .inputField,
-  .inputGroup:has(.taken) .inputField {
-    padding-right: 120px;
-  }
-  
-  .inputGroup:has(.togglePassword) .inputField {
-    padding-right: 60px;
-  }
-  
-  .checking,
-  .available,
-  .taken {
+  .checking, .available, .taken {
     font-size: 12px;
-    padding: 2px 6px;
+    padding: 4px 8px;
+    right: 12px;
   }
   
   .togglePassword {
-    width: 32px;
-    height: 32px;
-    font-size: 16px;
+    width: 30px;
+    height: 30px;
+    right: 12px;
   }
 }
+
+/* milestone 1*/

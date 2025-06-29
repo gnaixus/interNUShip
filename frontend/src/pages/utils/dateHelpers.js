@@ -1,16 +1,16 @@
-// src/utils/dateHelpers.js
+// Date utility function to ensure correct format of dd/mm/yyyy
 
 /**
- * Converts a date from YYYY-MM-DD format to DD/MM/YYYY format
- * @param {string} dateString - Date in YYYY-MM-DD format
+ * Converts a date from YYYY/MM/DD format to DD/MM/YYYY format
+ * @param {string} dateString - Date in YYYY/MM/DD format
  * @returns {string} Date in DD/MM/YYYY format
  */
 export const formatDateToDDMMYYYY = (dateString) => {
   if (!dateString) return '';
   
   const date = new Date(dateString);
-  
-  // Check if date is valid
+
+  // Check if the date is valid
   if (isNaN(date.getTime())) return '';
   
   const day = date.getDate().toString().padStart(2, '0');
@@ -21,9 +21,9 @@ export const formatDateToDDMMYYYY = (dateString) => {
 };
 
 /**
- * Converts a date from DD/MM/YYYY format to YYYY-MM-DD format (for HTML date inputs)
+ * Converts a date from DD/MM/YYYY format to YYYY/MM/DD format (for HTML date inputs)
  * @param {string} dateString - Date in DD/MM/YYYY format
- * @returns {string} Date in YYYY-MM-DD format
+ * @returns {string} Date in YYYY/MM/DD format
  */
 export const formatDateToYYYYMMDD = (dateString) => {
   if (!dateString) return '';
@@ -33,7 +33,7 @@ export const formatDateToYYYYMMDD = (dateString) => {
   
   const [day, month, year] = parts;
   
-  // Validate the parts
+  // Basic validation before converting the date format
   if (!day || !month || !year) return '';
   if (day.length !== 2 || month.length !== 2 || year.length !== 4) return '';
   
@@ -89,12 +89,12 @@ export const isValidDDMMYYYY = (dateString) => {
   
   const [day, month, year] = dateString.split('/').map(Number);
   
-  // Basic validation
+  // Basic validation to ensure date key is within range
   if (month < 1 || month > 12) return false;
   if (day < 1 || day > 31) return false;
   if (year < 1900 || year > 2100) return false;
   
-  // Create date and check if it's valid
+  // Create date and check if it's really valid 
   const date = new Date(year, month - 1, day);
   return date.getDate() === day && 
          date.getMonth() === month - 1 && 
@@ -122,3 +122,6 @@ export const calculateAge = (dobString) => {
   
   return age;
 };
+
+// TODO: Add function to check if date is in the future
+// TODO: Maybe add relative date formatting like "2 days ago"
