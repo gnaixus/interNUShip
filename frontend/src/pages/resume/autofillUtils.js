@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // autofillUtils.js - Utility functions for autofilling form data from parsed resume
 
 /**
@@ -6,6 +7,9 @@
  * @param {Object} currentFormData - Current form data state
  * @returns {Object} Updated form data
  */
+=======
+/* Milestone 3
+>>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
 
 export async function submitApplication(formData) {
   console.log('Submitting application data:', formData);
@@ -49,12 +53,17 @@ export function autofillFromResumeData(parsedData, currentFormData) {
   return updatedFormData;
 }
 
+<<<<<<< HEAD
 /**
  * Maps parsed education data to form structure
  * @param {Array} parsedEducation - Parsed education array
  * @param {Array} currentEducation - Current education form data
  * @returns {Array} Mapped education data
  */
+=======
+
+// Maps parsed education data to form structure
+>>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
 function mapEducationData(parsedEducation, currentEducation) {
   if (!parsedEducation || parsedEducation.length === 0) {
     return currentEducation;
@@ -79,12 +88,18 @@ function mapEducationData(parsedEducation, currentEducation) {
   });
 }
 
+<<<<<<< HEAD
 /**
  * Maps parsed experience data to form structure
  * @param {Array} parsedExperience - Parsed experience array
  * @param {Array} currentExperience - Current experience form data
  * @returns {Array} Mapped experience data
  */
+=======
+
+ // Maps parsed experience data to form structure
+
+>>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
 function mapExperienceData(parsedExperience, currentExperience) {
   if (!parsedExperience || parsedExperience.length === 0) {
     return currentExperience;
@@ -130,11 +145,17 @@ function mapExperienceData(parsedExperience, currentExperience) {
   });
 }
 
+<<<<<<< HEAD
 /**
  * Parses experience string in format "Position at Company (Start - End)"
  * @param {string} expString - Experience string
  * @returns {Object} Parsed experience components
  */
+=======
+
+ // Parses experience string in format "Position at Company (Start - End)"
+
+>>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
 function parseExperienceString(expString) {
   const result = {
     company: '',
@@ -167,12 +188,18 @@ function parseExperienceString(expString) {
   return result;
 }
 
+<<<<<<< HEAD
 /**
  * Formats skills data for form input
  * @param {Array} parsedSkills - Parsed skills array
  * @param {string} currentSkills - Current skills string
  * @returns {string} Formatted skills string
  */
+=======
+
+ // Formats skills data for form input
+
+>>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
 function formatSkillsData(parsedSkills, currentSkills) {
   if (!parsedSkills || parsedSkills.length === 0) {
     return currentSkills;
@@ -187,11 +214,17 @@ function formatSkillsData(parsedSkills, currentSkills) {
   return skillsString || currentSkills;
 }
 
+<<<<<<< HEAD
 /**
  * Extracts graduation year from various date formats
  * @param {string} yearString - Year string from parsed data
  * @returns {string} Formatted graduation year
  */
+=======
+
+// Extracts graduation year from various date formats
+
+>>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
 function extractGraduationYear(yearString) {
   if (!yearString) return '';
 
@@ -210,11 +243,16 @@ function extractGraduationYear(yearString) {
   return yearString;
 }
 
+<<<<<<< HEAD
 /**
  * Formats date string for form input (YYYY-MM-DD format)
  * @param {string} dateString - Date string from parsed data
  * @returns {string} Formatted date string
  */
+=======
+ // Formats date string for form input (YYYY-MM-DD format)
+
+>>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
 function formatDate(dateString) {
   if (!dateString || dateString.toLowerCase() === 'present') {
     return '';
@@ -254,12 +292,17 @@ function formatDate(dateString) {
   return '';
 }
 
+<<<<<<< HEAD
 /**
  * Validates autofilled data and provides feedback
  * @param {Object} updatedFormData - Updated form data after autofill
  * @param {Object} parsedData - Original parsed resume data
  * @returns {Object} Validation results and suggestions
  */
+=======
+
+ // Validates autofilled data and provides feedback
+>>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
 export function validateAutofillData(updatedFormData, parsedData) {
   const validation = {
     isValid: true,
@@ -339,6 +382,7 @@ export function validateAutofillData(updatedFormData, parsedData) {
   return validation;
 }
 
+<<<<<<< HEAD
 /**
  * Merges autofilled data with existing form data intelligently
  * @param {Object} existingData - Current form data
@@ -346,6 +390,10 @@ export function validateAutofillData(updatedFormData, parsedData) {
  * @param {Object} options - Merge options
  * @returns {Object} Merged form data
  */
+=======
+ // Merges autofilled data with existing form data
+
+>>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
 export function mergeFormData(existingData, newData, options = {}) {
   const {
     overwriteExisting = false,
@@ -412,6 +460,7 @@ export function mergeFormData(existingData, newData, options = {}) {
   return mergedData;
 }
 
+<<<<<<< HEAD
 /**
  * Generates a summary of autofill results
  * @param {Object} originalData - Original form data
@@ -419,6 +468,8 @@ export function mergeFormData(existingData, newData, options = {}) {
  * @param {Object} validation - Validation results
  * @returns {Object} Autofill summary
  */
+=======
+>>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
 export function generateAutofillSummary(originalData, updatedData, validation) {
   const summary = {
     fieldsUpdated: [],
@@ -461,11 +512,17 @@ export function generateAutofillSummary(originalData, updatedData, validation) {
   return summary;
 }
 
+<<<<<<< HEAD
 /**
  * Cleans and normalizes parsed resume data
  * @param {Object} rawParsedData - Raw parsed data from resume parser
  * @returns {Object} Cleaned and normalized data
  */
+=======
+
+ // Cleans and normalizes parsed resume data
+
+>>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
 export function cleanParsedData(rawParsedData) {
   if (!rawParsedData) return null;
 
@@ -485,17 +542,27 @@ export function cleanParsedData(rawParsedData) {
   return cleaned;
 }
 
+<<<<<<< HEAD
 /**
  * Helper function to clean text data
  */
+=======
+// Helper function to clean text data
+
+>>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
 function cleanText(text) {
   if (!text) return '';
   return text.toString().trim().replace(/\s+/g, ' ');
 }
 
+<<<<<<< HEAD
 /**
  * Helper function to clean email
  */
+=======
+// Helper function to clean email
+
+>>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
 function cleanEmail(email) {
   if (!email) return '';
   const cleanedEmail = email.toString().trim().toLowerCase();
@@ -504,18 +571,29 @@ function cleanEmail(email) {
   return emailRegex.test(cleanedEmail) ? cleanedEmail : '';
 }
 
+<<<<<<< HEAD
 /**
  * Helper function to clean phone number
  */
+=======
+
+// Helper function to clean phone number
+ 
+>>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
 function cleanPhone(phone) {
   if (!phone) return '';
   // Remove all non-digit characters except + and spaces
   return phone.toString().replace(/[^\d+\s()-]/g, '').trim();
 }
 
+<<<<<<< HEAD
 /**
  * Helper function to clean education array
  */
+=======
+// Helper function to clean education array
+ 
+>>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
 function cleanEducationArray(education) {
   if (!Array.isArray(education)) return [];
   return education.map(edu => ({
@@ -527,9 +605,14 @@ function cleanEducationArray(education) {
   })).filter(edu => edu.institution || edu.degree);
 }
 
+<<<<<<< HEAD
 /**
  * Helper function to clean experience array
  */
+=======
+// Helper function to clean experience array
+ 
+>>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
 function cleanExperienceArray(experience) {
   if (!Array.isArray(experience)) return [];
   return experience.map(exp => {
@@ -547,9 +630,14 @@ function cleanExperienceArray(experience) {
   }).filter(exp => exp && (typeof exp === 'string' || exp.company || exp.position));
 }
 
+<<<<<<< HEAD
 /**
  * Helper function to clean skills array
  */
+=======
+// Helper function to clean skills array
+ 
+>>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
 function cleanSkillsArray(skills) {
   if (!Array.isArray(skills)) return [];
   return skills
@@ -558,6 +646,7 @@ function cleanSkillsArray(skills) {
     .map(skill => skill.replace(/[,;]+/g, '').trim());
 }
 
+<<<<<<< HEAD
 /**
  * Helper function to clean generic arrays
  */
@@ -565,3 +654,12 @@ function cleanArray(arr) {
   if (!Array.isArray(arr)) return [];
   return arr.map(item => cleanText(item)).filter(item => item);
 }
+=======
+// Helper function to clean generic arrays
+ 
+function cleanArray(arr) {
+  if (!Array.isArray(arr)) return [];
+  return arr.map(item => cleanText(item)).filter(item => item);
+}
+*/
+>>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976

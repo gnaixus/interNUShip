@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // resumeParser.js - Utility for parsing resume data
 
 /**
@@ -6,6 +7,10 @@
  * @param {Object} resumeFile - Optional file object with metadata
  * @returns {Object} Parsed resume data
  */
+=======
+/* Milestone 3 
+
+>>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
 export function parseResumeText(resumeText, resumeFile = null) {
   const parsedData = {
     name: '',
@@ -41,7 +46,11 @@ export function parseResumeText(resumeText, resumeFile = null) {
       parsedData.phone = phoneMatch[1];
     }
 
+<<<<<<< HEAD
     // Extract address (basic pattern)
+=======
+    // Extract address 
+>>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
     const addressMatch = resumeText.match(/(?:Address[:\s]+)?([0-9]+\s+[A-Za-z\s,]+(?:Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd)[A-Za-z\s,0-9]*)/i);
     if (addressMatch) {
       parsedData.address = addressMatch[1].trim();
@@ -90,23 +99,33 @@ export function parseResumeText(resumeText, resumeFile = null) {
   }
 }
 
+<<<<<<< HEAD
 /**
  * Extracts a specific section from resume text
  * @param {string} text - Resume text
  * @param {string} sectionName - Section to extract
  * @returns {string|null} Section content
  */
+=======
+//Extracts a specific section from resume text
+
+>>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
 function extractSection(text, sectionName) {
   const regex = new RegExp(`(?:^|\\n)\\s*${sectionName}[:\n]([\\s\\S]*?)(?=\\n\\s*[A-Z][A-Za-z\\s]+:|$)`, 'i');
   const match = text.match(regex);
   return match ? match[1].trim() : null;
 }
 
+<<<<<<< HEAD
 /**
  * Parses education section
  * @param {string} educationText - Education section text
  * @returns {Array} Array of education objects
  */
+=======
+
+ //Parses education section
+>>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
 function parseEducation(educationText) {
   const education = [];
   const lines = educationText.split('\n').filter(line => line.trim());
@@ -155,11 +174,17 @@ function parseEducation(educationText) {
   }];
 }
 
+<<<<<<< HEAD
 /**
  * Parses experience section
  * @param {string} experienceText - Experience section text
  * @returns {Array} Array of experience objects
  */
+=======
+
+ //Parses experience section
+
+>>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
 function parseExperience(experienceText) {
   const experience = [];
   const jobBlocks = experienceText.split(/\n\s*\n/).filter(block => block.trim());
@@ -216,11 +241,17 @@ function parseExperience(experienceText) {
   }];
 }
 
+<<<<<<< HEAD
 /**
  * Parses skills section
  * @param {string} skillsText - Skills section text
  * @returns {Array} Array of skills
  */
+=======
+
+ //Parses skills section
+
+>>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
 function parseSkills(skillsText) {
   const skills = [];
   
@@ -233,11 +264,17 @@ function parseSkills(skillsText) {
   return skillItems.length > 0 ? skillItems : [];
 }
 
+<<<<<<< HEAD
 /**
  * Parses certifications section
  * @param {string} certText - Certifications section text
  * @returns {Array} Array of certifications
  */
+=======
+
+// Parses certifications section
+
+>>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
 function parseCertifications(certText) {
   const certifications = [];
   const lines = certText.split('\n').filter(line => line.trim());
@@ -272,11 +309,16 @@ function parseCertifications(certText) {
   return certifications;
 }
 
+<<<<<<< HEAD
 /**
  * Validates parsed resume data
  * @param {Object} parsedData - Parsed resume data
  * @returns {Object} Validation results
  */
+=======
+// Validates parsed resume data
+
+>>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
 export function validateResumeData(parsedData) {
   const validation = {
     isValid: true,
@@ -309,11 +351,16 @@ export function validateResumeData(parsedData) {
   return validation;
 }
 
+<<<<<<< HEAD
 /**
  * Processes uploaded resume file
  * @param {File} file - Resume file
  * @returns {Promise<Object>} Parsed resume data
  */
+=======
+
+ // Processes uploaded resume file
+>>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
 export async function processResumeFile(file) {
   if (!file) {
     throw new Error('No file provided');
@@ -336,8 +383,12 @@ export async function processResumeFile(file) {
     if (file.type === 'text/plain') {
       text = await file.text();
     } else {
+<<<<<<< HEAD
       // For PDF and DOC files, you would need additional libraries
       // This is a placeholder for actual file processing
+=======
+      // placeholder for actual file processing
+>>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
       text = await extractTextFromFile(file);
     }
 
@@ -348,6 +399,7 @@ export async function processResumeFile(file) {
   }
 }
 
+<<<<<<< HEAD
 /**
  * Placeholder for actual file text extraction
  * In a real implementation, you would use libraries like:
@@ -359,9 +411,19 @@ export async function processResumeFile(file) {
 async function extractTextFromFile(file) {
   // This is a placeholder - actual implementation would depend on file type
   // and chosen libraries for text extraction
+=======
+async function extractTextFromFile(file) {
+  //  placeholder 
+>>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve('Sample extracted text from ' + file.name);
     }, 1000);
   });
+<<<<<<< HEAD
 }
+=======
+}
+
+*/
+>>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
