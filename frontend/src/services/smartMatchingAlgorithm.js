@@ -1,4 +1,3 @@
-
 class SmartMatchingAlgorithm {
   constructor() {
     this.vocabulary = new Set();

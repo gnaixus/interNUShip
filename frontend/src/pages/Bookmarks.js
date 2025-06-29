@@ -3,33 +3,46 @@ import { useAuth } from './auth/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from '../styles/Home.module.css';
 import DataService from '../services/dataService';
+import ProfileBasedMatchingService from '../services/profileBasedMatchingService';
 
 const Bookmarks = () => {
-  const { user, isGuest, logout } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
-  // State for filtering and sorting bookmarks
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [sortBy, setSortBy] = useState('saved'); // saved, deadline, match
-
-  // State for dynamic data
-  const [bookmarkedInternships, setBookmarkedInternships] = useState([]);
+  const [sortBy, setSortBy] = useState('saved');
+  const [bookmarks, setBookmarks] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [matchingService] = useState(() => new ProfileBasedMatchingService());
 
-  // Redirect users who aren't logged in
-  useEffect(() => {
-    if (!user && !isGuest) {
-      navigate('/login');
-    }
-  }, [user, isGuest, navigate]);
+  const navItems = [
+    { path: '/home', label: 'Home', icon: '🏠' },
+    { path: '/internships', label: 'Browse', icon: '🔍' },
+    { path: '/applications', label: 'Applications', icon: '📝' },
+    { path: '/bookmarks', label: 'Bookmarks', icon: '🔖' },
+    { path: '/about', label: 'About', icon: '🏢' }  
+  ];
 
-  // Load bookmarks data
+  const priorityColors = {
+    high: '#ef4444',
+    medium: '#f59e0b', 
+    low: '#10b981'
+  };
+
+  const statusColors = {
+    'not-applied': '#6b7280',
+    'planning': '#3b82f6',
+    'applied': '#10b981',
+    'considering': '#8b5cf6'
+  };
+
+  // Load bookmarks and categories
   useEffect(() => {
-    const loadBookmarks = async () => {
+    const loadData = async () => {
       if (!user) return;
       
       try {
@@ -41,12 +54,53 @@ const Bookmarks = () => {
         if (categoriesResponse.success) {
           setCategories(categoriesResponse.data);
         }
-
-        // Load user's bookmarks
-        const bookmarksResponse = await DataService.getUserBookmarks(user.id);
-        if (bookmarksResponse.success) {
-          setBookmarkedInternships(bookmarksResponse.data);
+        
+        // Load bookmarks from localStorage and DataService fallback
+        let savedBookmarks = [];
+        
+        // Try localStorage first
+        const userBookmarks = JSON.parse(localStorage.getItem('userBookmarks') || '{}');
+        savedBookmarks = userBookmarks[user.id] || [];
+        
+        // If no localStorage bookmarks, try DataService
+        if (savedBookmarks.length === 0) {
+          const bookmarksResponse = await DataService.getUserBookmarks(user.id);
+          if (bookmarksResponse.success) {
+            savedBookmarks = bookmarksResponse.data;
+          }
         }
+        
+        // Enhance with AI matching
+        const userProfile = matchingService.getUserProfile();
+        const enhancedBookmarks = savedBookmarks.map(bookmark => {
+          const enhancedBookmark = {
+            ...bookmark,
+            priority: bookmark.priority || 'medium',
+            status: bookmark.status || 'not-applied',
+            bookmarkedDate: bookmark.bookmarkedDate || new Date().toISOString().split('T')[0],
+            notes: bookmark.notes || `Saved this ${bookmark.title} position for future application.`
+          };
+          
+          if (userProfile) {
+            const matchResult = matchingService.calculateMatchScore(userProfile, bookmark);
+            const explanation = matchingService.explainRecommendation(userProfile, bookmark);
+            enhancedBookmark.match = matchResult.totalScore;
+            enhancedBookmark.matchBreakdown = matchResult.breakdown;
+            enhancedBookmark.explanation = explanation;
+          }
+          
+          return enhancedBookmark;
+        });
+        
+        setBookmarks(enhancedBookmarks);
+        
+        // Save enhanced bookmarks back to localStorage
+        if (enhancedBookmarks.length > 0) {
+          const userBookmarks = JSON.parse(localStorage.getItem('userBookmarks') || '{}');
+          userBookmarks[user.id] = enhancedBookmarks;
+          localStorage.setItem('userBookmarks', JSON.stringify(userBookmarks));
+        }
+        
       } catch (err) {
         console.error('Error loading bookmarks:', err);
         setError('Failed to load bookmarks. Please try again.');
@@ -55,92 +109,80 @@ const Bookmarks = () => {
       }
     };
 
-    loadBookmarks();
-  }, [user]);
+    loadData();
+  }, [user, matchingService]);
 
-  const priorityColors = {
-    high: '#ef4444',
-    medium: '#f59e0b',
-    low: '#10b981'
+  // Save bookmarks to localStorage
+  const saveBookmarks = (updatedBookmarks) => {
+    try {
+      const userBookmarks = JSON.parse(localStorage.getItem('userBookmarks') || '{}');
+      userBookmarks[user.id] = updatedBookmarks;
+      localStorage.setItem('userBookmarks', JSON.stringify(userBookmarks));
+      setBookmarks(updatedBookmarks);
+    } catch (error) {
+      console.error('Error saving bookmarks:', error);
+    }
   };
 
-  const statusColors = {
-    'not-applied': '#6b7280',
-    'planning': '#3b82f6',
-    'applied': '#10b981',
-    'considering': '#8b5cf6'
-  };
-
-  const navigationItems = [
-    { path: '/home', label: 'Home', icon: '🏠' },
-    { path: '/internships', label: 'Browse', icon: '🔍' },
-    { path: '/applications', label: 'Applications', icon: '📝' },
-    { path: '/bookmarks', label: 'Bookmarks', icon: '🔖' },
-    { path: '/about', label: 'About', icon: '🏢' }
-  ];
-
-  // Handle various user interactions
+  // Handle actions
   const handleAction = async (action, internship = null) => {
     switch (action) {
       case 'logout':
         logout();
         navigate('/login');
         break;
+        
       case 'apply':
-        if (user) {
-          navigate(`/apply/${internship.id}`);
-        } else {
-          navigate('/signup');
-        }
+        navigate(`/apply/${internship.id}`);
         break;
-      case 'removeBookmark':
-        if (window.confirm(`Remove "${internship.title}" from bookmarks?`)) {
-          try {
-            const response = await DataService.removeBookmark(user.id, internship.id);
-            if (response.success) {
-              setBookmarkedInternships(prev => 
-                prev.filter(bookmark => bookmark.id !== internship.id)
-              );
-              alert(`Removed "${internship.title}" from bookmarks`);
-            }
-          } catch (error) {
-            console.error('Error removing bookmark:', error);
-            alert('Failed to remove bookmark. Please try again.');
-          }
-        }
-        break;
+        
       case 'viewDetails':
         navigate(`/internships/${internship.id}`);
         break;
+        
+      case 'removeBookmark':
+        if (window.confirm(`Remove "${internship.title}" from bookmarks?`)) {
+          const updatedBookmarks = bookmarks.filter(b => b.id !== internship.id);
+          saveBookmarks(updatedBookmarks);
+          alert(`Removed "${internship.title}" from bookmarks`);
+        }
+        break;
+        
       case 'editNotes':
         const newNotes = prompt('Edit your notes:', internship.notes);
         if (newNotes !== null) {
-          // Update locally (in real app, this would call API)
-          setBookmarkedInternships(prev => 
-            prev.map(bookmark => 
-              bookmark.id === internship.id 
-                ? { ...bookmark, notes: newNotes }
-                : bookmark
-            )
+          const updatedBookmarks = bookmarks.map(b => 
+            b.id === internship.id ? { ...b, notes: newNotes } : b
           );
-          alert('Notes updated!');
+          saveBookmarks(updatedBookmarks);
+          alert('Notes updated successfully!');
         }
         break;
+        
       case 'changePriority':
         const priorities = ['low', 'medium', 'high'];
         const currentIndex = priorities.indexOf(internship.priority);
         const newPriority = priorities[(currentIndex + 1) % priorities.length];
         
-        // Update locally (in real app, this would call API)
-        setBookmarkedInternships(prev => 
-          prev.map(bookmark => 
-            bookmark.id === internship.id 
-              ? { ...bookmark, priority: newPriority }
-              : bookmark
-          )
+        const updatedBookmarks = bookmarks.map(b => 
+          b.id === internship.id ? { ...b, priority: newPriority } : b
         );
-        alert(`Priority changed to ${newPriority}`);
+        saveBookmarks(updatedBookmarks);
+        alert(`Priority changed to ${newPriority.toUpperCase()}`);
         break;
+        
+      case 'changeStatus':
+        const statuses = ['not-applied', 'planning', 'applied', 'considering'];
+        const currentStatusIndex = statuses.indexOf(internship.status);
+        const newStatus = statuses[(currentStatusIndex + 1) % statuses.length];
+        
+        const updatedBookmarksStatus = bookmarks.map(b => 
+          b.id === internship.id ? { ...b, status: newStatus } : b
+        );
+        saveBookmarks(updatedBookmarksStatus);
+        alert(`Status changed to ${newStatus.replace('-', ' ').toUpperCase()}`);
+        break;
+        
       default:
         console.log('Unknown action:', action);
     }
@@ -148,7 +190,7 @@ const Bookmarks = () => {
 
   // Filter and sort bookmarks
   const getFilteredBookmarks = () => {
-    let filtered = bookmarkedInternships.filter(internship => {
+    let filtered = bookmarks.filter(internship => {
       const matchesSearch = internship.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            internship.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            internship.skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -156,15 +198,16 @@ const Bookmarks = () => {
       return matchesSearch && matchesCategory;
     });
 
-    // Sort bookmarks
     filtered.sort((a, b) => {
       switch (sortBy) {
         case 'saved':
           return new Date(b.bookmarkedDate) - new Date(a.bookmarkedDate);
         case 'deadline':
-          return new Date(a.deadline.split('/').reverse().join('-')) - new Date(b.deadline.split('/').reverse().join('-'));
+          const deadlineA = new Date(a.deadline?.split('/').reverse().join('-') || '2025-12-31');
+          const deadlineB = new Date(b.deadline?.split('/').reverse().join('-') || '2025-12-31');
+          return deadlineA - deadlineB;
         case 'match':
-          return user ? b.match - a.match : 0;
+          return (b.match || 0) - (a.match || 0);
         case 'priority':
           const priorityOrder = { high: 3, medium: 2, low: 1 };
           return priorityOrder[b.priority] - priorityOrder[a.priority];
@@ -178,40 +221,31 @@ const Bookmarks = () => {
 
   const filteredBookmarks = getFilteredBookmarks();
 
-  // Calculate quick stats
+  // Calculate stats
   const bookmarkStats = {
-    total: bookmarkedInternships.length,
-    notApplied: bookmarkedInternships.filter(b => b.status === 'not-applied').length,
-    applied: bookmarkedInternships.filter(b => b.status === 'applied').length,
-    highPriority: bookmarkedInternships.filter(b => b.priority === 'high').length
+    total: bookmarks.length,
+    notApplied: bookmarks.filter(b => b.status === 'not-applied').length,
+    applied: bookmarks.filter(b => b.status === 'applied').length,
+    highPriority: bookmarks.filter(b => b.priority === 'high').length,
+    highMatch: bookmarks.filter(b => (b.match || 0) > 80).length
   };
 
-  // Show login prompt for non-authenticated users
   if (!user) {
     return (
       <div className={styles.homeContainer}>
         <div className={styles.userHeader}>
           <div className={styles.headerLeft}>
-            <div className={styles.userInfo}>
-              <span>🔍 Please log in to view bookmarks</span>
-            </div>
+            <div className={styles.userInfo}>🔍 Please log in to view bookmarks</div>
           </div>
           <div className={styles.headerRight}>
-            <button className={styles.loginBtn} onClick={() => navigate('/login')}>
-              Login
-            </button>
-            <button className={styles.signupBtn} onClick={() => navigate('/signup')}>
-              Sign Up
-            </button>
+            <button className={styles.loginBtn} onClick={() => navigate('/login')}>Login</button>
+            <button className={styles.signupBtn} onClick={() => navigate('/signup')}>Sign Up</button>
           </div>
         </div>
-        
         <section className={styles.heroSection}>
           <h1 className={styles.heroTitle}>Your Bookmark Collection</h1>
           <p className={styles.heroSubtitle}>Sign in to save and organize your favorite internships</p>
-          <button className={styles.ctaPrimary} onClick={() => navigate('/login')}>
-            Login to Continue
-          </button>
+          <button className={styles.ctaPrimary} onClick={() => navigate('/login')}>Login to Continue</button>
         </section>
       </div>
     );
@@ -220,16 +254,10 @@ const Bookmarks = () => {
   if (loading) {
     return (
       <div className={styles.homeContainer}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100vh',
-          color: 'var(--text-primary)'
-        }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: 'var(--text-primary)' }}>
           <div style={{ textAlign: 'center' }}>
             <div className="spinner" style={{ margin: '0 auto 16px' }}></div>
-            <p>Loading your bookmarks...</p>
+            <p>Loading your AI-enhanced bookmarks...</p>
           </div>
         </div>
       </div>
@@ -239,22 +267,11 @@ const Bookmarks = () => {
   if (error) {
     return (
       <div className={styles.homeContainer}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100vh',
-          color: 'var(--text-primary)'
-        }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: 'var(--text-primary)' }}>
           <div style={{ textAlign: 'center' }}>
             <h2>Oops! Something went wrong</h2>
             <p>{error}</p>
-            <button 
-              className={styles.ctaPrimary} 
-              onClick={() => window.location.reload()}
-            >
-              Try Again
-            </button>
+            <button className={styles.ctaPrimary} onClick={() => window.location.reload()}>Try Again</button>
           </div>
         </div>
       </div>
@@ -266,63 +283,52 @@ const Bookmarks = () => {
       {/* Header */}
       <div className={styles.userHeader}>
         <div className={styles.headerLeft}>
-          <div className={styles.userInfo}>
-            <span>👋 {user.full_name || user.email}</span>
-          </div>
+          <div className={styles.userInfo}>👋 {user.full_name || user.email}</div>
           <ul className={styles.navItems}>
-            {navigationItems.map(item => (
+            {navItems.map(item => (
               <li key={item.path}>
                 <button
                   className={`${styles.navLink} ${location.pathname === item.path ? styles.active : ''}`}
                   onClick={() => navigate(item.path)}
                 >
-                  <span>{item.icon}</span>
-                  {item.label}
+                  <span>{item.icon}</span> {item.label}
                 </button>
               </li>
             ))}
           </ul>
         </div>
         <div className={styles.headerRight}>
-          <button className={styles.profileBtn} onClick={() => navigate('/profile')}>
-            Profile
-          </button>
-          <button className={styles.logoutBtn} onClick={() => handleAction('logout')}>
-            Logout
-          </button>
-          <button className={styles.mobileNavToggle}>☰</button>
+          <button className={styles.profileBtn} onClick={() => navigate('/profile')}>Profile</button>
+          <button className={styles.logoutBtn} onClick={() => handleAction('logout')}>Logout</button>
         </div>
       </div>
 
       {/* Page Header */}
       <section className={styles.heroSection}>
-        <h1 className={styles.heroTitle}>🔖 Your Saved Internships</h1>
-        <p className={styles.heroSubtitle}>
-          Keep track of opportunities that caught your eye and plan your applications strategically
-        </p>
-
-        {/* Quick Stats */}
+        <h1 className={styles.heroTitle}>🔖 Your Smart Bookmarks</h1>
+        <p className={styles.heroSubtitle}>AI-powered organization for your saved internships</p>
+        
         <div className={styles.userStats}>
           <div className={styles.statItem}>
             <span className={styles.statNumber}>{bookmarkStats.total}</span>
             <span className={styles.statLabel}>Saved</span>
           </div>
           <div className={styles.statItem}>
-            <span className={styles.statNumber}>{bookmarkStats.notApplied}</span>
-            <span className={styles.statLabel}>To Apply</span>
+            <span className={styles.statNumber}>{bookmarkStats.highMatch}</span>
+            <span className={styles.statLabel}>High Match</span>
           </div>
           <div className={styles.statItem}>
             <span className={styles.statNumber}>{bookmarkStats.highPriority}</span>
-            <span className={styles.statLabel}>High Priority</span>
+            <span className={styles.statLabel}>Priority</span>
           </div>
           <div className={styles.statItem}>
-            <span className={styles.statNumber}>{bookmarkStats.applied}</span>
-            <span className={styles.statLabel}>Applied</span>
+            <span className={styles.statNumber}>{bookmarkStats.notApplied}</span>
+            <span className={styles.statLabel}>To Apply</span>
           </div>
         </div>
       </section>
 
-      {/* Search and Filter Section */}
+      {/* Search and Filter */}
       <section className={styles.searchSection}>
         <div className={styles.searchBar}>
           <div className={styles.searchInput}>
@@ -337,7 +343,6 @@ const Bookmarks = () => {
         </div>
 
         <div className={styles.filterControls}>
-          {/* Category filters */}
           <div className={styles.categories}>
             {categories.map(cat => (
               <button
@@ -350,7 +355,6 @@ const Bookmarks = () => {
             ))}
           </div>
 
-          {/* Sort options */}
           <div className={styles.additionalFilters}>
             <select 
               value={sortBy} 
@@ -358,9 +362,9 @@ const Bookmarks = () => {
               className={styles.filterSelect}
             >
               <option value="saved">Recently Saved</option>
+              <option value="match">AI Match Score</option>
               <option value="deadline">Deadline</option>
-              <option value="priority">Priority</option>
-              {user && <option value="match">Best Match</option>}
+              <option value="priority">Priority Level</option>
             </select>
           </div>
         </div>
@@ -369,13 +373,8 @@ const Bookmarks = () => {
       {/* Bookmarks List */}
       <section className={styles.featuredSection}>
         <div className={styles.sectionHeader}>
-          <h2>
-            Your Collection
-            <span className={styles.badge}>{filteredBookmarks.length}</span>
-          </h2>
-          <button className={styles.viewAllButton} onClick={() => navigate('/internships')}>
-            Find More
-          </button>
+          <h2>Your Collection <span className={styles.badge}>{filteredBookmarks.length}</span></h2>
+          <button className={styles.viewAllButton} onClick={() => navigate('/internships')}>Find More</button>
         </div>
 
         {filteredBookmarks.length === 0 ? (
@@ -391,319 +390,156 @@ const Bookmarks = () => {
                 </div>
               </>
             )}
-            <button className={styles.ctaPrimary} onClick={() => navigate('/internships')}>
-              Browse Internships
-            </button>
+            <button className={styles.ctaPrimary} onClick={() => navigate('/internships')}>Browse Internships</button>
           </div>
         ) : (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(420px, 1fr))',
-            gap: '2rem',
-            marginTop: '2rem',
-            maxWidth: '1400px',
-            marginLeft: 'auto',
-            marginRight: 'auto'
-          }}>
+          <div className={styles.internshipsGrid}>
             {filteredBookmarks.map(internship => (
-              <div key={internship.id} style={{
-                background: 'var(--glass-bg)',
-                border: '1px solid var(--glass-border)',
-                borderRadius: 'var(--border-radius-lg)',
-                padding: '2rem',
-                backdropFilter: 'blur(10px)',
-                transition: 'var(--transition)',
-                position: 'relative',
-                overflow: 'hidden',
-                display: 'flex',
-                flexDirection: 'column',
-                minHeight: '580px'
-              }}>
-                {/* Top gradient bar */}
-                <div style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: '4px',
-                  background: 'var(--accent-gradient)'
-                }} />
-
+              <div key={internship.id} className={styles.internshipCard}>
                 {/* Priority and Match badges */}
-                <div style={{ 
-                  position: 'absolute', 
-                  top: '1rem', 
-                  left: '1rem', 
-                  display: 'flex', 
-                  gap: '0.5rem', 
-                  zIndex: 2 
-                }}>
-                  <div style={{
-                    backgroundColor: priorityColors[internship.priority],
-                    color: 'white',
-                    padding: '0.25rem 0.5rem',
-                    borderRadius: '0.75rem',
-                    fontSize: '0.75rem',
-                    fontWeight: '600',
-                    textTransform: 'uppercase'
-                  }}>
-                    {internship.priority}
-                  </div>
-                  {user && (
-                    <div style={{
-                      background: 'linear-gradient(135deg, var(--success) 0%, #059669 100%)',
+                <div style={{ position: 'absolute', top: '1rem', left: '1rem', display: 'flex', gap: '0.5rem', zIndex: 2 }}>
+                  <button
+                    onClick={() => handleAction('changePriority', internship)}
+                    style={{
+                      backgroundColor: priorityColors[internship.priority],
                       color: 'white',
                       padding: '0.25rem 0.5rem',
                       borderRadius: '0.75rem',
-                      fontSize: '0.75rem',
+                      fontSize: '0.7rem',
+                      fontWeight: '600',
+                      textTransform: 'uppercase',
+                      border: 'none',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {internship.priority}
+                  </button>
+                  
+                  {internship.match && (
+                    <div style={{
+                      background: internship.match > 80 ? 'linear-gradient(135deg, #10b981, #059669)' :
+                                internship.match > 60 ? 'linear-gradient(135deg, #f59e0b, #d97706)' :
+                                'linear-gradient(135deg, #6b7280, #4b5563)',
+                      color: 'white',
+                      padding: '0.25rem 0.5rem',
+                      borderRadius: '0.75rem',
+                      fontSize: '0.7rem',
                       fontWeight: '600'
                     }}>
-                      {internship.match}% Match
+                      🤖 {internship.match}%
                     </div>
                   )}
                 </div>
 
                 {/* Status badge */}
-                <div style={{
-                  position: 'absolute',
-                  top: '1rem',
-                  right: '1rem',
-                  backgroundColor: statusColors[internship.status],
-                  color: 'white',
-                  padding: '0.25rem 0.5rem',
-                  borderRadius: '0.75rem',
-                  fontSize: '0.7rem',
-                  fontWeight: '600',
-                  textTransform: 'uppercase',
-                  zIndex: 2
-                }}>
+                <button
+                  onClick={() => handleAction('changeStatus', internship)}
+                  style={{
+                    position: 'absolute',
+                    top: '1rem',
+                    right: '1rem',
+                    backgroundColor: statusColors[internship.status],
+                    color: 'white',
+                    padding: '0.25rem 0.5rem',
+                    borderRadius: '0.75rem',
+                    fontSize: '0.65rem',
+                    fontWeight: '600',
+                    textTransform: 'uppercase',
+                    border: 'none',
+                    cursor: 'pointer',
+                    zIndex: 2
+                  }}
+                >
                   {internship.status.replace('-', ' ')}
+                </button>
+                
+                {/* Card Header */}
+                <div className={styles.cardHeader} style={{ marginTop: '2.5rem' }}>
+                  <div className={styles.companyLogo}>{internship.logo}</div>
+                  <div className={styles.companyInfo}>
+                    <h3 className={styles.jobTitle}>{internship.title}</h3>
+                    <p className={styles.companyName}>{internship.company}</p>
+                  </div>
                 </div>
 
-                {/* Header with company info */}
-                <div style={{ 
-                  display: 'flex', 
-                  alignItems: 'flex-start', 
-                  gap: '1rem', 
-                  marginBottom: '1.5rem',
-                  marginTop: '2.5rem'
-                }}>
+                {/* Job Details */}
+                <div className={styles.jobDetails}>
+                  <div className={styles.detailItem}><span>📍</span> {internship.location}</div>
+                  <div className={styles.detailItem}><span>💰</span> {internship.stipend}</div>
+                  <div className={styles.detailItem}><span>⏱️</span> {internship.duration}</div>
+                  <div className={styles.detailItem}><span>📅</span> Due {internship.deadline}</div>
+                </div>
+
+                {/* AI Explanation */}
+                {internship.explanation && (
                   <div style={{
-                    fontSize: '2.5rem',
-                    background: 'var(--glass-bg)',
-                    borderRadius: 'var(--border-radius)',
+                    margin: '1rem 0',
                     padding: '0.75rem',
-                    border: '1px solid var(--glass-border)',
-                    width: '70px',
-                    height: '70px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0
+                    backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                    borderRadius: '0.5rem',
+                    border: '1px solid rgba(139, 92, 246, 0.2)'
                   }}>
-                    {internship.logo}
+                    <div style={{ fontSize: '0.75rem', color: '#8b5cf6', fontWeight: '600', marginBottom: '0.5rem' }}>
+                      🤖 AI Analysis: {internship.explanation.recommendation}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                      {internship.explanation.explanations.slice(0, 2).join('. ')}
+                    </div>
                   </div>
-                  <div style={{ flex: 1, minHeight: '70px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                    <h3 style={{
-                      color: 'var(--text-primary)',
-                      fontSize: '1.25rem',
-                      fontWeight: '600',
-                      margin: '0 0 0.5rem 0',
-                      lineHeight: '1.3'
-                    }}>
-                      {internship.title}
-                    </h3>
-                    <p style={{
-                      color: 'var(--text-muted)',
-                      fontSize: '1rem',
-                      margin: 0,
-                      lineHeight: '1.2'
-                    }}>
-                      {internship.company}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Job details */}
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
-                  gap: '0.75rem',
-                  margin: '1rem 0',
-                  minHeight: '100px'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-subtle)', fontSize: '0.9rem' }}>
-                    <span>📍</span> {internship.location}
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-subtle)', fontSize: '0.9rem' }}>
-                    <span>💰</span> {internship.stipend}
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-subtle)', fontSize: '0.9rem' }}>
-                    <span>⏱️</span> {internship.duration}
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-subtle)', fontSize: '0.9rem' }}>
-                    <span>📅</span> Due {internship.deadline}
-                  </div>
-                </div>
+                )}
 
                 {/* Description */}
-                <p style={{
-                  color: 'var(--text-secondary)',
-                  fontSize: '0.9rem',
-                  lineHeight: '1.6',
-                  margin: '1rem 0',
-                  flex: 1,
-                  minHeight: '60px'
-                }}>
-                  {internship.description}
-                </p>
+                <p className={styles.jobDescription}>{internship.description}</p>
 
                 {/* Skills */}
-                <div style={{
-                  display: 'flex',
-                  gap: '0.5rem',
-                  flexWrap: 'wrap',
-                  margin: '1rem 0',
-                  minHeight: '50px',
-                  alignItems: 'flex-start',
-                  alignContent: 'flex-start'
-                }}>
-                  {internship.skills.map(skill => (
-                    <span key={skill} style={{
-                      background: 'rgba(139, 92, 246, 0.2)',
-                      color: '#c4b5fd',
-                      padding: '0.375rem 0.75rem',
-                      borderRadius: 'var(--border-radius)',
-                      fontSize: '0.75rem',
-                      fontWeight: '500',
-                      border: '1px solid rgba(139, 92, 246, 0.3)',
-                      whiteSpace: 'nowrap'
-                    }}>
-                      {skill}
-                    </span>
+                <div className={styles.skillsTags}>
+                  {internship.skills.slice(0, 4).map(skill => (
+                    <span key={skill} className={styles.skillTag}>{skill}</span>
                   ))}
-                </div>
-
-                {/* Bookmark info */}
-                <div style={{ 
-                  margin: '1rem 0', 
-                  padding: '1rem', 
-                  backgroundColor: 'rgba(139, 92, 246, 0.1)', 
-                  borderRadius: '0.5rem',
-                  border: '1px solid rgba(139, 92, 246, 0.2)',
-                  minHeight: '80px'
-                }}>
-                  <div style={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
-                    alignItems: 'center', 
-                    marginBottom: '0.5rem' 
-                  }}>
-                    <span style={{ 
-                      fontSize: '0.75rem', 
-                      color: '#8b5cf6', 
-                      fontWeight: '600' 
-                    }}>
-                      📌 Saved {new Date(internship.bookmarkedDate).toLocaleDateString()}
-                    </span>
-                    <button
-                      onClick={() => handleAction('changePriority', internship)}
-                      style={{
-                        padding: '0.25rem 0.5rem',
-                        fontSize: '0.65rem',
-                        backgroundColor: 'transparent',
-                        border: '1px solid #8b5cf6',
-                        borderRadius: '0.25rem',
-                        color: '#8b5cf6',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      🎯 Priority
-                    </button>
-                  </div>
-                  {internship.notes && (
-                    <p style={{ 
-                      fontSize: '0.8rem', 
-                      color: '#6b7280', 
-                      margin: 0, 
-                      fontStyle: 'italic',
-                      lineHeight: '1.4'
-                    }}>
-                      "{internship.notes}"
-                    </p>
+                  {internship.skills.length > 4 && (
+                    <span className={styles.skillTag}>+{internship.skills.length - 4} more</span>
                   )}
                 </div>
 
-                {/* Action buttons */}
-                <div style={{ display: 'flex', gap: '0.75rem', marginTop: 'auto', paddingTop: '1rem' }}>
+                {/* Bookmark Info */}
+                <div style={{
+                  margin: '1rem 0',
+                  padding: '1rem',
+                  backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                  borderRadius: '0.5rem',
+                  border: '1px solid rgba(139, 92, 246, 0.2)'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <span style={{ fontSize: '0.75rem', color: '#8b5cf6', fontWeight: '600' }}>
+                      📌 Saved {new Date(internship.bookmarkedDate).toLocaleDateString()}
+                    </span>
+                  </div>
+                  {internship.notes && (
+                    <div style={{ fontSize: '0.8rem', color: '#6b7280', fontStyle: 'italic' }}>
+                      "{internship.notes}"
+                    </div>
+                  )}
+                </div>
+
+                {/* Actions */}
+                <div className={styles.cardActions}>
                   {internship.status === 'not-applied' || internship.status === 'planning' ? (
-                    <button 
-                      onClick={() => handleAction('apply', internship)}
-                      style={{
-                        flex: 2,
-                        background: 'var(--accent-gradient)',
-                        color: 'white',
-                        border: 'none',
-                        padding: '0.75rem 1.5rem',
-                        borderRadius: 'var(--border-radius)',
-                        cursor: 'pointer',
-                        fontSize: '0.875rem',
-                        fontWeight: '600'
-                      }}
-                    >
+                    <button className={styles.applyButton} onClick={() => handleAction('apply', internship)}>
                       Apply Now
                     </button>
                   ) : (
-                    <button 
-                      onClick={() => handleAction('viewDetails', internship)}
-                      style={{
-                        flex: 2,
-                        background: 'var(--glass-bg)',
-                        color: 'var(--text-primary)',
-                        border: '1px solid var(--glass-border)',
-                        padding: '0.75rem 1.5rem',
-                        borderRadius: 'var(--border-radius)',
-                        cursor: 'pointer',
-                        fontSize: '0.875rem',
-                        fontWeight: '500'
-                      }}
-                    >
+                    <button className={styles.detailsButton} onClick={() => handleAction('viewDetails', internship)}>
                       View Details
                     </button>
                   )}
-                  
-                  <button 
-                    onClick={() => handleAction('editNotes', internship)}
-                    style={{
-                      flex: 1,
-                      background: 'var(--glass-bg)',
-                      color: 'var(--text-primary)',
-                      border: '1px solid var(--glass-border)',
-                      padding: '0.75rem 1rem',
-                      borderRadius: 'var(--border-radius)',
-                      cursor: 'pointer',
-                      fontSize: '0.875rem',
-                      fontWeight: '500'
-                    }}
-                  >
-                    📝
+                  <button className={styles.editButton} onClick={() => handleAction('editNotes', internship)}>
+                    📝 Notes
                   </button>
-                  
                   <button 
+                    className={styles.withdrawButton} 
                     onClick={() => handleAction('removeBookmark', internship)}
-                    style={{
-                      flex: 1,
-                      background: 'var(--glass-bg)',
-                      color: '#ef4444',
-                      border: '1px solid #ef4444',
-                      padding: '0.75rem 1rem',
-                      borderRadius: 'var(--border-radius)',
-                      cursor: 'pointer',
-                      fontSize: '0.875rem',
-                      fontWeight: '500'
-                    }}
                   >
-                    🗑️
+                    🗑️ Remove
                   </button>
                 </div>
               </div>
@@ -718,28 +554,100 @@ const Bookmarks = () => {
         <div className={styles.tipsGrid}>
           <div className={styles.tipCard}>
             <div className={styles.tipIcon}>🎯</div>
-            <h3>Set Priorities</h3>
-            <p>Mark internships as high, medium, or low priority to focus your application efforts on the opportunities that matter most to your career goals.</p>
+            <h3>Use Priority Levels</h3>
+            <p>Click priority badges to cycle through low/medium/high. Focus on high-priority, high-match internships first!</p>
+          </div>
+          <div className={styles.tipCard}>
+            <div className={styles.tipIcon}>🤖</div>
+            <h3>Trust the AI Scores</h3>
+            <p>Internships with 80%+ match scores align well with your profile. Use AI explanations to understand why.</p>
           </div>
           <div className={styles.tipCard}>
             <div className={styles.tipIcon}>📝</div>
-            <h3>Add Personal Notes</h3>
-            <p>Jot down why you saved each internship, what excites you about the role, or what you need to prepare before applying. Your future self will thank you!</p>
-          </div>
-          <div className={styles.tipCard}>
-            <div className={styles.tipIcon}>⏰</div>
-            <h3>Track Deadlines</h3>
-            <p>Sort by deadline to see which applications need urgent attention. Set personal deadlines a few days before the actual deadline to avoid last-minute stress.</p>
-          </div>
-          <div className={styles.tipCard}>
-            <div className={styles.tipIcon}>🔄</div>
-            <h3>Regular Review</h3>
-            <p>Review your bookmarks weekly. Remove positions you're no longer interested in and update your notes as your priorities evolve.</p>
+            <h3>Add Meaningful Notes</h3>
+            <p>Jot down why you saved each internship, preparation needed, or questions to ask during interviews.</p>
           </div>
         </div>
       </section>
     </div>
   );
+};
+
+// Enhanced bookmark handler hook for other components
+export const useBookmarkHandler = () => {
+  const { user } = useAuth();
+  const [matchingService] = useState(() => new ProfileBasedMatchingService());
+
+  const addBookmark = async (internship) => {
+    if (!user) return { success: false, message: 'Please log in to bookmark internships' };
+
+    try {
+      const userBookmarks = JSON.parse(localStorage.getItem('userBookmarks') || '{}');
+      const currentBookmarks = userBookmarks[user.id] || [];
+      
+      // Check if already bookmarked
+      if (currentBookmarks.some(b => b.id === internship.id)) {
+        return { success: false, message: 'Already bookmarked!' };
+      }
+      
+      // Create enhanced bookmark with AI
+      const userProfile = matchingService.getUserProfile();
+      const newBookmark = { 
+        ...internship, 
+        bookmarkedDate: new Date().toISOString().split('T')[0],
+        priority: 'medium',
+        status: 'not-applied',
+        notes: `Saved this ${internship.title} position for future application.`
+      };
+      
+      if (userProfile) {
+        const matchResult = matchingService.calculateMatchScore(userProfile, newBookmark);
+        const explanation = matchingService.explainRecommendation(userProfile, newBookmark);
+        newBookmark.match = matchResult.totalScore;
+        newBookmark.matchBreakdown = matchResult.breakdown;
+        newBookmark.explanation = explanation;
+      }
+      
+      userBookmarks[user.id] = [newBookmark, ...currentBookmarks];
+      localStorage.setItem('userBookmarks', JSON.stringify(userBookmarks));
+      
+      return { success: true, message: `Bookmarked "${internship.title}" with ${newBookmark.match}% match!` };
+    } catch (error) {
+      console.error('Error adding bookmark:', error);
+      return { success: false, message: 'Failed to bookmark internship' };
+    }
+  };
+
+  const removeBookmark = async (internshipId) => {
+    if (!user) return { success: false, message: 'Please log in' };
+
+    try {
+      const userBookmarks = JSON.parse(localStorage.getItem('userBookmarks') || '{}');
+      const currentBookmarks = userBookmarks[user.id] || [];
+      
+      userBookmarks[user.id] = currentBookmarks.filter(b => b.id !== internshipId);
+      localStorage.setItem('userBookmarks', JSON.stringify(userBookmarks));
+      
+      return { success: true, message: 'Bookmark removed successfully' };
+    } catch (error) {
+      console.error('Error removing bookmark:', error);
+      return { success: false, message: 'Failed to remove bookmark' };
+    }
+  };
+
+  const isBookmarked = (internshipId) => {
+    if (!user) return false;
+    
+    try {
+      const userBookmarks = JSON.parse(localStorage.getItem('userBookmarks') || '{}');
+      const currentBookmarks = userBookmarks[user.id] || [];
+      return currentBookmarks.some(b => b.id === internshipId);
+    } catch (error) {
+      return false;
+    }
+  };
+
+  return { addBookmark, removeBookmark, isBookmarked };
 };
 
 export default Bookmarks;

@@ -50,10 +50,10 @@ const Profile = () => {
       experience: [],
       education: [],
       resumeUploaded: false,
-      lastUpdated: ''
     };
   };
 
+  
   // Use lazy state initialization to load saved data immediately
   const [profileData, setProfileData] = useState(getInitialProfileData);
   // Add a separate state to store the original data for canceling edits
@@ -571,7 +571,6 @@ const Profile = () => {
                   <span className={styles.resumeIcon}>📄</span>
                   <div>
                     <p className={styles.resumeStatus}>Resume uploaded</p>
-                    <p className={styles.resumeDate}>Last updated: {profileData.lastUpdated}</p>
                   </div>
                 </div>
               ) : (
