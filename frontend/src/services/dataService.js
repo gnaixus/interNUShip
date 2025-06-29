@@ -1,3 +1,4 @@
+
 import { 
   dummyInternships, 
   simulateAPIResponse, 
@@ -484,3 +485,4 @@ class DataService {
   }
 }
 
+export default DataService;

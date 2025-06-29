@@ -279,3 +279,4 @@ export async function testMatchingAlgorithm() {
     return { success: false, error: error.message };
   }
 }
+export default EnhancedMatchingService;

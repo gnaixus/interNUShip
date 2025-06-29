@@ -63,11 +63,10 @@ const Browse = () => {
     { path: '/internships', label: 'Browse', icon: '🔍' },
     { path: '/applications', label: 'Applications', icon: '📝' },
    { path: '/bookmarks', label: 'Bookmarks', icon: '🔖' },
-    { path: '/about', label: 'About', icon: '🏢' }  // Added About page
+    { path: '/about', label: 'About', icon: '🏢' }  
   ] : [
     { path: '/home', label: 'Home', icon: '🏠' },
     { path: '/internships', label: 'Browse', icon: '🔍' },
-    { path: '/how-it-works', label: 'How It Works', icon: '❓' },
    { path: '/about', label: 'About', icon: '🏢' }
   ];
 
@@ -399,3 +398,4 @@ const Browse = () => {
   );
 };
 
+export default Browse;

@@ -1,10 +1,12 @@
 // autofillUtils.js - Utility functions for autofilling form data from parsed resume
 
 /**
- * Submits application data to the backend
- * @param {Object} formData - Form data to submit
- * @returns {Promise<Object>} Response from submission
+ * Autofills form data from parsed resume data
+ * @param {Object} parsedData - Parsed resume data
+ * @param {Object} currentFormData - Current form data state
+ * @returns {Object} Updated form data
  */
+
 export async function submitApplication(formData) {
   console.log('Submitting application data:', formData);
 
@@ -17,12 +19,6 @@ export async function submitApplication(formData) {
   });
 }
 
-/**
- * Autofills form data from parsed resume data
- * @param {Object} parsedData - Parsed resume data
- * @param {Object} currentFormData - Current form data state
- * @returns {Object} Updated form data
- */
 export function autofillFromResumeData(parsedData, currentFormData) {
   if (!parsedData) return currentFormData;
 

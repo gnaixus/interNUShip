@@ -12,7 +12,7 @@ export function useSmartMatching() {
     matchingServiceInstance = new EnhancedMatchingService();
   }
 
-  const getRecommendations = useCallback(async (userProfile, options = {}) => {
+  const getRecommendations = useCallback(async (userProfile, options) => {
     setIsLoading(true);
     setError(null);
     
@@ -20,12 +20,11 @@ export function useSmartMatching() {
       const result = await matchingServiceInstance.getPersonalizedRecommendations(userProfile, options);
       
       if (!result.success) {
-        throw new Error(result.error || 'Failed to get recommendations');
+        throw new Error(result.error);
       }
       
       return result;
     } catch (err) {
-      console.error('Error getting recommendations:', err);
       setError(err.message);
       throw err;
     } finally {
@@ -34,37 +33,15 @@ export function useSmartMatching() {
   }, []);
 
   const explainRecommendation = useCallback((userProfile, internship) => {
-    try {
-      return matchingServiceInstance.explainRecommendation(userProfile, internship);
-    } catch (err) {
-      console.error('Error explaining recommendation:', err);
-      setError(err.message);
-      return { explanation: 'Unable to explain recommendation', confidence: 0 };
-    }
+    return matchingServiceInstance.explainRecommendation(userProfile, internship);
   }, []);
 
   const recordFeedback = useCallback((feedback) => {
-    try {
-      return matchingServiceInstance.recordUserFeedback(feedback);
-    } catch (err) {
-      console.error('Error recording feedback:', err);
-      setError(err.message);
-      return false;
-    }
+    return matchingServiceInstance.recordUserFeedback(feedback);
   }, []);
 
   const getMetrics = useCallback(() => {
-    try {
-      return matchingServiceInstance.getPerformanceMetrics();
-    } catch (err) {
-      console.error('Error getting metrics:', err);
-      setError(err.message);
-      return null;
-    }
-  }, []);
-
-  const clearError = useCallback(() => {
-    setError(null);
+    return matchingServiceInstance.getPerformanceMetrics();
   }, []);
 
   return {
@@ -72,7 +49,6 @@ export function useSmartMatching() {
     explainRecommendation,
     recordFeedback,
     getMetrics,
-    clearError,
     isLoading,
     error
   };

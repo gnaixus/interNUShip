@@ -1,3 +1,4 @@
+
 export const internshipPlatforms = [
   { name: 'LinkedIn Jobs', source: 'linkedin' },
   { name: 'Indeed Singapore', source: 'indeed' },
