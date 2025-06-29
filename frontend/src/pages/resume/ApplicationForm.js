@@ -11,22 +11,22 @@ const ApplicationForm = () => {
   const { id } = useParams();
   
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    university: '',
-    major: '',
-    graduationDate: '',
-    gpa: '',
-    skills: [],
-    linkedinUrl: '',
-    githubUrl: '',
-    portfolioUrl: '',
-    resumeFile: null,
-    coverLetter: '',
-    availability: '',
-    relevantExperience: ''
+    firstName: '', // Extracted from profile.name 
+    lastName: '', // Extracted from profile.name
+    email: '', // Direct mapping from profile.email
+    phone: '', // Direct mapping from profile.phone
+    university: '', // From profile.university or education[0].institution
+    major: '', // Direct mapping from profile.major
+    graduationDate: '', // Extracted from education[0].period
+    gpa: '', // Extracted from education[0].gpa
+    skills: [], // Direct mapping from profile.skills
+    linkedinUrl: '', // Not in profile (manual entry)
+    githubUrl: '', // Not in profile (manual entry)
+    portfolioUrl: '', // Not in profile (manual entry)
+    resumeFile: null, // File upload (separate from profile)
+    coverLetter: '', // Application-specific content
+    availability: '', // Application-specific content
+    relevantExperience: '' // Generated from profile.experience array
   });
 
   const [errors, setErrors] = useState({});

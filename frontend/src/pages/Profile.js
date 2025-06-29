@@ -76,66 +76,97 @@ const Profile = () => {
     }, 2000);
   };
 
-  const handleFileUpload = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
+  // const handleFileUpload = async (event) => {
+  //   const file = event.target.files[0];
+  //   if (!file) return;
 
-    if (file.type !== 'application/pdf') {
-      alert('Please upload a PDF file');
-      return;
-    }
-    setUploading(true);
-    setParsing(true);
+  //   if (file.type !== 'application/pdf') {
+  //     alert('Please upload a PDF file');
+  //     return;
+  //   }
+  //   setUploading(true);
+  //   setParsing(true);
 
-    try {
-      console.log('Processing PDF resume...');
-      const result = await processPDFResume(file);
+  //   try {
+  //     console.log('Processing PDF resume...');
+  //     const result = await processPDFResume(file);
       
-      if (!result.success) {
-        throw new Error(result.error);
-      }
+  //     if (!result.success) {
+  //       throw new Error(result.error);
+  //     }
       
-      const parsedData = result.data;
-      console.log('Parsed data:', parsedData);
-      console.log('Extracted text preview:', result.extractedText);
+  //     const parsedData = result.data;
+  //     console.log('Parsed data:', parsedData);
+  //     console.log('Extracted text preview:', result.extractedText);
       
-      setProfileData(prev => ({
-        ...prev,
-        name: parsedData.name && parsedData.name.trim() ? parsedData.name : prev.name,
-        email: parsedData.email && parsedData.email.trim() ? parsedData.email : prev.email,
-        phone: parsedData.phone && parsedData.phone.trim() ? parsedData.phone : prev.phone,
-        location: parsedData.location && parsedData.location.trim() ? parsedData.location : prev.location,
-        skills: parsedData.skills && parsedData.skills.length > 0 ? parsedData.skills : prev.skills,
-        experience: parsedData.experience && parsedData.experience.length > 0 ? parsedData.experience : prev.experience,
-        education: parsedData.education && parsedData.education.length > 0 ? parsedData.education : prev.education,
-        resumeUploaded: true,
-        lastUpdated: new Date().toLocaleDateString()
-      }));
+  //     setProfileData(prev => ({
+  //       ...prev,
+  //       name: parsedData.name && parsedData.name.trim() ? parsedData.name : prev.name,
+  //       email: parsedData.email && parsedData.email.trim() ? parsedData.email : prev.email,
+  //       phone: parsedData.phone && parsedData.phone.trim() ? parsedData.phone : prev.phone,
+  //       location: parsedData.location && parsedData.location.trim() ? parsedData.location : prev.location,
+  //       skills: parsedData.skills && parsedData.skills.length > 0 ? parsedData.skills : prev.skills,
+  //       experience: parsedData.experience && parsedData.experience.length > 0 ? parsedData.experience : prev.experience,
+  //       education: parsedData.education && parsedData.education.length > 0 ? parsedData.education : prev.education,
+  //       resumeUploaded: true,
+  //       lastUpdated: new Date().toLocaleDateString()
+  //     }));
 
-      const updatedFields = [];
-      if (parsedData.name) updatedFields.push('name');
-      if (parsedData.email) updatedFields.push('email');
-      if (parsedData.phone) updatedFields.push('phone');
-      if (parsedData.location) updatedFields.push('location');
-      if (parsedData.skills.length > 0) updatedFields.push('skills');
-      if (parsedData.experience.length > 0) updatedFields.push('experience');
-      if (parsedData.education.length > 0) updatedFields.push('education');
+  //     const updatedFields = [];
+  //     if (parsedData.name) updatedFields.push('name');
+  //     if (parsedData.email) updatedFields.push('email');
+  //     if (parsedData.phone) updatedFields.push('phone');
+  //     if (parsedData.location) updatedFields.push('location');
+  //     if (parsedData.skills.length > 0) updatedFields.push('skills');
+  //     if (parsedData.experience.length > 0) updatedFields.push('experience');
+  //     if (parsedData.education.length > 0) updatedFields.push('education');
       
-      if (updatedFields.length > 0) {
-        alert(`Resume parsed successfully! Updated: ${updatedFields.join(', ')}. Please review and edit the information.`);
-        setIsEditing(true);
-      } else {
-        alert('Resume uploaded but no information could be extracted. Please check if the PDF contains readable text.');
-      }
+  //     if (updatedFields.length > 0) {
+  //       alert(`Resume parsed successfully! Updated: ${updatedFields.join(', ')}. Please review and edit the information.`);
+  //       setIsEditing(true);
+  //     } else {
+  //       alert('Resume uploaded but no information could be extracted. Please check if the PDF contains readable text.');
+  //     }
       
-    } catch (error) {
-      console.error('Error processing resume:', error);
-      alert(`Failed to parse resume: ${error.message}. Please ensure the PDF contains readable text.`);
-    } finally {
-      setUploading(false);
-      setParsing(false);
-    }
-  };
+  //   } catch (error) {
+  //     console.error('Error processing resume:', error);
+  //     alert(`Failed to parse resume: ${error.message}. Please ensure the PDF contains readable text.`);
+  //   } finally {
+  //     setUploading(false);
+  //     setParsing(false);
+  //   }
+  // };
+  
+
+const handleFileUpload = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  if (file.type !== 'application/pdf') {
+    alert('Please upload a PDF file');
+    return;
+  }
+  
+  setUploading(true);
+
+  try {
+    console.log('Uploading PDF resume...');
+    setProfileData(prev => ({
+      ...prev,
+      resumeUploaded: true,
+      resumeFileName: file.name,
+      lastUpdated: new Date().toLocaleDateString()
+    }));
+
+    alert('Resume uploaded successfully!');
+    
+  } catch (error) {
+    console.error('Error uploading resume:', error);
+    alert(`Failed to upload resume: ${error.message}`);
+  } finally {
+    setUploading(false);
+  }
+};
 
 const handleSaveProfile = () => {
   setIsEditing(false);

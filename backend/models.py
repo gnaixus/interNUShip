@@ -22,8 +22,8 @@ class Candidate(Base):
     phone = Column(String(50))
     designation = Column(String(255))
     _experience = Column("experience", Text)
-    _skills = Column("skills", Text)  # store as JSON string
-    _degree = Column("degree", Text)  # store as JSON string
+    _skills = Column("skills", Text)  
+    _degree = Column("degree", Text)  
 
     def get_skills(self):
         return json.loads(self._skills) if self._skills else []

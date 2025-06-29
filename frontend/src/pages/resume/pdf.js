@@ -1,6 +1,5 @@
-// pdf.js - PDF parsing utilities
+/* Milestone 3 
 
-// PDF.js worker setup
 const loadPDFJS = () => {
   if (window.pdfjsLib) {
     return window.pdfjsLib;
@@ -15,11 +14,6 @@ const loadPDFJS = () => {
   });
 };
 
-/**
- * Extract text from PDF file using PDF.js
- * @param {File} file - PDF file object
- * @returns {Promise<string>} - Extracted text content
- */
 export const extractTextFromPDF = async (file) => {
   try {
     const pdfjsLib = await loadPDFJS();
@@ -28,7 +22,7 @@ export const extractTextFromPDF = async (file) => {
       throw new Error('PDF.js not loaded');
     }
     
-    // Set worker path
+ 
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     
     const arrayBuffer = await file.arrayBuffer();
@@ -57,11 +51,6 @@ export const extractTextFromPDF = async (file) => {
   }
 };
 
-/**
- * Parse resume text and extract structured data
- * @param {string} text - Raw text content from resume
- * @returns {Object} - Parsed resume data
- */
 export const parseResumeText = (text) => {
   if (!text || typeof text !== 'string') {
     throw new Error('Invalid text input for parsing');
@@ -81,21 +70,21 @@ export const parseResumeText = (text) => {
     bio: ''
   };
 
-  // Extract email (improved regex)
+  // Extract email 
   const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g;
   const emailMatches = text.match(emailRegex);
   if (emailMatches && emailMatches.length > 0) {
     parsedData.email = emailMatches[0];
   }
 
-  // Extract phone (improved regex for various formats)
+  // Extract phone 
   const phoneRegex = /(?:\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}|\+\d{1,3}[-.\s]?\d{1,14}/g;
   const phoneMatches = text.match(phoneRegex);
   if (phoneMatches && phoneMatches.length > 0) {
     parsedData.phone = phoneMatches[0];
   }
 
-  // Extract name (first few lines that look like names)
+  // Extract name 
   const namePatterns = [
     /^([A-Z][a-z]+ [A-Z][a-z]+(?:\s[A-Z][a-z]+)?)/m,
     /^([A-Z][A-Z\s]+)$/m,
@@ -110,7 +99,7 @@ export const parseResumeText = (text) => {
     }
   }
 
-  // Extract location (look for common location patterns)
+  // Extract location 
   const locationPatterns = [
     /([A-Z][a-z]+,\s*[A-Z]{2})/g,
     /([A-Z][a-z]+,\s*[A-Z][a-z]+)/g,
@@ -125,7 +114,7 @@ export const parseResumeText = (text) => {
     }
   }
 
-  // Extract skills section (enhanced)
+  // Extract skills section 
   const skillsSectionPatterns = [
     /(?:Skills?|Technical Skills?|Programming Languages?|Technologies?)[:\s]*([^]*?)(?=\n\s*[A-Z][a-z]+|$)/i,
     /(?:Skills?|Technical Skills?)[:\s]*(.+?)(?:\n\n|\n[A-Z]|$)/i
@@ -146,7 +135,7 @@ export const parseResumeText = (text) => {
     }
   }
 
-  // Extract experience section (enhanced)
+  // Extract experience section 
   const experiencePatterns = [
     /(?:Experience|Work Experience|Professional Experience|Employment)[:\s]*([^]*?)(?=Education|Skills|Projects|$)/i,
     /(?:Experience|Work Experience)[:\s]*([^]*?)(?=\n\s*[A-Z][a-z]+:|\n\s*EDUCATION|\n\s*SKILLS|$)/i
@@ -205,7 +194,7 @@ export const parseResumeText = (text) => {
     }
   }
 
-  // Extract education section (enhanced)
+  // Extract education section 
   const educationPatterns = [
     /(?:Education|Academic Background|University)[:\s]*([^]*?)(?=Experience|Skills|Projects|$)/i,
     /(?:Education)[:\s]*([^]*?)(?=\n\s*[A-Z][a-z]+:|\n\s*EXPERIENCE|\n\s*SKILLS|$)/i
@@ -271,11 +260,6 @@ export const parseResumeText = (text) => {
   return parsedData;
 };
 
-/**
- * Main function to process PDF resume file
- * @param {File} file - PDF file object
- * @returns {Promise<Object>} - Parsed resume data
- */
 export const processPDFResume = async (file) => {
   if (!file || file.type !== 'application/pdf') {
     throw new Error('Please provide a valid PDF file');
@@ -311,3 +295,5 @@ export default {
   parseResumeText,
   processPDFResume
 };
+
+*/

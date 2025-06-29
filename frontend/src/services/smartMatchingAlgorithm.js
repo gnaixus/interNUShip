@@ -349,17 +349,14 @@ class SmartMatchingAlgorithm {
     
     // Exact match
     if (userLocation === internshipLocation) return 1.0;
-    
     // Same city/region (basic implementation)
     if (userLocation.includes('singapore') && internshipLocation.includes('singapore')) {
       return 0.9;
     }
-    
     // Remote work preference
     if (internshipLocation.includes('remote') && userProfile.preferences?.remote) {
       return 1.0;
     }
-    
     return 0.3; // Different location penalty
   }
 

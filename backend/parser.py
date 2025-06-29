@@ -5,7 +5,6 @@ import logging
 import dateparser
 from datetime import datetime
 
-# Load spaCy NLP model
 try:
     nlp = spacy.load("en_core_web_sm")
 except OSError:
@@ -15,7 +14,7 @@ except OSError:
 # Set up logging
 logging.basicConfig(level=logging.ERROR)
 
-# Sample skills list (customize as needed)
+# Sample skills list (add)
 SKILLS_DB = [
     "python", "java", "sql", "excel", "javascript", "react", "node.js",
     "machine learning", "data analysis", "communication", "project management",
@@ -29,7 +28,7 @@ DEGREES_DB = [
     "mba", "phd", "btech", "mtech", "associate", "diploma"
 ]
 
-# Company keywords - THIS WAS MISSING!
+# Company keywords
 COMPANY_DB = [
     "pte ltd", "ltd", "llc", "inc", "corp", "corporation", "company", "co",
     "technologies", "tech", "systems", "solutions", "consulting", "services",
@@ -59,7 +58,7 @@ def extract_name_email_phone(text):
     if phone_match:
         phone = phone_match.group().strip()
     
-    # Extract name using spaCy if available
+    # Extract name 
     if nlp:
         doc = nlp(text[:500])  # Process first 500 chars
         person_entities = [ent.text for ent in doc.ents if ent.label_ == "PERSON"]
@@ -101,7 +100,6 @@ def extract_experience(text):
         if any(kw in line.lower() for kw in COMPANY_DB) and date_pattern.search(line):
             experience_entries.append(line.strip())
         elif any(kw in line.lower() for kw in COMPANY_DB):
-            # Look ahead one line for date
             next_line = lines[i+1] if i+1 < len(lines) else ""
             if date_pattern.search(next_line):
                 experience_entries.append(f"{line.strip()} {next_line.strip()}")
@@ -113,7 +111,6 @@ def calculate_experience_years(experience_entries):
     total_months = 0
     
     for entry in experience_entries:
-        # Look for date ranges in the entry
         date_matches = re.findall(
             r"((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)?\.?\s?\d{4})\s?[-–to]+\s?((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)?\.?\s?(?:\d{4}|present|current))",
             entry, flags=re.IGNORECASE
