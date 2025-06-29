@@ -1,11 +1,6 @@
-<<<<<<< HEAD
 // pdf.js - PDF parsing utilities
 
 // PDF.js worker setup
-=======
-/* Milestone 3 
-
->>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
 const loadPDFJS = () => {
   if (window.pdfjsLib) {
     return window.pdfjsLib;
@@ -20,14 +15,11 @@ const loadPDFJS = () => {
   });
 };
 
-<<<<<<< HEAD
 /**
  * Extract text from PDF file using PDF.js
  * @param {File} file - PDF file object
  * @returns {Promise<string>} - Extracted text content
  */
-=======
->>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
 export const extractTextFromPDF = async (file) => {
   try {
     const pdfjsLib = await loadPDFJS();
@@ -36,11 +28,7 @@ export const extractTextFromPDF = async (file) => {
       throw new Error('PDF.js not loaded');
     }
     
-<<<<<<< HEAD
     // Set worker path
-=======
- 
->>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     
     const arrayBuffer = await file.arrayBuffer();
@@ -69,14 +57,11 @@ export const extractTextFromPDF = async (file) => {
   }
 };
 
-<<<<<<< HEAD
 /**
  * Parse resume text and extract structured data
  * @param {string} text - Raw text content from resume
  * @returns {Object} - Parsed resume data
  */
-=======
->>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
 export const parseResumeText = (text) => {
   if (!text || typeof text !== 'string') {
     throw new Error('Invalid text input for parsing');
@@ -96,33 +81,21 @@ export const parseResumeText = (text) => {
     bio: ''
   };
 
-<<<<<<< HEAD
   // Extract email (improved regex)
-=======
-  // Extract email 
->>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
   const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g;
   const emailMatches = text.match(emailRegex);
   if (emailMatches && emailMatches.length > 0) {
     parsedData.email = emailMatches[0];
   }
 
-<<<<<<< HEAD
   // Extract phone (improved regex for various formats)
-=======
-  // Extract phone 
->>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
   const phoneRegex = /(?:\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}|\+\d{1,3}[-.\s]?\d{1,14}/g;
   const phoneMatches = text.match(phoneRegex);
   if (phoneMatches && phoneMatches.length > 0) {
     parsedData.phone = phoneMatches[0];
   }
 
-<<<<<<< HEAD
   // Extract name (first few lines that look like names)
-=======
-  // Extract name 
->>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
   const namePatterns = [
     /^([A-Z][a-z]+ [A-Z][a-z]+(?:\s[A-Z][a-z]+)?)/m,
     /^([A-Z][A-Z\s]+)$/m,
@@ -137,11 +110,7 @@ export const parseResumeText = (text) => {
     }
   }
 
-<<<<<<< HEAD
   // Extract location (look for common location patterns)
-=======
-  // Extract location 
->>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
   const locationPatterns = [
     /([A-Z][a-z]+,\s*[A-Z]{2})/g,
     /([A-Z][a-z]+,\s*[A-Z][a-z]+)/g,
@@ -156,11 +125,7 @@ export const parseResumeText = (text) => {
     }
   }
 
-<<<<<<< HEAD
   // Extract skills section (enhanced)
-=======
-  // Extract skills section 
->>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
   const skillsSectionPatterns = [
     /(?:Skills?|Technical Skills?|Programming Languages?|Technologies?)[:\s]*([^]*?)(?=\n\s*[A-Z][a-z]+|$)/i,
     /(?:Skills?|Technical Skills?)[:\s]*(.+?)(?:\n\n|\n[A-Z]|$)/i
@@ -181,11 +146,7 @@ export const parseResumeText = (text) => {
     }
   }
 
-<<<<<<< HEAD
   // Extract experience section (enhanced)
-=======
-  // Extract experience section 
->>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
   const experiencePatterns = [
     /(?:Experience|Work Experience|Professional Experience|Employment)[:\s]*([^]*?)(?=Education|Skills|Projects|$)/i,
     /(?:Experience|Work Experience)[:\s]*([^]*?)(?=\n\s*[A-Z][a-z]+:|\n\s*EDUCATION|\n\s*SKILLS|$)/i
@@ -244,11 +205,7 @@ export const parseResumeText = (text) => {
     }
   }
 
-<<<<<<< HEAD
   // Extract education section (enhanced)
-=======
-  // Extract education section 
->>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
   const educationPatterns = [
     /(?:Education|Academic Background|University)[:\s]*([^]*?)(?=Experience|Skills|Projects|$)/i,
     /(?:Education)[:\s]*([^]*?)(?=\n\s*[A-Z][a-z]+:|\n\s*EXPERIENCE|\n\s*SKILLS|$)/i
@@ -314,14 +271,11 @@ export const parseResumeText = (text) => {
   return parsedData;
 };
 
-<<<<<<< HEAD
 /**
  * Main function to process PDF resume file
  * @param {File} file - PDF file object
  * @returns {Promise<Object>} - Parsed resume data
  */
-=======
->>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976
 export const processPDFResume = async (file) => {
   if (!file || file.type !== 'application/pdf') {
     throw new Error('Please provide a valid PDF file');
@@ -356,10 +310,4 @@ export default {
   extractTextFromPDF,
   parseResumeText,
   processPDFResume
-<<<<<<< HEAD
 };
-=======
-};
-
-*/
->>>>>>> 1b66db2cc1277f7eef88daa3d341bc56e8aea976

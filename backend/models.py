@@ -26,10 +26,6 @@ class Candidate(Base):
     _skills = Column("skills", Text)  # store as JSON string
     _degree = Column("degree", Text)  # store as JSON string
 
-
-    _skills = Column("skills", Text)  # store as JSON string
-    _degree = Column("degree", Text)  # store as JSON string
-
     _skills = Column("skills", Text)  
     _degree = Column("degree", Text)  
 
