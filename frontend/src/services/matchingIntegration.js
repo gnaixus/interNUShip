@@ -2,10 +2,7 @@
 import SmartMatchingAlgorithm, { createSmartMatcher } from './smartMatchingAlgorithm.js';
 import DataService from './dataService.js';
 
-/**
- * Enhanced Matching Service
- * Integrates the smart matching algorithm with your existing data service
- */
+
 class EnhancedMatchingService {
   constructor() {
     this.matcher = createSmartMatcher();
@@ -13,9 +10,6 @@ class EnhancedMatchingService {
     this.userFeedback = [];
   }
 
-  /**
-   * Initialize the matching service with current data
-   */
   async initialize() {
     try {
       console.log('Initializing Enhanced Matching Service...');
@@ -280,3 +274,5 @@ export async function testMatchingAlgorithm() {
   }
 }
 export default EnhancedMatchingService;
+
+// ms2 final 

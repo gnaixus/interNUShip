@@ -22,17 +22,16 @@
   --transition: all 0.3s ease;
 }
 
-/* ✅ MAIN CONTAINER - Single Scroll Area */
+/* MAIN CONTAINER  */
 .profileContainer {
   min-height: 100vh;
   background: var(--bg-gradient);
   color: var(--text-primary);
-  overflow-y: auto; /* Main scroll here */
+  overflow-y: auto; 
   overflow-x: hidden;
-  -webkit-overflow-scrolling: touch; /* Smooth scrolling on mobile */
+  -webkit-overflow-scrolling: touch; 
 }
 
-/* ✅ CUSTOM SCROLLBAR STYLING */
 .profileContainer::-webkit-scrollbar {
   width: 8px;
 }
@@ -52,7 +51,7 @@
   background: linear-gradient(135deg, #7c3aed, #0891b2);
 }
 
-/* Header - Sticky */
+/* Header */
 .userHeader {
   display: flex;
   justify-content: space-between;
@@ -133,12 +132,12 @@
   background: rgba(239, 68, 68, 0.2); 
 }
 
-/* ✅ PROFILE HEADER - Can be sticky */
+/* PROFILE HEADER */
 .profileHeader {
   background: linear-gradient(135deg, rgba(167, 139, 250, 0.1), rgba(236, 72, 153, 0.1));
   padding: 2rem 0;
   position: sticky;
-  top: 64px; /* Below the main header */
+  top: 64px; 
   z-index: 90;
 }
 
@@ -205,7 +204,7 @@
   padding-bottom: 1rem;
 }
 
-/* ✅ MAIN CONTENT AREA - Unified Scroll */
+/* MAIN CONTENT AREA */
 .profileContent {
   max-width: 1200px;
   margin: 0 auto;
@@ -213,32 +212,29 @@
   display: grid;
   grid-template-columns: 350px 1fr;
   gap: 3rem;
-  /* ✅ Remove height restrictions for unified scroll */
   min-height: auto;
   height: auto;
 }
 
-/* ✅ SIDEBAR - No Individual Scroll */
+/* SIDEBAR */
 .profileSidebar {
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  /* ✅ Remove overflow restrictions */
   overflow: visible;
   height: auto;
 }
 
-/* ✅ MAIN CONTENT - No Individual Scroll */
+/* MAIN CONTENT  */
 .profileMain {
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  /* ✅ Remove overflow restrictions */
   overflow: visible;
   height: auto;
 }
 
-/* ✅ CARDS - No Individual Scroll Areas */
+/* CARDS */
 .profileCard {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
@@ -246,7 +242,6 @@
   padding: 2rem;
   backdrop-filter: blur(10px);
   transition: var(--transition);
-  /* ✅ Remove height restrictions */
   height: auto;
   min-height: auto;
   overflow: visible;
@@ -535,17 +530,6 @@
   color: var(--text-muted);
 }
 
-/* Mobile Navigation Toggle */
-.mobileNavToggle {
-  display: none;
-  background: none;
-  border: none;
-  color: var(--text-primary);
-  font-size: 1.5rem;
-  cursor: pointer;
-}
-
-/* ✅ RESPONSIVE DESIGN - Unified Scroll */
 @media (max-width: 768px) {
   .headerLeft { 
     gap: 16px; 
@@ -572,7 +556,6 @@
     gap: 1rem;
   }
   
-  /* ✅ Mobile: Single column layout with unified scroll */
   .profileContent {
     grid-template-columns: 1fr;
     gap: 2rem;
@@ -593,3 +576,5 @@
     top: auto;
   }
 }
+
+/* ms2 final */

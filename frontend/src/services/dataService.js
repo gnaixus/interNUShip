@@ -8,7 +8,7 @@ import {
 } from '../data/internshipData';
 
 class DataService {
-  // Simulate fetching all internships (as if from aggregated API/scraping)
+  // Simulate fetching all internships 
   static async getAllInternships(filters = {}) {
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 500));
@@ -486,3 +486,6 @@ class DataService {
 }
 
 export default DataService;
+
+// ms2 final
+// used instead of scraping due to private API

@@ -7,7 +7,6 @@ export function useSmartMatching() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Singleton pattern to ensure one instance
   if (!matchingServiceInstance) {
     matchingServiceInstance = new EnhancedMatchingService();
   }

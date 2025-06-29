@@ -2,12 +2,12 @@ import DataService from './dataService.js';
 
 class ProfileBasedMatchingService {
   constructor() {
-    // Updated weights based on the Master Formula from readme
+    // Updated weights based on the Formula 
     this.weights = {
       contentSimilarity: 0.20,  // TF-IDF Content Similarity (20% weight)
       skillMatch: 0.40,         // Skill Matching (40% weight)
       experienceRelevance: 0.25, // Experience Relevance (25% weight)
-      educationRelevance: 0.15,  // Education Relevance (15% weight) - updated from 25% in readme text to 15% as per formula
+      educationRelevance: 0.15,  // Education Relevance (15% weight) 
       locationScore: 0.10,       // Location Score (10% weight)
       categoryScore: 0.10,       // Category Score (10% weight)
       experienceLevelScore: 0.10 // Experience Level Score (10% weight)
@@ -484,9 +484,9 @@ class ProfileBasedMatchingService {
   }
 
   /**
-   * Get personalized recommendations using the updated algorithm
+   * Get personalised recommendations using the updated algorithm
    */
-  async getPersonalizedRecommendations(options = {}) {
+  async getPersonalisedRecommendations(options = {}) {
     const { limit = 10, minMatchScore = 30 } = options;
 
     try {
@@ -654,3 +654,5 @@ class ProfileBasedMatchingService {
 }
 
 export default ProfileBasedMatchingService;
+
+// ms2 final

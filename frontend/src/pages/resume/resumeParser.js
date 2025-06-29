@@ -1,5 +1,3 @@
-// resumeParser.js - Utility for parsing resume data
-
 /**
  * Parses resume text/data and extracts structured information
  * @param {string} resumeText - Raw resume text
@@ -336,7 +334,7 @@ export async function processResumeFile(file) {
     if (file.type === 'text/plain') {
       text = await file.text();
     } else {
-      // For PDF and DOC files, you would need additional libraries
+
       // This is a placeholder for actual file processing
       text = await extractTextFromFile(file);
     }
@@ -350,9 +348,6 @@ export async function processResumeFile(file) {
 
 /**
  * Placeholder for actual file text extraction
- * In a real implementation, you would use libraries like:
- * - pdf-parse for PDFs
- * - mammoth for DOCX files
  * @param {File} file - File to extract text from
  * @returns {Promise<string>} Extracted text
  */
@@ -365,3 +360,6 @@ async function extractTextFromFile(file) {
     }, 1000);
   });
 }
+
+// ms2 final
+// also a bit buggy need more refinement

@@ -244,7 +244,7 @@ const Bookmarks = () => {
         </div>
         <section className={styles.heroSection}>
           <h1 className={styles.heroTitle}>Your Bookmark Collection</h1>
-          <p className={styles.heroSubtitle}>Sign in to save and organize your favorite internships</p>
+          <p className={styles.heroSubtitle}>Sign in to save and organise your favorite internships</p>
           <button className={styles.ctaPrimary} onClick={() => navigate('/login')}>Login to Continue</button>
         </section>
       </div>
@@ -306,7 +306,7 @@ const Bookmarks = () => {
       {/* Page Header */}
       <section className={styles.heroSection}>
         <h1 className={styles.heroTitle}>🔖 Your Smart Bookmarks</h1>
-        <p className={styles.heroSubtitle}>AI-powered organization for your saved internships</p>
+        <p className={styles.heroSubtitle}>AI-powered organisation for your saved internships</p>
         
         <div className={styles.userStats}>
           <div className={styles.statItem}>
@@ -651,3 +651,5 @@ export const useBookmarkHandler = () => {
 };
 
 export default Bookmarks;
+
+//ms2 final

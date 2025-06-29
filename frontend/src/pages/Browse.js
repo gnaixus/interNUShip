@@ -11,9 +11,9 @@ const Browse = () => {
   const location = useLocation();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [sortBy, setSortBy] = useState(user ? 'match' : 'published'); // Default to match for logged-in users
+  const [sortBy, setSortBy] = useState(user ? 'match' : 'published'); 
 
-  // Profile-based matching service
+  // Profile-based matching service same as Home.js
   const [matchingService] = useState(() => new ProfileBasedMatchingService());
 
   // State for dynamic data
@@ -681,3 +681,6 @@ const Browse = () => {
 };
 
 export default Browse;
+
+// ms2 final
+// a bit faulty still with the bookmark function will debug in ms3

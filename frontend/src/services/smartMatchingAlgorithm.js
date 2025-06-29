@@ -14,7 +14,7 @@ class SmartMatchingAlgorithm {
   }
 
   /**
-   * Preprocess text by cleaning and tokenizing
+   * Preprocess text by cleaning 
    */
   preprocessText(text) {
     if (!text) return [];
@@ -450,7 +450,7 @@ class SmartMatchingAlgorithm {
   }
 
   /**
-   * Get personalized recommendations for a user
+   * Get personalised recommendations for a user
    */
   getRecommendations(userProfile, internships, limit = 10) {
     // Build vocabulary with current data
@@ -551,3 +551,5 @@ export default SmartMatchingAlgorithm;
 export function createSmartMatcher() {
   return new SmartMatchingAlgorithm();
 }
+
+//ms2 final

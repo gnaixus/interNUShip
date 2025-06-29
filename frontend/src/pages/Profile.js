@@ -135,7 +135,7 @@ const Profile = () => {
         console.error('❌ Error loading saved profile:', error);
       }
     } else {
-      // If no saved data, store current state as original
+      // If got no saved data, store current state as original
       setOriginalData(profileData);
     }
   }, [user?.id]);
@@ -233,7 +233,7 @@ const Profile = () => {
     }
   };
 
-  // ✅ Enhanced save function with validation and verification
+  // Enhanced save function with validation and verification
   const handleSaveProfile = () => {
     try {
       // Apply local changes first
@@ -872,3 +872,4 @@ const Profile = () => {
 };
 
 export default Profile;
+// ms2 final

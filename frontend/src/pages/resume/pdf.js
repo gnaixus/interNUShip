@@ -1,6 +1,3 @@
-// pdf.js - PDF parsing utilities
-
-// PDF.js worker setup
 const loadPDFJS = () => {
   if (window.pdfjsLib) {
     return window.pdfjsLib;
@@ -16,7 +13,6 @@ const loadPDFJS = () => {
 };
 
 /**
- * Extract text from PDF file using PDF.js
  * @param {File} file - PDF file object
  * @returns {Promise<string>} - Extracted text content
  */
@@ -311,3 +307,6 @@ export default {
   parseResumeText,
   processPDFResume
 };
+
+//ms2 final 
+// can be further improved for ms3, a bit buggy for now

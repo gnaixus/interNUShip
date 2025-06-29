@@ -9,8 +9,7 @@ export const internshipPlatforms = [
 ];
 
 export const dummyInternships = [
-  // Technology Internships
-  {
+  {//software intern
     id: 1,
     title: 'Software Engineering Intern',
     company: 'TechCorp Singapore',
@@ -41,7 +40,7 @@ export const dummyInternships = [
     companySize: '201-500 employees',
     industry: 'Technology'
   },
-  {
+  {//backend developer
     id: 2,
     title: 'Backend Developer Intern',
     company: 'CloudTech Solutions',
@@ -72,7 +71,7 @@ export const dummyInternships = [
     companySize: '51-200 employees',
     industry: 'Cloud Services'
   },
-  {
+  {//frontend developer
     id: 3,
     title: 'Frontend Developer Intern',
     company: 'Digital Innovations Lab',
@@ -82,7 +81,7 @@ export const dummyInternships = [
     category: 'technology',
     match: 85,
     logo: '🎨',
-    description: 'Create beautiful and responsive user interfaces using modern frontend technologies. Work on cutting-edge web applications.',
+    description: 'Create engaging and responsive user interfaces using modern frontend technologies. Work on cutting-edge web applications.',
     deadline: '22/06/2025',
     postedDate: '08/05/2025',
     skills: ['Vue.js', 'TypeScript', 'CSS3', 'HTML5', 'Figma'],
@@ -103,7 +102,7 @@ export const dummyInternships = [
     companySize: '11-50 employees',
     industry: 'Digital Agency'
   },
-  {
+  {//mobile app developer
     id: 4,
     title: 'Mobile App Developer Intern',
     company: 'MobileTech Singapore',
@@ -135,8 +134,7 @@ export const dummyInternships = [
     industry: 'Mobile Technology'
   },
 
-  // Data Science Internships
-  {
+  {//data science 
     id: 5,
     title: 'Data Science Intern',
     company: 'Analytics Plus',
@@ -167,7 +165,7 @@ export const dummyInternships = [
     companySize: '201-500 employees',
     industry: 'Data Analytics'
   },
-  {
+  {//ai research
     id: 6,
     title: 'AI Research Intern',
     company: 'NUS AI Lab',
@@ -199,8 +197,7 @@ export const dummyInternships = [
     industry: 'Research & Education'
   },
 
-  // Design Internships
-  {
+  {//ux design
     id: 7,
     title: 'UX Design Intern',
     company: 'Design Studio',
@@ -231,7 +228,7 @@ export const dummyInternships = [
     companySize: '11-50 employees',
     industry: 'Design Agency'
   },
-  {
+  {//graphic design
     id: 8,
     title: 'Graphic Design Intern',
     company: 'Creative Minds Agency',
@@ -263,8 +260,7 @@ export const dummyInternships = [
     industry: 'Creative Agency'
   },
 
-  // Marketing Internships
-  {
+  {//digital marketing
     id: 9,
     title: 'Digital Marketing Intern',
     company: 'Marketing Innovations',
@@ -295,7 +291,7 @@ export const dummyInternships = [
     companySize: '51-200 employees',
     industry: 'Marketing & Advertising'
   },
-  {
+  {//content marketing
     id: 10,
     title: 'Content Marketing Intern',
     company: 'Content Creators Hub',
@@ -327,8 +323,7 @@ export const dummyInternships = [
     industry: 'Content & Media'
   },
 
-  // Business Internships
-  {
+  {//biz development
     id: 11,
     title: 'Business Development Intern',
     company: 'Growth Ventures',
@@ -359,7 +354,7 @@ export const dummyInternships = [
     companySize: '11-50 employees',
     industry: 'Business Development'
   },
-  {
+  {//product management
     id: 12,
     title: 'Product Management Intern',
     company: 'Innovation Labs',
@@ -391,8 +386,7 @@ export const dummyInternships = [
     industry: 'Product Development'
   },
 
-  // Finance Internships
-  {
+  {//finance analyst
     id: 13,
     title: 'Financial Analyst Intern',
     company: 'InvestCorp Singapore',
@@ -423,7 +417,7 @@ export const dummyInternships = [
     companySize: '501-1000 employees',
     industry: 'Financial Services'
   },
-  {
+  {//investment banker
     id: 14,
     title: 'Investment Banking Intern',
     company: 'Asia Capital Partners',
@@ -455,8 +449,7 @@ export const dummyInternships = [
     industry: 'Investment Banking'
   },
 
-  // Engineering Internships
-  {
+  {//engineering
     id: 15,
     title: 'Mechanical Engineering Intern',
     company: 'Engineering Solutions',
@@ -489,7 +482,7 @@ export const dummyInternships = [
   }
 ];
 
-// Simulated API response structure
+//simulated API response structure
 export const simulateAPIResponse = (platform, category = null, searchTerm = null) => {
   let filteredInternships = dummyInternships.filter(internship => 
     internship.source === platform
@@ -520,7 +513,7 @@ export const simulateAPIResponse = (platform, category = null, searchTerm = null
   };
 };
 
-// Simulate web scraping results from multiple platforms
+//simulate web scraping results from multiple platforms
 export const simulateWebScrapingResults = () => {
   const platforms = ['linkedin', 'indeed', 'jobsbank', 'mycareersfuture'];
   const results = {};
@@ -538,7 +531,7 @@ export const simulateWebScrapingResults = () => {
   };
 };
 
-// Categories for filtering
+//categories for filtering
 export const internshipCategories = [
   { id: 'all', name: 'All Categories', icon: '🌟', count: dummyInternships.length },
   { id: 'technology', name: 'Technology', icon: '💻', count: dummyInternships.filter(i => i.category === 'technology').length },
@@ -550,7 +543,6 @@ export const internshipCategories = [
   { id: 'engineering', name: 'Engineering', icon: '⚙️', count: dummyInternships.filter(i => i.category === 'engineering').length }
 ];
 
-// Mock smart matching algorithm results
 export const calculateMatchScore = (userProfile, internship) => {
   let score = 0;
   
