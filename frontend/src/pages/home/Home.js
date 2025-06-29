@@ -83,7 +83,6 @@ const Home = () => {
 ] : [
    { path: '/home', label: 'Home', icon: '🏠' },
     { path: '/internships', label: 'Browse', icon: '🔍' },
-   { path: '/how-it-works', label: 'How It Works', icon: '❓' },
    { path: '/about', label: 'About', icon: '🏢' }
 ];
 

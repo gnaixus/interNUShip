@@ -1,3 +1,4 @@
+/* CSS Variables */
 :root {
   --primary-gradient: linear-gradient(135deg, #a78bfa, #ec4899);
   --accent-gradient: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%);
@@ -21,14 +22,37 @@
   --transition: all 0.3s ease;
 }
 
-/* Base Container */
-.homeContainer {
+/* ✅ MAIN CONTAINER - Single Scroll Area */
+.profileContainer {
   min-height: 100vh;
   background: var(--bg-gradient);
   color: var(--text-primary);
+  overflow-y: auto; /* Main scroll here */
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on mobile */
 }
 
-/* Header - Reuse from Home */
+/* ✅ CUSTOM SCROLLBAR STYLING */
+.profileContainer::-webkit-scrollbar {
+  width: 8px;
+}
+
+.profileContainer::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+.profileContainer::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+  border-radius: 4px;
+  transition: var(--transition);
+}
+
+.profileContainer::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #7c3aed, #0891b2);
+}
+
+/* Header - Sticky */
 .userHeader {
   display: flex;
   justify-content: space-between;
@@ -43,22 +67,22 @@
   gap: 24px;
 }
 
-.headerLeft {
-  display: flex;
-  align-items: center;
-  gap: 32px;
+.headerLeft { 
+  display: flex; 
+  align-items: center; 
+  gap: 32px; 
 }
 
-.headerRight {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.headerRight { 
+  display: flex; 
+  align-items: center; 
+  gap: 12px; 
 }
 
-.userInfo {
-  font-size: 16px;
-  font-weight: 500;
-  color: var(--text-secondary);
+.userInfo { 
+  font-size: 16px; 
+  font-weight: 500; 
+  color: var(--text-secondary); 
 }
 
 .navItems {
@@ -83,13 +107,13 @@
   transition: var(--transition);
 }
 
-.navLink:hover,
-.navLink.active {
+.navLink:hover, .navLink.active {
   color: var(--purple-light);
   background: var(--purple-bg);
 }
 
-.logoutBtn {
+/* Header Buttons */
+.profileBtn, .loginBtn, .signupBtn, .logoutBtn {
   padding: 8px 16px;
   border-radius: 8px;
   font-size: 14px;
@@ -97,19 +121,25 @@
   cursor: pointer;
   transition: var(--transition);
   border: none;
-  background: rgba(239, 68, 68, 0.1);
-  color: #f87171;
-  border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
-.logoutBtn:hover {
-  background: rgba(239, 68, 68, 0.2);
+.logoutBtn { 
+  background: rgba(239, 68, 68, 0.1); 
+  color: #f87171; 
+  border: 1px solid rgba(239, 68, 68, 0.3); 
 }
 
-/* Profile Header Section */
+.logoutBtn:hover { 
+  background: rgba(239, 68, 68, 0.2); 
+}
+
+/* ✅ PROFILE HEADER - Can be sticky */
 .profileHeader {
   background: linear-gradient(135deg, rgba(167, 139, 250, 0.1), rgba(236, 72, 153, 0.1));
   padding: 2rem 0;
+  position: sticky;
+  top: 64px; /* Below the main header */
+  z-index: 90;
 }
 
 .profileCover {
@@ -175,40 +205,7 @@
   padding-bottom: 1rem;
 }
 
-/* Buttons */
-.btn {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: var(--border-radius);
-  font-weight: 600;
-  cursor: pointer;
-  transition: var(--transition);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.btn-primary {
-  background: var(--accent-gradient);
-  color: white;
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
-}
-
-.btn-secondary {
-  background: var(--glass-bg);
-  color: var(--text-primary);
-  border: 1px solid var(--glass-border);
-}
-
-.btn-secondary:hover {
-  background: var(--glass-hover);
-}
-
-/* Profile Content Layout */
+/* ✅ MAIN CONTENT AREA - Unified Scroll */
 .profileContent {
   max-width: 1200px;
   margin: 0 auto;
@@ -216,21 +213,32 @@
   display: grid;
   grid-template-columns: 350px 1fr;
   gap: 3rem;
+  /* ✅ Remove height restrictions for unified scroll */
+  min-height: auto;
+  height: auto;
 }
 
+/* ✅ SIDEBAR - No Individual Scroll */
 .profileSidebar {
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  /* ✅ Remove overflow restrictions */
+  overflow: visible;
+  height: auto;
 }
 
+/* ✅ MAIN CONTENT - No Individual Scroll */
 .profileMain {
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  /* ✅ Remove overflow restrictions */
+  overflow: visible;
+  height: auto;
 }
 
-/* Profile Cards */
+/* ✅ CARDS - No Individual Scroll Areas */
 .profileCard {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
@@ -238,6 +246,10 @@
   padding: 2rem;
   backdrop-filter: blur(10px);
   transition: var(--transition);
+  /* ✅ Remove height restrictions */
+  height: auto;
+  min-height: auto;
+  overflow: visible;
 }
 
 .profileCard:hover {
@@ -286,7 +298,7 @@
   font-weight: 500;
 }
 
-/* Form Inputs */
+/* Form Elements */
 .editInput {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
@@ -328,8 +340,7 @@
   text-align: center;
 }
 
-.resumeUploaded,
-.resumeEmpty {
+.resumeUploaded, .resumeEmpty {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -355,7 +366,7 @@
   margin: 0;
 }
 
-/* Skills Section */
+/* Skills */
 .skillsContainer {
   display: flex;
   flex-wrap: wrap;
@@ -378,6 +389,7 @@
 
 .skillTag:hover {
   background: rgba(139, 92, 246, 0.3);
+  transform: translateY(-1px);
 }
 
 .removeSkill {
@@ -396,61 +408,29 @@
   transform: scale(1.2);
 }
 
-.skillInput {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: 0.5rem;
-  padding: 0.5rem;
-  color: var(--text-primary);
-  font-size: 0.875rem;
-  flex: 1;
-}
-
-.addSkillBtn {
-  background: var(--accent-gradient);
-  color: white;
-  border: none;
-  padding: 0.5rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: var(--transition);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.addSkillBtn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
-}
-
-/* Bio Text */
+/* Bio */
 .bioText {
   color: var(--text-secondary);
   line-height: 1.6;
   margin: 0;
 }
 
-/* Education & Experience Items */
-.educationItem,
-.experienceItem {
+/* Education and Experience */
+.educationItem, .experienceItem {
   display: flex;
   gap: 1rem;
   margin-bottom: 1.5rem;
   padding-bottom: 1.5rem;
   border-bottom: 1px solid var(--glass-border);
-  position: relative;
 }
 
-.educationItem:last-child,
-.experienceItem:last-child {
+.educationItem:last-child, .experienceItem:last-child {
   border-bottom: none;
   margin-bottom: 0;
   padding-bottom: 0;
 }
 
-.educationIcon,
-.experienceIcon {
+.educationIcon, .experienceIcon {
   font-size: 2rem;
   width: 50px;
   height: 50px;
@@ -462,28 +442,20 @@
   flex-shrink: 0;
 }
 
-.educationDetails,
-.experienceDetails {
-  flex: 1;
-}
-
-.educationDegree,
-.experienceTitle {
+.educationDegree, .experienceTitle {
   color: var(--text-primary);
   font-size: 1.1rem;
   font-weight: 600;
   margin: 0 0 0.5rem 0;
 }
 
-.educationInstitution,
-.experienceCompany {
+.educationInstitution, .experienceCompany {
   color: var(--text-secondary);
   font-weight: 500;
   margin: 0 0 0.25rem 0;
 }
 
-.educationPeriod,
-.experienceDuration {
+.educationPeriod, .experienceDuration {
   color: var(--text-muted);
   font-size: 0.875rem;
   margin: 0 0 0.5rem 0;
@@ -502,60 +474,40 @@
   margin: 0;
 }
 
-/* Section Headers for Add Buttons */
-.sectionHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.addBtn {
-  background: var(--accent-gradient);
-  color: white;
+/* Buttons */
+.btn {
+  padding: 0.75rem 1.5rem;
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
+  border-radius: var(--border-radius);
   font-weight: 600;
   cursor: pointer;
   transition: var(--transition);
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.addBtn:hover {
+.btn-primary {
+  background: var(--accent-gradient);
+  color: white;
+}
+
+.btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
 }
 
-.removeBtn {
-  background: none;
-  border: none;
-  color: var(--danger);
-  cursor: pointer;
-  padding: 0.25rem;
-  border-radius: 0.25rem;
-  transition: var(--transition);
-  position: absolute;
-  top: 0;
-  right: 0;
+.btn-secondary {
+  background: var(--glass-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--glass-border);
 }
 
-.removeBtn:hover {
-  background: rgba(239, 68, 68, 0.1);
-  transform: scale(1.1);
+.btn-secondary:hover {
+  background: var(--glass-hover);
 }
 
-/* Edit Fields Container */
-.editFields {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-/* Stats Grid */
+/* Statistics */
 .statsGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -565,9 +517,9 @@
 .statItem {
   text-align: center;
   padding: 1rem;
-  background: var(--glass-bg);
+  background: rgba(139, 92, 246, 0.1);
   border-radius: var(--border-radius);
-  border: 1px solid var(--glass-border);
+  border: 1px solid rgba(139, 92, 246, 0.2);
 }
 
 .statNumber {
@@ -583,8 +535,30 @@
   color: var(--text-muted);
 }
 
-/* Responsive Design */
+/* Mobile Navigation Toggle */
+.mobileNavToggle {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+/* ✅ RESPONSIVE DESIGN - Unified Scroll */
 @media (max-width: 768px) {
+  .headerLeft { 
+    gap: 16px; 
+  }
+  
+  .navItems { 
+    display: none; 
+  }
+  
+  .mobileNavToggle { 
+    display: block; 
+  }
+  
   .profileCover {
     flex-direction: column;
     align-items: center;
@@ -598,40 +572,24 @@
     gap: 1rem;
   }
   
+  /* ✅ Mobile: Single column layout with unified scroll */
   .profileContent {
     grid-template-columns: 1fr;
     gap: 2rem;
     padding: 2rem 1rem;
   }
   
-  .headerLeft {
-    gap: 16px;
-  }
-  
-  .navItems {
-    display: none;
-  }
-  
   .statsGrid {
     grid-template-columns: 1fr;
-    gap: 1rem;
   }
   
-  .sectionHeader {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
+  
+  .profileContainer {
+    -webkit-overflow-scrolling: touch;
   }
   
-  .educationItem,
-  .experienceItem {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-  
-  .removeBtn {
-    position: static;
-    margin-top: 1rem;
+  .profileHeader {
+    position: relative; 
+    top: auto;
   }
 }
