@@ -6,7 +6,7 @@ import DataService from '../services/dataService';
 import ProfileBasedMatchingService from '../services/profileBasedMatchingService';
 
 const Bookmarks = () => {
-  const { user, logout } = useAuth();
+  const { user, isGuest,logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -15,9 +15,16 @@ const Bookmarks = () => {
   const [sortBy, setSortBy] = useState('saved');
   const [bookmarks, setBookmarks] = useState([]);
   const [categories, setCategories] = useState([]);
+
+  const [userBookmarks, setUserBookmarks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [matchingService] = useState(() => new ProfileBasedMatchingService());
+
+  // // Debug logging
+  // console.log('Bookmarks component - User:', user);
+  // console.log('Bookmarks component - IsGuest:', isGuest);
+  // console.log('Bookmarks component - Current bookmarks state:', userBookmarks);
 
   const navItems = [
     { path: '/home', label: 'Home', icon: '🏠' },

@@ -145,31 +145,98 @@ const Browse = () => {
         navigate('/signup');
       }
     }
+
+// Bookmark action 
     else if (action === 'bookmark') {
       if (user) {
         try {
-          // Record feedback
-          matchingService.recordFeedback({
-            type: 'bookmarked',
-            internshipId: internship.id,
-            userId: user.id,
-            match: internship.match,
-            category: internship.category,
-            source: 'browse_page'
-          });
+          // Check if already bookmarked in localStorage
+          const userBookmarks = JSON.parse(localStorage.getItem('userBookmarks') || '{}');
+          const currentBookmarks = userBookmarks[user.id] || [];
           
-          const response = await DataService.bookmarkInternship(user.id, internship.id, 'Saved from browse page');
-          if (response.success) {
-            alert(`Bookmarked: ${internship.title}`);
+          if (currentBookmarks.some(b => b.id === internship.id)) {
+            alert(`${internship.title} is already in your bookmarks!`);
+            return;
           }
+
+          // Priority selection prompt with clear options
+          const priorityMessage = `Choose priority for "${internship.title}":
+
+    🔴 HIGH - Must apply! Dream internship, perfect match
+    🟡 MEDIUM - Good option, worth considering 
+    🟢 LOW - Maybe later, exploratory save
+
+    Type: high, medium, or low`;
+
+          const priorityChoice = prompt(priorityMessage, 'medium');
+
+          // Handle if user cancels
+          if (priorityChoice === null) {
+            return; // User cancelled
+          }
+
+          // Validate priority choice
+          const validPriorities = ['high', 'medium', 'low'];
+          const selectedPriority = validPriorities.includes(priorityChoice?.toLowerCase()) 
+            ? priorityChoice.toLowerCase() 
+            : 'medium';
+
+          // Notes prompt
+          const notesMessage = `Add a personal note for "${internship.title}" (optional):
+
+    Examples:
+    • "Perfect match for my React skills!"
+    • "Great company culture, need to research more"
+    • "Good backup option for summer internship"`;
+
+          const notes = prompt(notesMessage, `Interested in this ${internship.category} role at ${internship.company}`);
+
+          // Handle if user cancels notes (but allow empty notes)
+          if (notes === null) {
+            return; // User cancelled
+          }
+
+          // Create bookmark for localStorage
+          const newBookmark = {
+            ...internship,
+            bookmarkedDate: new Date().toISOString().split('T')[0],
+            priority: selectedPriority,
+            status: 'not-applied',
+            notes: notes.trim() || `Saved from browse page - ${internship.title} at ${internship.company}`
+          };
+
+          // Add to localStorage
+          userBookmarks[user.id] = [newBookmark, ...currentBookmarks];
+          localStorage.setItem('userBookmarks', JSON.stringify(userBookmarks));
+
+          console.log('Bookmark saved to localStorage:', newBookmark);
+
+          // Success confirmation with visual priority indicator
+          const priorityEmoji = {
+            high: '🔴 HIGH',
+            medium: '🟡 MEDIUM', 
+            low: '🟢 LOW'
+          };
+
+          const successMessage = `✅ Successfully bookmarked!
+
+    📋 ${internship.title}
+    🏢 ${internship.company}
+    ${priorityEmoji[selectedPriority]} Priority
+
+    You can view and manage your bookmarks in the Bookmarks page.`;
+
+          alert(successMessage);
+          
         } catch (error) {
           console.error('Error bookmarking:', error);
-          alert('Failed to bookmark internship');
+          alert('❌ Failed to bookmark internship. Please try again.');
         }
       } else {
         navigate('/signup');
       }
     }
+
     else if (action === 'details') {
       navigate(`/internships/${internship.id}`);
     }
