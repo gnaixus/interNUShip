@@ -67,7 +67,7 @@ const About = () => {
       <section className={styles.heroSection}>
         <h1 className={styles.heroTitle}>About InterNUShip</h1>
         <p className={styles.heroSubtitle}>
-          Revolutionizing how NUS students discover and secure meaningful internship opportunities
+          Changing how NUS students discover and secure meaningful internship opportunities
         </p>
       </section>
 
@@ -104,8 +104,8 @@ const About = () => {
             maxWidth: '800px',
             margin: '0 auto'
           }}>
-            InterNUShip is a web-based application designed to centralize relevant internship opportunities 
-            into a single platform while optimizing the matching process between university students and employers. 
+            InterNUShip is a web-based application designed to centralise relevant internship opportunities 
+            into a single platform while optimising the matching process between university students and employers. 
             We help students find meaningful internship opportunities that align with their skills, 
             interests, and career goals while streamlining the application process.
           </p>
@@ -157,7 +157,7 @@ const About = () => {
               step: '4',
               icon: '📝',
               title: 'Apply & Track',
-              description: 'Apply directly through our platform with auto-filled forms, track your application progress, manage deadlines, and get updates - all in one centralized dashboard.'
+              description: 'Apply directly through our platform with auto-filled forms, track your application progress, manage deadlines, and get updates - all in one centralised dashboard.'
             }
           ].map((item) => (
             <div key={item.step} style={{
@@ -245,7 +245,7 @@ const About = () => {
             },
             {
               icon: '📊',
-              title: 'Centralized Dashboard',
+              title: 'Centralised Dashboard',
               description: 'Track all your applications, deadlines, and progress in one place. Never miss an opportunity or deadline again.'
             },
             {
@@ -256,7 +256,7 @@ const About = () => {
             {
               icon: '🔖',
               title: 'Smart Bookmarking',
-              description: 'Save interesting opportunities with personal notes and priority levels. Organize your internship search effectively.'
+              description: 'Save interesting opportunities with personal notes and priority levels. Organise your internship search effectively.'
             },
             {
               icon: '🌐',
@@ -371,7 +371,7 @@ const About = () => {
             }}>
               <h4 style={{ color: 'var(--text-primary)', marginBottom: '0.5rem' }}>Our Vision</h4>
               <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                Democratize access to internship opportunities for all students
+                Democratise access to internship opportunities for all students
               </p>
             </div>
             
@@ -453,3 +453,5 @@ const About = () => {
 };
 
 export default About;
+
+// ms2 final

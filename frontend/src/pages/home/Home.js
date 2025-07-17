@@ -13,11 +13,9 @@ const Home = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
 
 
-
-  // Profile-based matching service
+  // Profile-based matching service from services
   const [matchingService] = useState(() => new ProfileBasedMatchingService());
 
-  // State for dynamic data
   const [internships, setInternships] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -29,7 +27,7 @@ const Home = () => {
     bookmarks: 2
   });
 
-  // Load data on component mount with smart matching
+  // Load data on component with smart matching
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -47,7 +45,7 @@ const Home = () => {
           console.log('Loading data for logged-in user with profile-based matching...');
           
           try {
-            // Check if we have profile data for smart matching
+            // Check if there is profile data for smart matching
             const savedProfile = localStorage.getItem('userProfileData');
             console.log('Profile data available:', !!savedProfile);
             
@@ -563,7 +561,7 @@ const Home = () => {
                 )}
               </div>
 
-              {/* Master Formula indicator */}
+              {/* Formula indicator */}
               {user && isUsingSmartMatching && (
                 <div style={{
                   margin: '1rem 0',
@@ -657,3 +655,5 @@ const Home = () => {
 };
 
 export default Home;
+
+//milestone 2 final

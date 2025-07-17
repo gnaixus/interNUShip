@@ -228,9 +228,9 @@ const ApplicationForm = () => {
         graduationDate: graduationDate,
         gpa: gpaValue,
         skills: profileData.skills || [],
-        linkedinUrl: '', // Not available in Profile component
-        githubUrl: '', // Not available in Profile component
-        portfolioUrl: '', // Not available in Profile component
+        linkedinUrl: '', 
+        githubUrl: '', 
+        portfolioUrl: '', 
         availability: '',
         relevantExperience: relevantExperienceText
       }));
@@ -817,3 +817,5 @@ const ApplicationForm = () => {
 };
 
 export default ApplicationForm;
+
+//ms2 final

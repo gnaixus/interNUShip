@@ -442,7 +442,7 @@ const Applications = () => {
         <div className={styles.tipsGrid}>
           <div className={styles.tipCard}>
             <div className={styles.tipIcon}>📋</div>
-            <h3>Stay Organized</h3>
+            <h3>Stay Organised</h3>
             <p>Keep detailed notes about each application. What went well in interviews? What could you improve? Track your progress and celebrate small wins!</p>
           </div>
           <div className={styles.tipCard}>
@@ -462,3 +462,5 @@ const Applications = () => {
 };
 
 export default Applications;
+
+// ms2 final
