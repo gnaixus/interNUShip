@@ -50,12 +50,17 @@ const Applications = () => {
   }, [user]);
 
   // Navigation items for the header
-  const navigationItems = [
+  const navItems = user ? [
     { path: '/home', label: 'Home', icon: '🏠' },
     { path: '/internships', label: 'Browse', icon: '🔍' },
     { path: '/applications', label: 'Applications', icon: '📝' },
     { path: '/bookmarks', label: 'Bookmarks', icon: '🔖' },
-    { path: '/about', label: 'About', icon: '🏢' }  
+    { path: '/community', label: 'Community', icon: '👥' },
+    { path: '/about', label: 'About', icon: '🏢' }
+  ] : [
+    { path: '/home', label: 'Home', icon: '🏠' },
+    { path: '/internships', label: 'Browse', icon: '🔍' },
+    { path: '/about', label: 'About', icon: '🏢' }
   ];
 
   // Configuration for different application statuses
@@ -247,7 +252,7 @@ const Applications = () => {
           </div>
 
           <ul className={styles.navItems}>
-            {navigationItems.map(item => (
+            {navItems.map(item => (
               <li key={item.path}>
                 <button
                   className={`${styles.navLink} ${location.pathname === item.path ? styles.active : ''}`}

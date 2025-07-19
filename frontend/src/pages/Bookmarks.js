@@ -21,17 +21,17 @@ const Bookmarks = () => {
   const [error, setError] = useState(null);
   const [matchingService] = useState(() => new ProfileBasedMatchingService());
 
-  // // Debug logging
-  // console.log('Bookmarks component - User:', user);
-  // console.log('Bookmarks component - IsGuest:', isGuest);
-  // console.log('Bookmarks component - Current bookmarks state:', userBookmarks);
-
-  const navItems = [
+  const navItems = user ? [
     { path: '/home', label: 'Home', icon: '🏠' },
     { path: '/internships', label: 'Browse', icon: '🔍' },
     { path: '/applications', label: 'Applications', icon: '📝' },
     { path: '/bookmarks', label: 'Bookmarks', icon: '🔖' },
-    { path: '/about', label: 'About', icon: '🏢' }  
+    { path: '/community', label: 'Community', icon: '👥' },
+    { path: '/about', label: 'About', icon: '🏢' }
+  ] : [
+    { path: '/home', label: 'Home', icon: '🏠' },
+    { path: '/internships', label: 'Browse', icon: '🔍' },
+    { path: '/about', label: 'About', icon: '🏢' }
   ];
 
   const priorityColors = {

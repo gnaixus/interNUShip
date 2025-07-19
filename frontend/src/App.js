@@ -7,6 +7,7 @@ import Home from './pages/home/Home';
 import Browse from './pages/Browse';
 import Applications from './pages/Applications';
 import Profile from './pages/Profile';
+import Community from './pages/Community';
 import Bookmarks from './pages/Bookmarks';
 import About from './pages/About';
 import ResumeUpload from './pages/resume/ResumeUpload';
@@ -147,17 +148,7 @@ const AppContent = () => {
       {/* Community page - placeholder for future development */}
       <Route path="/community" element={
         <ProtectedRoute>
-          <div style={{ 
-            padding: '50px', 
-            textAlign: 'center', 
-            color: '#f8fafc',
-            background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #374151 100%)',
-            minHeight: '100vh'
-          }}>
-            <h1>👥 Community Page</h1>
-            <p>Connect with fellow students and share internship experiences!</p>
-            <p style={{ marginTop: '2rem', opacity: 0.7 }}>Coming soon in Milestone 3...</p>
-          </div>
+          <Community />
         </ProtectedRoute>
       } />
       

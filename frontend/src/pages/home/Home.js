@@ -137,7 +137,8 @@ const Home = () => {
     { path: '/internships', label: 'Browse', icon: '🔍' },
     { path: '/applications', label: 'Applications', icon: '📝' },
     { path: '/bookmarks', label: 'Bookmarks', icon: '🔖' },
-    { path: '/about', label: 'About', icon: '🏢' }  
+    { path: '/community', label: 'Community', icon: '👥' },
+    { path: '/about', label: 'About', icon: '🏢' }
   ] : [
     { path: '/home', label: 'Home', icon: '🏠' },
     { path: '/internships', label: 'Browse', icon: '🔍' },

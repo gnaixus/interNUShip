@@ -145,6 +145,7 @@ const Profile = () => {
     { path: '/internships', label: 'Browse', icon: '🔍' },
     { path: '/applications', label: 'Applications', icon: '📝' },
     { path: '/bookmarks', label: 'Bookmarks', icon: '🔖' },
+    { path: '/community', label: 'Community', icon: '👥' },
     { path: '/about', label: 'About', icon: '🏢' }
   ];
 
