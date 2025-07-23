@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useAuth } from './auth/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from '../styles/Profile.module.css';
-import { Upload, Edit3, Save, X, Plus, Trash2, FileText, User, Mail, Phone, MapPin, GraduationCap, Briefcase, Award } from 'lucide-react';
+import { Upload, Edit3, Save, X, Plus, Trash2, FileText, User, Mail, Phone, MapPin, GraduationCap, Briefcase, Award, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { processPDFResume } from './resume/pdf.js'
 
 const Profile = () => {
@@ -13,13 +13,16 @@ const Profile = () => {
   const [newSkill, setNewSkill] = useState('')
   const fileInputRef = useRef(null);
 
-  // Profile state
+  // Enhanced state management with better error handling
   const [draftSaved, setDraftSaved] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState(null); // 'success', 'error', 'warning'
+  const [uploadMessage, setUploadMessage] = useState('');
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  // Function to get initial profile data (checks localStorage first)
+  // Function to get initial profile data (enhanced with better error handling)
   const getInitialProfileData = () => {
     try {
       const savedProfile = localStorage.getItem('userProfileData');
@@ -35,6 +38,8 @@ const Profile = () => {
       }
     } catch (error) {
       console.error('❌ Error loading saved profile on init:', error);
+      setUploadStatus('error');
+      setUploadMessage('Error loading saved profile data');
     }
     
     return {
@@ -53,7 +58,6 @@ const Profile = () => {
     };
   };
 
-  
   // Use lazy state initialization to load saved data immediately
   const [profileData, setProfileData] = useState(getInitialProfileData);
   // Add a separate state to store the original data for canceling edits
@@ -70,6 +74,41 @@ const Profile = () => {
     bio: ''
   });
 
+  // Enhanced auto-save with debouncing
+  const autoSaveProfile = useCallback(async (data) => {
+    try {
+      const dataToSave = {
+        ...data,
+        lastUpdated: new Date().toISOString()
+      };
+      
+      localStorage.setItem('userProfileData', JSON.stringify(dataToSave));
+      console.log('✅ Auto-saved profile data');
+      
+      // Clear any previous error messages
+      if (uploadStatus === 'error') {
+        setUploadStatus(null);
+        setUploadMessage('');
+      }
+    } catch (error) {
+      console.error('❌ Failed to auto-save profile:', error);
+      setUploadStatus('error');
+      setUploadMessage('Failed to save profile data');
+    }
+  }, [uploadStatus]);
+
+  // Debounced auto-save effect
+  useEffect(() => {
+    if (hasUnsavedChanges && profileData) {
+      const timeoutId = setTimeout(() => {
+        autoSaveProfile(profileData);
+        setHasUnsavedChanges(false);
+      }, 2000); // Auto-save after 2 seconds of inactivity
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [profileData, hasUnsavedChanges, autoSaveProfile]);
+
   // Sync local inputs with profile data when editing starts/stops
   useEffect(() => {
     if (isEditing) {
@@ -85,12 +124,13 @@ const Profile = () => {
     }
   }, [isEditing, profileData.email, profileData.phone, profileData.name, profileData.major, profileData.university, profileData.location, profileData.bio]);
 
-  // Handle local input changes
+  // Handle local input changes with enhanced tracking
   const handleLocalInputChange = useCallback((field, value) => {
     setLocalInputs(prev => ({
       ...prev,
       [field]: value
     }));
+    setHasUnsavedChanges(true);
   }, []);
 
   // Apply local changes to profile data
@@ -112,6 +152,7 @@ const Profile = () => {
         [field]: value
       };
     });
+    setHasUnsavedChanges(true);
   }, []);
 
   // useEffect to sync with user changes and load saved data
@@ -133,6 +174,8 @@ const Profile = () => {
         setOriginalData(updatedProfile); // Store original data for cancel functionality
       } catch (error) {
         console.error('❌ Error loading saved profile:', error);
+        setUploadStatus('error');
+        setUploadMessage('Error loading saved profile');
       }
     } else {
       // If got no saved data, store current state as original
@@ -167,21 +210,48 @@ const Profile = () => {
     }
     setIsEditing(false);
     setNewSkill(''); // Reset new skill input
+    setHasUnsavedChanges(false);
+    setUploadStatus(null);
+    setUploadMessage('');
   };
+
+  // Replace your handleFileUpload function in Profile.js with this enhanced version:
 
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
+    // Reset status
+    setUploadStatus(null);
+    setUploadMessage('');
+
+    // Enhanced file validation
     if (file.type !== 'application/pdf') {
-      alert('Please upload a PDF file');
+      setUploadStatus('error');
+      setUploadMessage('Please upload a PDF file only');
       return;
     }
+
+    if (file.size > 10 * 1024 * 1024) { // 10MB limit
+      setUploadStatus('error');
+      setUploadMessage('File size too large. Please upload a PDF smaller than 10MB');
+      return;
+    }
+
+    if (file.size < 100) {
+      setUploadStatus('error');
+      setUploadMessage('File appears to be too small or corrupted');
+      return;
+    }
+
     setUploading(true);
     setParsing(true);
+    setUploadStatus('info');
+    setUploadMessage('Processing your resume...');
 
     try {
-      console.log('Processing PDF resume...');
+      console.log('🔄 Processing PDF resume:', file.name);
+      
       const result = await processPDFResume(file);
       
       if (!result.success) {
@@ -189,53 +259,170 @@ const Profile = () => {
       }
       
       const parsedData = result.data;
-      console.log('Parsed data:', parsedData);
+      console.log('✅ Parsed resume data:', parsedData);
       
-      const updatedProfile = {
-        ...profileData,
-        name: parsedData.name && parsedData.name.trim() ? parsedData.name : profileData.name,
-        email: parsedData.email && parsedData.email.trim() ? parsedData.email : profileData.email,
-        phone: parsedData.phone && parsedData.phone.trim() ? parsedData.phone : profileData.phone,
-        location: parsedData.location && parsedData.location.trim() ? parsedData.location : profileData.location,
-        skills: parsedData.skills && parsedData.skills.length > 0 ? parsedData.skills : profileData.skills,
-        experience: parsedData.experience && parsedData.experience.length > 0 ? parsedData.experience : profileData.experience,
-        education: parsedData.education && parsedData.education.length > 0 ? parsedData.education : profileData.education,
-        resumeUploaded: true,
-        lastUpdated: new Date().toLocaleDateString()
-      };
+      // Smart merging: only update fields that have meaningful data
+      const updatedProfile = { ...profileData };
+      
+      // Enhanced data validation and merging
+      if (parsedData.name && parsedData.name.trim() && parsedData.name.length > 1) {
+        updatedProfile.name = parsedData.name.trim();
+        console.log('✅ Updated name:', updatedProfile.name);
+      }
+      
+      if (parsedData.email && parsedData.email.includes('@')) {
+        updatedProfile.email = parsedData.email.trim();
+        console.log('✅ Updated email:', updatedProfile.email);
+      }
+      
+      if (parsedData.phone && parsedData.phone.length > 6) {
+        updatedProfile.phone = parsedData.phone.trim();
+        console.log('✅ Updated phone:', updatedProfile.phone);
+      }
+      
+      if (parsedData.location && parsedData.location.length > 2) {
+        updatedProfile.location = parsedData.location.trim();
+        console.log('✅ Updated location:', updatedProfile.location);
+      }
+      
+      // FIX: Major field mapping from parsed data
+      if (parsedData.major && parsedData.major.trim()) {
+        updatedProfile.major = parsedData.major.trim();
+        console.log('✅ Updated major:', updatedProfile.major);
+      } else if (parsedData.education && parsedData.education.length > 0) {
+        const primaryEducation = parsedData.education[0];
+        if (primaryEducation.fieldOfStudy && primaryEducation.fieldOfStudy.trim()) {
+          updatedProfile.major = primaryEducation.fieldOfStudy.trim();
+          console.log('✅ Updated major from education:', updatedProfile.major);
+        }
+      }
+      
+      // FIX: University field mapping from parsed data
+      if (parsedData.university && parsedData.university.trim()) {
+        updatedProfile.university = parsedData.university.trim();
+        console.log('✅ Updated university:', updatedProfile.university);
+      } else if (parsedData.education && parsedData.education.length > 0) {
+        const primaryEducation = parsedData.education[0];
+        if (primaryEducation.institution && primaryEducation.institution.trim()) {
+          updatedProfile.university = primaryEducation.institution.trim();
+          console.log('✅ Updated university from education:', updatedProfile.university);
+        }
+      }
+      
+      // FIX: Bio field mapping from parsed data
+      if (parsedData.bio && parsedData.bio.trim() && parsedData.bio.length > 10) {
+        updatedProfile.bio = parsedData.bio.trim();
+        console.log('✅ Updated bio:', updatedProfile.bio.substring(0, 50) + '...');
+      }
+      
+      // Skills: merge without duplicates
+      if (parsedData.skills && Array.isArray(parsedData.skills) && parsedData.skills.length > 0) {
+        const existingSkills = updatedProfile.skills || [];
+        const newSkills = parsedData.skills.filter(skill => 
+          skill && skill.trim() && !existingSkills.some(existing => 
+            existing.toLowerCase() === skill.toLowerCase()
+          )
+        );
+        updatedProfile.skills = [...existingSkills, ...newSkills];
+        console.log('✅ Updated skills:', updatedProfile.skills);
+      }
+      
+      // Experience: replace if better data available
+      if (parsedData.experience && Array.isArray(parsedData.experience) && parsedData.experience.length > 0) {
+        const hasValidExp = parsedData.experience.some(exp => 
+          (exp.position && exp.position.trim()) || (exp.company && exp.company.trim()) ||
+          (exp.title && exp.title.trim())
+        );
+        
+        if (hasValidExp) {
+          updatedProfile.experience = parsedData.experience.map((exp, index) => ({
+            id: Date.now() + index,
+            title: exp.position || exp.title || '',
+            company: exp.company || '',
+            duration: exp.startDate && exp.endDate ? 
+              `${exp.startDate} - ${exp.endDate}` : 
+              exp.duration || '',
+            description: exp.description || ''
+          }));
+          console.log('✅ Updated experience:', updatedProfile.experience.length + ' entries');
+        }
+      }
+      
+      // Education: replace if better data available
+      if (parsedData.education && Array.isArray(parsedData.education) && parsedData.education.length > 0) {
+        const hasValidEdu = parsedData.education.some(edu => 
+          (edu.institution && edu.institution.trim()) || (edu.degree && edu.degree.trim())
+        );
+        
+        if (hasValidEdu) {
+          updatedProfile.education = parsedData.education.map((edu, index) => ({
+            id: Date.now() + index,
+            institution: edu.institution || '',
+            degree: edu.degree || '',
+            period: edu.year || edu.period || '',
+            gpa: edu.gpa || ''
+          }));
+          console.log('✅ Updated education:', updatedProfile.education.length + ' entries');
+        }
+      }
+      
+      updatedProfile.resumeUploaded = true;
+      updatedProfile.lastUpdated = new Date().toLocaleDateString();
+
+      // LOG FINAL PROFILE STATE
+      console.log('📊 Final profile update summary:');
+      console.log('  Name:', updatedProfile.name);
+      console.log('  Email:', updatedProfile.email);
+      console.log('  Phone:', updatedProfile.phone);
+      console.log('  Major:', updatedProfile.major);
+      console.log('  University:', updatedProfile.university);
+      console.log('  Bio length:', updatedProfile.bio?.length || 0);
+      console.log('  Location:', updatedProfile.location);
+      console.log('  Skills count:', updatedProfile.skills?.length || 0);
+      console.log('  Experience count:', updatedProfile.experience?.length || 0);
+      console.log('  Education count:', updatedProfile.education?.length || 0);
 
       setProfileData(updatedProfile);
       setOriginalData(updatedProfile); // Update original data too
-      localStorage.setItem('userProfileData', JSON.stringify(updatedProfile));
-      console.log('✅ Auto-saved parsed resume data');
+      autoSaveProfile(updatedProfile);
 
-      const updatedFields = [];
-      if (parsedData.name) updatedFields.push('name');
-      if (parsedData.email) updatedFields.push('email');
-      if (parsedData.phone) updatedFields.push('phone');
-      if (parsedData.location) updatedFields.push('location');
-      if (parsedData.skills?.length > 0) updatedFields.push('skills');
-      if (parsedData.experience?.length > 0) updatedFields.push('experience');
-      if (parsedData.education?.length > 0) updatedFields.push('education');
+      // Determine success message
+      const extractedFields = [];
+      if (parsedData.name) extractedFields.push('name');
+      if (parsedData.email) extractedFields.push('email');
+      if (parsedData.phone) extractedFields.push('phone');
+      if (parsedData.location) extractedFields.push('location');
+      if (parsedData.major || (parsedData.education?.[0]?.fieldOfStudy)) extractedFields.push('major');
+      if (parsedData.university || (parsedData.education?.[0]?.institution)) extractedFields.push('university');
+      if (parsedData.bio) extractedFields.push('bio');
+      if (parsedData.skills?.length > 0) extractedFields.push('skills');
+      if (parsedData.experience?.length > 0) extractedFields.push('experience');
+      if (parsedData.education?.length > 0) extractedFields.push('education');
       
-      if (updatedFields.length > 0) {
-        alert(`Resume parsed and saved! Updated: ${updatedFields.join(', ')}. Please review and edit the information.`);
+      if (extractedFields.length > 0) {
+        setUploadStatus('success');
+        setUploadMessage(`Resume parsed successfully! Updated: ${extractedFields.join(', ')}`);
         setIsEditing(true);
       } else {
-        alert('Resume uploaded but no information could be extracted. Please check if the PDF contains readable text.');
+        setUploadStatus('warning');
+        setUploadMessage('Resume uploaded but minimal information could be extracted. Please verify the PDF contains readable text.');
       }
       
     } catch (error) {
-      console.error('Error processing resume:', error);
-      alert(`Failed to parse resume: ${error.message}. Please ensure the PDF contains readable text.`);
+      console.error('❌ Error processing resume:', error);
+      setUploadStatus('error');
+      setUploadMessage(`Failed to parse resume: ${error.message}`);
     } finally {
       setUploading(false);
       setParsing(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
-
   // Enhanced save function with validation and verification
-  const handleSaveProfile = () => {
+  const handleSaveProfile = async () => {
     try {
       // Apply local changes first
       applyLocalChanges();
@@ -246,15 +433,17 @@ const Profile = () => {
       };
 
       if (!finalData.name?.trim()) {
-        alert('Name is required');
+        setUploadStatus('error');
+        setUploadMessage('Name is required');
         return;
       }
       if (!finalData.email?.trim()) {
-        alert('Email is required');
+        setUploadStatus('error');
+        setUploadMessage('Email is required');
         return;
       }
 
-      setIsEditing(false);
+      setIsSubmitting(true);
       const updatedProfile = {
         ...finalData,  
         lastUpdated: new Date().toLocaleDateString(),
@@ -263,29 +452,37 @@ const Profile = () => {
       
       setProfileData(updatedProfile);
       setOriginalData(updatedProfile); // Update original data after successful save
-      localStorage.setItem('userProfileData', JSON.stringify(updatedProfile));
+      await autoSaveProfile(updatedProfile);
       
-      const savedData = localStorage.getItem('userProfileData');
-      if (savedData) {
-        console.log('✅ Profile saved successfully');
-        alert('Profile updated successfully!');
-      } else {
-        throw new Error('Failed to save to localStorage');
-      }
+      setIsEditing(false);
+      setHasUnsavedChanges(false);
+      setUploadStatus('success');
+      setUploadMessage('Profile updated successfully!');
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => {
+        setUploadStatus(null);
+        setUploadMessage('');
+      }, 3000);
       
     } catch (error) {
       console.error('❌ Error saving profile:', error);
-      alert('Failed to save profile. Please try again.');
+      setUploadStatus('error');
+      setUploadMessage('Failed to save profile. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
+  // Enhanced skills management
   const addSkill = () => {
-    if (newSkill && !profileData.skills.includes(newSkill)) {
+    if (newSkill && newSkill.trim() && !profileData.skills.includes(newSkill.trim())) {
       setProfileData(prev => ({
         ...prev,
-        skills: [...prev.skills, newSkill]
+        skills: [...prev.skills, newSkill.trim()]
       }));
       setNewSkill('');
+      setHasUnsavedChanges(true);
     }
   };
 
@@ -294,8 +491,10 @@ const Profile = () => {
       ...prev,
       skills: prev.skills.filter(skill => skill !== skillToRemove)
     }));
+    setHasUnsavedChanges(true);
   };
 
+  // Enhanced experience management
   const addExperience = () => {
     const newExp = {
       id: Date.now(),
@@ -308,6 +507,7 @@ const Profile = () => {
       ...prev,
       experience: [...prev.experience, newExp]
     }));
+    setHasUnsavedChanges(true);
   };
 
   const updateExperience = (id, field, value) => {
@@ -317,6 +517,7 @@ const Profile = () => {
         exp.id === id ? { ...exp, [field]: value } : exp
       )
     }));
+    setHasUnsavedChanges(true);
   };
 
   const removeExperience = (id) => {
@@ -324,8 +525,10 @@ const Profile = () => {
       ...prev,
       experience: prev.experience.filter(exp => exp.id !== id)
     }));
+    setHasUnsavedChanges(true);
   };
 
+  // Enhanced education management
   const addEducation = () => {
     const newEdu = {
       id: Date.now(),
@@ -338,6 +541,7 @@ const Profile = () => {
       ...prev,
       education: [...prev.education, newEdu]
     }));
+    setHasUnsavedChanges(true);
   };
 
   const updateEducation = (id, field, value) => {
@@ -347,6 +551,7 @@ const Profile = () => {
         edu.id === id ? { ...edu, [field]: value } : edu
       )
     }));
+    setHasUnsavedChanges(true);
   };
 
   const removeEducation = (id) => {
@@ -354,6 +559,72 @@ const Profile = () => {
       ...prev,
       education: prev.education.filter(edu => edu.id !== id)
     }));
+    setHasUnsavedChanges(true);
+  };
+
+  // Status message component
+  const StatusMessage = () => {
+    if (!uploadStatus || !uploadMessage) return null;
+    
+    const getStatusIcon = () => {
+      switch (uploadStatus) {
+        case 'success': return <CheckCircle size={16} style={{ color: 'var(--success)' }} />;
+        case 'error': return <AlertCircle size={16} style={{ color: 'var(--danger)' }} />;
+        case 'warning': return <AlertCircle size={16} style={{ color: 'var(--warning)' }} />;
+        case 'info': return <Loader2 size={16} style={{ color: 'var(--purple-light)' }} className="animate-spin" />;
+        default: return null;
+      }
+    };
+    
+    const getStatusColor = () => {
+      switch (uploadStatus) {
+        case 'success': return 'var(--success)';
+        case 'error': return 'var(--danger)';
+        case 'warning': return 'var(--warning)';
+        case 'info': return 'var(--purple-light)';
+        default: return 'var(--text-secondary)';
+      }
+    };
+    
+    return (
+      <div style={{
+        position: 'fixed',
+        top: '100px',
+        right: '2rem',
+        background: 'var(--glass-bg)',
+        border: '1px solid var(--glass-border)',
+        borderRadius: 'var(--border-radius)',
+        padding: '1rem',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.75rem',
+        fontSize: '0.875rem',
+        color: getStatusColor(),
+        backdropFilter: 'blur(10px)',
+        zIndex: 1000,
+        maxWidth: '350px',
+        wordWrap: 'break-word'
+      }}>
+        {getStatusIcon()}
+        <span>{uploadMessage}</span>
+        <button
+          onClick={() => {
+            setUploadStatus(null);
+            setUploadMessage('');
+          }}
+          style={{
+            marginLeft: 'auto',
+            background: 'none',
+            border: 'none',
+            color: 'inherit',
+            cursor: 'pointer',
+            opacity: 0.7
+          }}
+        >
+          <X size={14} />
+        </button>
+      </div>
+    );
   };
 
   // Improved EditableField component with better key handling
@@ -397,7 +668,10 @@ const Profile = () => {
 
   return (
     <div className={styles.profileContainer}>
-      {/* Header */}
+      {/* Status Message */}
+      <StatusMessage />
+
+      {/* Header - keeping your exact structure */}
       <div className={styles.userHeader}>
         <div className={styles.headerLeft}>
           <div className={styles.userInfo}>
@@ -424,7 +698,7 @@ const Profile = () => {
         </div>
       </div>
 
-      {/* Profile Header */}
+      {/* Profile Header - keeping your exact design */}
       <section className={styles.profileHeader}>
         <div className={styles.profileCover}>
           <div className={styles.profileAvatarSection}>
@@ -491,9 +765,22 @@ const Profile = () => {
           <div className={styles.profileActions}>
             {isEditing ? (
               <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <button className={`${styles.btn} ${styles['btn-primary']}`} onClick={handleSaveProfile}>
-                  <Save size={16} style={{ marginRight: '0.5rem' }} />
-                  Save Changes
+                <button 
+                  className={`${styles.btn} ${styles['btn-primary']}`} 
+                  onClick={handleSaveProfile}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 size={16} style={{ marginRight: '0.5rem' }} className="animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save size={16} style={{ marginRight: '0.5rem' }} />
+                      Save Changes
+                    </>
+                  )}
                 </button>
                 <button className={`${styles.btn} ${styles['btn-secondary']}`} onClick={handleCancelEditing}>
                   <X size={16} style={{ marginRight: '0.5rem' }} />
@@ -510,7 +797,7 @@ const Profile = () => {
         </div>
       </section>
 
-      {/* Main Content Area - Unified Scroll */}
+      {/* Main Content Area - keeping your exact layout */}
       <div className={styles.profileContent}>
         {/* Left Sidebar */}
         <div className={styles.profileSidebar}>
@@ -572,6 +859,11 @@ const Profile = () => {
                   <span className={styles.resumeIcon}>📄</span>
                   <div>
                     <p className={styles.resumeStatus}>Resume uploaded</p>
+                    {profileData.lastUpdated && (
+                      <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
+                        Updated: {profileData.lastUpdated}
+                      </p>
+                    )}
                   </div>
                 </div>
               ) : (
@@ -586,15 +878,25 @@ const Profile = () => {
                 onChange={handleFileUpload}
                 accept=".pdf"
                 style={{ display: 'none' }}
+                disabled={uploading}
               />
               <button
                 className={`${styles.btn} ${styles['btn-primary']}`}
-                style={{ width: '100%' }}
+                style={{ width: '100%', opacity: uploading ? 0.7 : 1 }}
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
               >
-                <Upload size={16} style={{ marginRight: '0.5rem' }} />
-                {uploading ? 'Uploading...' : profileData.resumeUploaded ? 'Update Resume' : 'Upload Resume'}
+                {uploading ? (
+                  <>
+                    <Loader2 size={16} style={{ marginRight: '0.5rem' }} className="animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <Upload size={16} style={{ marginRight: '0.5rem' }} />
+                    {profileData.resumeUploaded ? 'Update Resume' : 'Upload Resume'}
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -844,7 +1146,7 @@ const Profile = () => {
             )}
           </div>
 
-          {/* Application Stats */}
+          {/* Application Stats - keeping your exact design */}
           <div className={styles.profileCard}>
             <h3 className={styles.cardTitle}>Application Statistics</h3>
             <div className={styles.statsGrid}>
@@ -868,9 +1170,31 @@ const Profile = () => {
           </div>
         </div>
       </div>
+
+      {/* Unsaved Changes Indicator */}
+      {hasUnsavedChanges && (
+        <div style={{
+          position: 'fixed',
+          bottom: '2rem',
+          right: '2rem',
+          background: 'var(--glass-bg)',
+          border: '1px solid var(--glass-border)',
+          borderRadius: 'var(--border-radius)',
+          padding: '0.75rem 1rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+          fontSize: '0.875rem',
+          color: 'var(--text-secondary)',
+          backdropFilter: 'blur(10px)',
+          zIndex: 1000
+        }}>
+          <AlertCircle size={16} style={{ color: 'var(--warning)' }} />
+          <span>You have unsaved changes</span>
+        </div>
+      )}
     </div>
   );
 };
 
 export default Profile;
-// ms2 final

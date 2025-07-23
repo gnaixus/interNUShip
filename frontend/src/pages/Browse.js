@@ -3,6 +3,7 @@ import { useAuth } from './auth/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from '../styles/Home.module.css';
 import DataService from '../services/dataService';
+import { createUnifiedBookmarkHandler } from './utils/bookmarkHandler';
 import ProfileBasedMatchingService from '../services/profileBasedMatchingService';
 
 const Browse = () => {
@@ -11,6 +12,7 @@ const Browse = () => {
   const location = useLocation();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const bookmarkHandler = createUnifiedBookmarkHandler(user, navigate);
   const [sortBy, setSortBy] = useState(user ? 'match' : 'published'); 
 
   // Profile-based matching service same as Home.js
@@ -147,96 +149,34 @@ const Browse = () => {
       }
     }
 
-// Bookmark action 
     else if (action === 'bookmark') {
-      if (user) {
-        try {
-          // Check if already bookmarked in localStorage
-          const userBookmarks = JSON.parse(localStorage.getItem('userBookmarks') || '{}');
-          const currentBookmarks = userBookmarks[user.id] || [];
+    if (user) {
+      try {
+        console.log('🔖 Bookmarking from browse page:', internship.title);
+        
+        // Use the unified bookmark handler
+        const result = await bookmarkHandler(internship, false, null);
+        
+        if (result && result.success) {
+          console.log('✅ Bookmark successful from browse page');
           
-          if (currentBookmarks.some(b => b.id === internship.id)) {
-            alert(`${internship.title} is already in your bookmarks!`);
-            return;
-          }
-
-          // Priority selection prompt with clear options
-          const priorityMessage = `Choose priority for "${internship.title}":
-
-    🔴 HIGH - Must apply! Dream internship, perfect match
-    🟡 MEDIUM - Good option, worth considering 
-    🟢 LOW - Maybe later, exploratory save
-
-    Type: high, medium, or low`;
-
-          const priorityChoice = prompt(priorityMessage, 'medium');
-
-          // Handle if user cancels
-          if (priorityChoice === null) {
-            return; // User cancelled
-          }
-
-          // Validate priority choice
-          const validPriorities = ['high', 'medium', 'low'];
-          const selectedPriority = validPriorities.includes(priorityChoice?.toLowerCase()) 
-            ? priorityChoice.toLowerCase() 
-            : 'medium';
-
-          // Notes prompt
-          const notesMessage = `Add a personal note for "${internship.title}" (optional):
-
-    Examples:
-    • "Perfect match for my React skills!"
-    • "Great company culture, need to research more"
-    • "Good backup option for summer internship"`;
-
-          const notes = prompt(notesMessage, `Interested in this ${internship.category} role at ${internship.company}`);
-
-          // Handle if user cancels notes (but allow empty notes)
-          if (notes === null) {
-            return; // User cancelled
-          }
-
-          // Create bookmark for localStorage
-          const newBookmark = {
-            ...internship,
-            bookmarkedDate: new Date().toISOString().split('T')[0],
-            priority: selectedPriority,
-            status: 'not-applied',
-            notes: notes.trim() || `Saved from browse page - ${internship.title} at ${internship.company}`
-          };
-
-          // Add to localStorage
-          userBookmarks[user.id] = [newBookmark, ...currentBookmarks];
-          localStorage.setItem('userBookmarks', JSON.stringify(userBookmarks));
-
-          console.log('Bookmark saved to localStorage:', newBookmark);
-
-          // Success confirmation with visual priority indicator
-          const priorityEmoji = {
-            high: '🔴 HIGH',
-            medium: '🟡 MEDIUM', 
-            low: '🟢 LOW'
-          };
-
-          const successMessage = `✅ Successfully bookmarked!
-
-    📋 ${internship.title}
-    🏢 ${internship.company}
-    ${priorityEmoji[selectedPriority]} Priority
-
-    You can view and manage your bookmarks in the Bookmarks page.`;
-
-          alert(successMessage);
+          // Optional: Show success with navigation option
+          const showBookmarks = window.confirm(
+            `✅ "${internship.title}" has been bookmarked!\n\nWould you like to view your bookmarks page?`
+          );
           
-        } catch (error) {
-          console.error('Error bookmarking:', error);
-          alert('❌ Failed to bookmark internship. Please try again.');
+          if (showBookmarks) {
+            navigate('/bookmarks');
+          }
         }
-      } else {
-        navigate('/signup');
+      } catch (error) {
+        console.error('❌ Error bookmarking from browse page:', error);
+        alert('Failed to bookmark internship. Please try again.');
       }
+    } else {
+      navigate('/signup');
     }
+  }
 
     else if (action === 'details') {
       navigate(`/internships/${internship.id}`);
@@ -316,6 +256,7 @@ const Browse = () => {
       }
     }
   };
+
 
   // Enhanced filtering and sorting
   const getFilteredAndSortedInternships = () => {

@@ -13,6 +13,7 @@ import About from './pages/About';
 import ResumeUpload from './pages/resume/ResumeUpload';
 import ApplicationForm from './pages/resume/ApplicationForm';
 import './styles/App.css';
+import InternshipDetailPage from './pages/InternshipDetails';
 
 //Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -152,19 +153,11 @@ const AppContent = () => {
         </ProtectedRoute>
       } />
       
-      {/* Internship details page - placeholder */}
+      {/* Internship details page - protected route */}
       <Route path="/internships/:id" element={
-        <div style={{ 
-          padding: '50px', 
-          textAlign: 'center', 
-          color: '#f8fafc',
-          background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #374151 100%)',
-          minHeight: '100vh'
-        }}>
-          <h1>📋 Internship Details</h1>
-          <p>Detailed view of internship opportunities</p>
-          <p style={{ marginTop: '2rem', opacity: 0.7 }}>Coming soon in Milestone 2...</p>
-        </div>
+        <ProtectedRoute>
+          <InternshipDetailPage/>
+        </ProtectedRoute>
       } />
       
       {/* Catch all route - redirect to home */}

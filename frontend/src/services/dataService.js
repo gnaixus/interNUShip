@@ -1,4 +1,3 @@
-
 import { 
   dummyInternships, 
   simulateAPIResponse, 
@@ -7,12 +6,8 @@ import {
   calculateMatchScore 
 } from '../data/internshipData';
 
-// In-memory storage for bookmarks 
-const bookmarksStore = new Map();
-let bookmarkIdCounter = 1;
-
 class DataService {
-  // Simulate fetching all internships 
+  // Simulate fetching all internships (as if from aggregated API/scraping)
   static async getAllInternships(filters = {}) {
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 500));
@@ -174,7 +169,7 @@ class DataService {
       message: 'Profile retrieved successfully'
     };
   }
-  
+
   // Simulate platform-specific scraping results
   static async getInternshipsByPlatform(platform) {
     await new Promise(resolve => setTimeout(resolve, 800));
@@ -196,205 +191,340 @@ class DataService {
     };
   }
 
-  // Bookmark functionality
-  static async bookmarkInternship(userId, internshipId, notes = '', priority = 'medium') {
-    await new Promise(resolve => setTimeout(resolve, 300));
+  // ============ UNIFIED BOOKMARK SYSTEM ============
+  
+  /**
+   * Get unified bookmark key for localStorage
+   */
+  static getBookmarkKey(userId) {
+    return `userBookmarks_${userId}`;
+  }
 
+  /**
+   * Check if internship is bookmarked by user
+   */
+  static async isBookmarked(userId, internshipId) {
     try {
-      // Find the internship to bookmark
-      const internship = dummyInternships.find(i => i.id === parseInt(internshipId));
-      if (!internship) {
-        return {
-          success: false,
-          error: 'Internship not found'
-        };
-      }
-
-      // Check if already bookmarked
-      const userBookmarks = Array.from(bookmarksStore.values())
-        .filter(bookmark => bookmark.userId === userId);
+      const bookmarkKey = this.getBookmarkKey(userId);
+      const bookmarks = JSON.parse(localStorage.getItem(bookmarkKey) || '[]');
+      const isBookmarked = bookmarks.some(bookmark => 
+        bookmark.internshipId === parseInt(internshipId) || bookmark.id === parseInt(internshipId)
+      );
       
-      const existingBookmark = userBookmarks.find(b => b.internshipId === parseInt(internshipId));
-      
-      if (existingBookmark) {
-        return {
-          success: false,
-          error: 'Internship already bookmarked'
-        };
-      }
-
-      // Create new bookmark
-      const bookmark = {
-        id: bookmarkIdCounter++,
-        userId: userId,
-        internshipId: parseInt(internshipId),
-        notes: notes,
-        priority: priority,
-        status: 'not-applied', // Default status
-        bookmarkedDate: new Date().toISOString(),
-        // Include internship details for easy access
-        ...internship
-      };
-
-      bookmarksStore.set(bookmark.id, bookmark);
-
-      console.log('Bookmark created:', bookmark);
-      console.log('Current bookmarks store:', Array.from(bookmarksStore.values()));
-
       return {
         success: true,
-        data: bookmark,
-        message: 'Internship bookmarked successfully'
+        isBookmarked: isBookmarked
       };
-
     } catch (error) {
-      console.error('Error creating bookmark:', error);
+      console.error('Error checking bookmark status:', error);
       return {
         success: false,
-        error: 'Failed to bookmark internship'
+        isBookmarked: false,
+        error: error.message
       };
     }
   }
 
-  // Remove bookmark
-  static async removeBookmark(userId, internshipId) {
+/**
+   * Add bookmark with complete internship data
+   */
+  static async bookmarkInternship(userId, internshipId, notes = '', priority = 'medium') {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    try {
+      const bookmarkKey = this.getBookmarkKey(userId);
+      const bookmarks = JSON.parse(localStorage.getItem(bookmarkKey) || '[]');
+      
+      // Check if already bookmarked
+      const existingIndex = bookmarks.findIndex(bookmark => 
+        bookmark.internshipId === parseInt(internshipId) || 
+        bookmark.id === parseInt(internshipId)
+      );
+      
+      if (existingIndex !== -1) {
+        return {
+          success: false,
+          error: 'Internship is already bookmarked'
+        };
+      }
+
+      // Get full internship data
+      const internshipResponse = await this.getInternshipById(internshipId);
+      if (!internshipResponse.success) {
+        throw new Error('Could not fetch internship details');
+      }
+      
+      const internship = internshipResponse.data;
+      
+      // Create complete bookmark object with all necessary data
+      const bookmarkEntry = {
+        id: Date.now(), // Unique bookmark ID
+        internshipId: parseInt(internshipId),
+        userId: parseInt(userId),
+        notes: notes.trim() || `Saved ${internship.title} at ${internship.company}`,
+        priority: priority.toLowerCase(),
+        bookmarkedAt: new Date().toISOString(),
+        bookmarkedDate: new Date().toISOString().split('T')[0],
+        
+        // Include COMPLETE internship data for bookmarks page
+        title: internship.title,
+        company: internship.company,
+        location: internship.location,
+        description: internship.description,
+        requirements: internship.requirements,
+        benefits: internship.benefits,
+        skills: internship.skills || [],
+        category: internship.category,
+        type: internship.type,
+        duration: internship.duration,
+        stipend: internship.stipend,
+        applicationDeadline: internship.applicationDeadline,
+        startDate: internship.startDate,
+        published: internship.published,
+        
+        // Additional metadata
+        source: 'bookmark_handler', // Track where bookmark came from
+        version: '1.0' // For future data migrations
+      };
+
+      // Add to bookmarks array
+      bookmarks.push(bookmarkEntry);
+      
+      // Sort by bookmark date (most recent first)
+      bookmarks.sort((a, b) => new Date(b.bookmarkedAt) - new Date(a.bookmarkedAt));
+      
+      // Save updated bookmarks
+      localStorage.setItem(bookmarkKey, JSON.stringify(bookmarks));
+
+      console.log('✅ Bookmark added successfully:', bookmarkEntry);
+      
+      return {
+        success: true,
+        message: 'Internship bookmarked successfully',
+        data: bookmarkEntry
+      };
+    } catch (error) {
+      console.error('❌ Error bookmarking internship:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
+  /**
+   * Get user's bookmarks with complete data - ENHANCED VERSION
+   */
+  static async getUserBookmarks(userId) {
     await new Promise(resolve => setTimeout(resolve, 200));
 
     try {
-      // Find the bookmark to remove
-      const bookmarkToRemove = Array.from(bookmarksStore.values())
-        .find(bookmark => 
-          bookmark.userId === userId && bookmark.internshipId === parseInt(internshipId)
-        );
-
-      if (!bookmarkToRemove) {
-        return {
-          success: false,
-          error: 'Bookmark not found'
-        };
-      }
-
-      bookmarksStore.delete(bookmarkToRemove.id);
-
-      return {
-        success: true,
-        message: 'Bookmark removed successfully'
-      };
-
-    } catch (error) {
-      console.error('Error removing bookmark:', error);
-      return {
-        success: false,
-        error: 'Failed to remove bookmark'
-      };
-    }
-  }
-
-  // Get user's bookmarks with full internship data
-  static async getUserBookmarks(userId) {
-    await new Promise(resolve => setTimeout(resolve, 400));
-
-    try {
-      // Get all bookmarks for this user
-      const userBookmarks = Array.from(bookmarksStore.values())
-        .filter(bookmark => bookmark.userId === userId)
-        .map(bookmark => ({
-          ...bookmark,
-          // Ensure we have the latest internship data
-          bookmarkedDate: new Date(bookmark.bookmarkedDate).toLocaleDateString()
-        }));
-
-      // If no bookmarks in store, return sample data for demo
-      if (userBookmarks.length === 0) {
-        const sampleBookmarks = dummyInternships.slice(0, 3).map((internship, index) => ({
-          ...internship,
-          bookmarkedDate: new Date(Date.now() - (index + 1) * 24 * 60 * 60 * 1000).toLocaleDateString(),
-          notes: [
-            'Really interested in this role! Perfect match for my React skills.',
-            'Great company culture from what I\'ve heard. Need to research more.',
-            'Good backup option. Flexible timeline works well with my schedule.'
-          ][index],
-          priority: ['high', 'medium', 'low'][index],
-          status: ['not-applied', 'planning', 'considering'][index],
-          userId: userId,
-          internshipId: internship.id
-        }));
-
+      const bookmarkKey = this.getBookmarkKey(userId);
+      const bookmarks = JSON.parse(localStorage.getItem(bookmarkKey) || '[]');
+      
+      console.log(`📚 Loading ${bookmarks.length} bookmarks for user ${userId}`);
+      
+      // If no bookmarks, return empty array (don't create sample data)
+      if (bookmarks.length === 0) {
+        console.log('No bookmarks found for user');
         return {
           success: true,
-          data: sampleBookmarks,
-          total: sampleBookmarks.length
+          data: [],
+          message: 'No bookmarks found'
         };
       }
 
+      // Validate and enrich bookmark data
+      const validatedBookmarks = await Promise.all(
+        bookmarks.map(async (bookmark) => {
+          try {
+            // If bookmark is missing internship data, try to fetch it
+            if (!bookmark.title || !bookmark.company) {
+              console.log(`🔄 Enriching bookmark ${bookmark.internshipId} with missing data`);
+              
+              const internshipResponse = await this.getInternshipById(
+                bookmark.internshipId || bookmark.id
+              );
+              
+              if (internshipResponse.success) {
+                const internship = internshipResponse.data;
+                return {
+                  ...bookmark,
+                  // Merge missing fields from internship data
+                  title: bookmark.title || internship.title,
+                  company: bookmark.company || internship.company,
+                  location: bookmark.location || internship.location,
+                  description: bookmark.description || internship.description,
+                  requirements: bookmark.requirements || internship.requirements,
+                  benefits: bookmark.benefits || internship.benefits,
+                  skills: bookmark.skills || internship.skills || [],
+                  category: bookmark.category || internship.category,
+                  type: bookmark.type || internship.type,
+                  duration: bookmark.duration || internship.duration,
+                  stipend: bookmark.stipend || internship.stipend,
+                  applicationDeadline: bookmark.applicationDeadline || internship.applicationDeadline,
+                  startDate: bookmark.startDate || internship.startDate,
+                  published: bookmark.published || internship.published
+                };
+              }
+            }
+            
+            return bookmark;
+          } catch (error) {
+            console.warn(`⚠️ Could not enrich bookmark ${bookmark.internshipId}:`, error);
+            return bookmark; // Return as-is if enrichment fails
+          }
+        })
+      );
+
+      // Sort by bookmark date (most recent first)
+      const sortedBookmarks = validatedBookmarks.sort((a, b) => 
+        new Date(b.bookmarkedAt || b.bookmarkedDate) - new Date(a.bookmarkedAt || a.bookmarkedDate)
+      );
+
+      console.log('✅ Bookmarks loaded successfully:', sortedBookmarks.length);
+      
       return {
         success: true,
-        data: userBookmarks,
-        total: userBookmarks.length
+        data: sortedBookmarks,
+        message: `Found ${sortedBookmarks.length} bookmark(s)`
       };
-
     } catch (error) {
-      console.error('Error fetching bookmarks:', error);
+      console.error('❌ Error loading bookmarks:', error);
       return {
         success: false,
-        error: 'Failed to load bookmarks'
+        error: error.message,
+        data: []
       };
     }
   }
 
-  // Update bookmark details (notes, priority, status)
-  static async updateBookmark(userId, internshipId, updates) {
-    await new Promise(resolve => setTimeout(resolve, 300));
-
+  /**
+   * Check if internship is bookmarked - ENHANCED VERSION
+   */
+  static async isBookmarked(userId, internshipId) {
     try {
-      const bookmark = Array.from(bookmarksStore.values())
-        .find(b => b.userId === userId && b.internshipId === parseInt(internshipId));
+      const bookmarkKey = this.getBookmarkKey(userId);
+      const bookmarks = JSON.parse(localStorage.getItem(bookmarkKey) || '[]');
+      
+      const isBookmarked = bookmarks.some(bookmark => 
+        bookmark.internshipId === parseInt(internshipId) || 
+        bookmark.id === parseInt(internshipId)
+      );
+      
+      const bookmarkData = bookmarks.find(bookmark => 
+        bookmark.internshipId === parseInt(internshipId) || 
+        bookmark.id === parseInt(internshipId)
+      );
+      
+      return {
+        success: true,
+        isBookmarked,
+        data: bookmarkData || null
+      };
+    } catch (error) {
+      console.error('Error checking bookmark status:', error);
+      return {
+        success: false,
+        isBookmarked: false,
+        error: error.message
+      };
+    }
+  }
 
-      if (!bookmark) {
+  /**
+   * Remove bookmark - ENHANCED VERSION
+   */
+  static async removeBookmark(userId, internshipId) {
+    await new Promise(resolve => setTimeout(resolve, 200));
+    
+    try {
+      const bookmarkKey = this.getBookmarkKey(userId);
+      const bookmarks = JSON.parse(localStorage.getItem(bookmarkKey) || '[]');
+      
+      const initialCount = bookmarks.length;
+      
+      // Remove the bookmark (check both internshipId and id)
+      const updatedBookmarks = bookmarks.filter(bookmark => 
+        bookmark.internshipId !== parseInt(internshipId) && 
+        bookmark.id !== parseInt(internshipId)
+      );
+      
+      const removedCount = initialCount - updatedBookmarks.length;
+      
+      if (removedCount === 0) {
         return {
           success: false,
           error: 'Bookmark not found'
         };
       }
+      
+      // Save updated bookmarks
+      localStorage.setItem(bookmarkKey, JSON.stringify(updatedBookmarks));
 
-      // Update the bookmark
-      const updatedBookmark = {
-        ...bookmark,
-        ...updates,
-        lastUpdated: new Date().toISOString()
-      };
-
-      bookmarksStore.set(bookmark.id, updatedBookmark);
-
+      console.log(`✅ Removed ${removedCount} bookmark(s) successfully`);
+      
       return {
         success: true,
-        data: updatedBookmark,
-        message: 'Bookmark updated successfully'
+        message: 'Bookmark removed successfully',
+        removedCount
       };
-
     } catch (error) {
-      console.error('Error updating bookmark:', error);
+      console.error('❌ Error removing bookmark:', error);
       return {
         success: false,
-        error: 'Failed to update bookmark'
+        error: error.message
       };
     }
   }
 
-  // Check if internship is bookmarked by user
-  static async isBookmarked(userId, internshipId) {
-    await new Promise(resolve => setTimeout(resolve, 100));
-
-    const isBookmarked = Array.from(bookmarksStore.values())
-      .some(bookmark => 
-        bookmark.userId === userId && bookmark.internshipId === parseInt(internshipId)
-      );
-
-    return {
-      success: true,
-      isBookmarked: isBookmarked
-    };
+  /**
+   * Get bookmark statistics
+   */
+  static async getBookmarkStats(userId) {
+    try {
+      const bookmarksResponse = await this.getUserBookmarks(userId);
+      if (!bookmarksResponse.success) {
+        throw new Error(bookmarksResponse.error);
+      }
+      
+      const bookmarks = bookmarksResponse.data;
+      
+      const stats = {
+        total: bookmarks.length,
+        byPriority: {
+          high: bookmarks.filter(b => b.priority === 'high').length,
+          medium: bookmarks.filter(b => b.priority === 'medium').length,
+          low: bookmarks.filter(b => b.priority === 'low').length
+        },
+        byCategory: {},
+        recentCount: bookmarks.filter(b => {
+          const bookmarkDate = new Date(b.bookmarkedAt || b.bookmarkedDate);
+          const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+          return bookmarkDate > weekAgo;
+        }).length
+      };
+      
+      // Count by category
+      bookmarks.forEach(bookmark => {
+        const category = bookmark.category || 'Other';
+        stats.byCategory[category] = (stats.byCategory[category] || 0) + 1;
+      });
+      
+      return {
+        success: true,
+        data: stats
+      };
+    } catch (error) {
+      console.error('Error getting bookmark stats:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
   }
+
+  // ============ OTHER EXISTING METHODS ============
 
   // Simulate submitting an application
   static async submitApplication(applicationData) {
@@ -636,39 +766,8 @@ class DataService {
       }
     };
   }
-
- // Get bookmark statistics for user dashboard
-  static async getBookmarkStats(userId) {
-    await new Promise(resolve => setTimeout(resolve, 200));
-
-    const userBookmarks = Array.from(bookmarksStore.values())
-      .filter(bookmark => bookmark.userId === userId);
-
-    const stats = {
-      total: userBookmarks.length,
-      byStatus: {
-        'not-applied': userBookmarks.filter(b => b.status === 'not-applied').length,
-        'planning': userBookmarks.filter(b => b.status === 'planning').length,
-        'applied': userBookmarks.filter(b => b.status === 'applied').length,
-        'considering': userBookmarks.filter(b => b.status === 'considering').length
-      },
-      byPriority: {
-        'high': userBookmarks.filter(b => b.priority === 'high').length,
-        'medium': userBookmarks.filter(b => b.priority === 'medium').length,
-        'low': userBookmarks.filter(b => b.priority === 'low').length
-      },
-      recentlyAdded: userBookmarks
-        .sort((a, b) => new Date(b.bookmarkedDate) - new Date(a.bookmarkedDate))
-        .slice(0, 3)
-        .map(b => ({ title: b.title, company: b.company, date: b.bookmarkedDate }))
-    };
-
-    return {
-      success: true,
-      data: stats
-    };
-  }
 }
+
 export default DataService;
 
 // ms2 final
