@@ -123,7 +123,7 @@ const AppContent = () => {
         <ProtectedRoute>
           <Bookmarks />
         </ProtectedRoute>
-      } />
+      } /> 
 
       {/* Resume Upload Route - protected */}
       <Route path="/resume-upload" element={

@@ -62,20 +62,29 @@ const Bookmarks = () => {
           setCategories(categoriesResponse.data);
         }
         
-        // Load bookmarks from localStorage and DataService fallback
+        // Load bookmarks from unified bookmark handler storage
         let savedBookmarks = [];
-        
-        // Try localStorage first
-        const userBookmarks = JSON.parse(localStorage.getItem('userBookmarks') || '{}');
-        savedBookmarks = userBookmarks[user.id] || [];
-        
-        // If no localStorage bookmarks, try DataService
-        if (savedBookmarks.length === 0) {
+
+        try {
+          // Use the same method that DataService.getUserBookmarks uses
           const bookmarksResponse = await DataService.getUserBookmarks(user.id);
           if (bookmarksResponse.success) {
             savedBookmarks = bookmarksResponse.data;
+            console.log(`✅ Loaded ${savedBookmarks.length} bookmarks via DataService`);
+          } else {
+            console.log('❌ DataService returned no bookmarks:', bookmarksResponse.error);
           }
-        }
+        } catch (error) {
+          console.error('❌ Error loading bookmarks via DataService:', error);
+          
+          // Fallback: try direct localStorage access
+          const bookmarkKey = `userBookmarks_${user.id}`;
+          const storedBookmarks = localStorage.getItem(bookmarkKey);
+          if (storedBookmarks) {
+            savedBookmarks = JSON.parse(storedBookmarks);
+            console.log(`✅ Fallback: Loaded ${savedBookmarks.length} bookmarks from ${bookmarkKey}`);
+          }
+        } 
         
         // Enhance with AI matching
         const userProfile = matchingService.getUserProfile();
@@ -119,13 +128,14 @@ const Bookmarks = () => {
     loadData();
   }, [user, matchingService]);
 
-  // Save bookmarks to localStorage
-  const saveBookmarks = (updatedBookmarks) => {
+// Save bookmarks to localStorage (unified format)
+  const saveBookmarks = async (updatedBookmarks) => {
     try {
-      const userBookmarks = JSON.parse(localStorage.getItem('userBookmarks') || '{}');
-      userBookmarks[user.id] = updatedBookmarks;
-      localStorage.setItem('userBookmarks', JSON.stringify(userBookmarks));
+      // Update localStorage directly (same format as DataService)
+      const bookmarkKey = `userBookmarks_${user.id}`;
+      localStorage.setItem(bookmarkKey, JSON.stringify(updatedBookmarks));
       setBookmarks(updatedBookmarks);
+      console.log(`✅ Updated ${updatedBookmarks.length} bookmarks in ${bookmarkKey}`);
     } catch (error) {
       console.error('Error saving bookmarks:', error);
     }
@@ -149,9 +159,24 @@ const Bookmarks = () => {
         
       case 'removeBookmark':
         if (window.confirm(`Remove "${internship.title}" from bookmarks?`)) {
-          const updatedBookmarks = bookmarks.filter(b => b.id !== internship.id);
-          saveBookmarks(updatedBookmarks);
-          alert(`Removed "${internship.title}" from bookmarks`);
+          try {
+            // Use DataService.removeBookmark (same as unified handler)
+            const response = await DataService.removeBookmark(user.id, internship.internshipId || internship.id);
+            
+            if (response.success) {
+              // Also update local state
+              const updatedBookmarks = bookmarks.filter(b => 
+                b.id !== internship.id && b.internshipId !== internship.id
+              );
+              setBookmarks(updatedBookmarks);
+              alert(`✅ Removed "${internship.title}" from bookmarks`);
+            } else {
+              alert(`❌ ${response.error || 'Failed to remove bookmark'}`);
+            }
+          } catch (error) {
+            console.error('Error removing bookmark:', error);
+            alert('❌ Failed to remove bookmark');
+          }
         }
         break;
         

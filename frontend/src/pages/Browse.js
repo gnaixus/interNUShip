@@ -53,7 +53,7 @@ const Browse = () => {
               setMatchingStatus('Using AI matching for sorting');
               
               // Get profile-based recommendations for ALL internships (higher limit)
-              const smartResult = await matchingService.getPersonalizedRecommendations({
+              const smartResult = await matchingService.getPersonalizedRecommendations(user, {
                 limit: 50, // Get more internships for browse page
                 minMatchScore: 20 // Lower threshold to include more options
               });
