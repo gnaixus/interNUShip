@@ -578,3 +578,5 @@ export const calculateMatchScore = (userProfile, internship) => {
 };
 
 export default dummyInternships;
+
+//ms2 final
