@@ -138,7 +138,7 @@ class DataService {
   static async getUserProfile(userId) {
     await new Promise(resolve => setTimeout(resolve, 300));
 
-    // Simulate user profile data - you can customize this data
+    // Simulate user profile data - you can customise this data
     const userProfile = {
       id: userId,
       firstName: 'John',
