@@ -5,6 +5,7 @@ import styles from '../../styles/Signup.module.css';
 import authStyles from '../../styles/Auth.module.css';
 import axios from 'axios';
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 const FormField = React.memo(({ name, type = 'text', placeholder, children, hint, value, onChange, error }) => (
   <div className={authStyles.inputGroup}>
@@ -80,7 +81,7 @@ export default function Signup() {
     
     setUsernameStatus('checking');
     try {
-      const res = await axios.get(`http://localhost:8000/check-username?username=${username}`);
+      const res = await axios.get(`${API_URL}/check-username?username=${username}`);
       setUsernameStatus(res.data.available ? 'available' : 'taken');
     } catch (error) {
       console.error('Username check failed:', error);
@@ -96,7 +97,7 @@ export default function Signup() {
     
     setEmailStatus('checking');
     try {
-      const res = await axios.get(`http://localhost:8000/check-email?email=${email}`);
+      const res = await axios.get(`${API_URL}/check-email?email=${email}`);
       setEmailStatus(res.data.available ? 'available' : 'taken');
     } catch (error) {
       console.error('Email check failed:', error);
