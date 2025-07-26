@@ -23,7 +23,11 @@
     "start": "react-scripts start",
     "build": "CI=false react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "test:coverage": "react-scripts test --coverage --watchAll=false",
+    "test:bookmark": "react-scripts test --testNamePattern='bookmarkHandler' --watchAll=false",
+    "eject": "react-scripts eject",
+    "test:pdf": "react-scripts test --testNamePattern='PDF' --watchAll=false",
+    "test:resume": "react-scripts test src/pages/resume --watchAll=false"
   },
   "eslintConfig": {
     "extends": [
@@ -42,5 +46,13 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "jest": {
+    "transformIgnorePatterns": [
+      "node_modules/(?!(axios|lucide-react)/)"
+    ],
+    "moduleNameMapper": {
+      "^axios$": "axios/dist/node/axios.cjs"
+    }
   }
 }
