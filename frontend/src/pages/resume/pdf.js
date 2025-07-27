@@ -86,8 +86,8 @@ export const extractTextFromPDF = async (file) => {
     // Sort items by page, then by Y position (top to bottom), then by X position (left to right)
     allTextItems.sort((a, b) => {
       if (a.page !== b.page) return a.page - b.page;
-      if (Math.abs(a.y - b.y) > 5) return b.y - a.y; // Higher Y = higher on page
-      return a.x - b.x; // Left to right
+      if (Math.abs(a.y - b.y) > 5) return b.y - a.y; 
+      return a.x - b.x; 
     });
     
     // Reconstruct text with proper line breaks
@@ -147,9 +147,7 @@ export const extractTextFromPDF = async (file) => {
   }
 };
 
-/**
- * Clean and normalize extracted text
- */
+
 function cleanExtractedText(text) {
   if (!text || typeof text !== 'string') {
     return '';
@@ -166,9 +164,7 @@ function cleanExtractedText(text) {
     .trim();
 }
 
-/**
- * CUSTOM PARSER FOR TAN JIE YING'S RESUME FORMAT
- */
+
 export const parseResumeText = (text) => {
   console.log('🔍 Starting custom parsing for TAN JIE YING resume...');
   console.log('📄 Text length:', text?.length || 0);

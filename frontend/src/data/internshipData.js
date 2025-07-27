@@ -144,7 +144,7 @@ export const dummyInternships = [
     category: 'data',
     match: 87,
     logo: '📊',
-    description: 'Analyze large datasets and create machine learning models to drive business insights. Work with real customer data and advanced analytics tools.',
+    description: 'Analyse large datasets and create machine learning models to drive business insights. Work with real customer data and advanced analytics tools.',
     deadline: '20/8/2025',
     postedDate: '03/05/2025',
     skills: ['Python', 'Machine Learning', 'SQL', 'Pandas', 'Tableau'],
@@ -165,6 +165,7 @@ export const dummyInternships = [
     companySize: '201-500 employees',
     industry: 'Data Analytics'
   },
+  
   {//ai research
     id: 6,
     title: 'AI Research Intern',
@@ -270,7 +271,7 @@ export const dummyInternships = [
     category: 'marketing',
     match: 78,
     logo: '📈',
-    description: 'Execute digital marketing campaigns across social media, email, and web platforms. Analyze campaign performance and optimize for better results.',
+    description: 'Execute digital marketing campaigns across social media, email, and web platforms. Analyse campaign performance and optimise for better results.',
     deadline: '15/07/2025',
     postedDate: '15/05/2025',
     skills: ['Social Media Marketing', 'Google Analytics', 'Content Creation', 'SEO', 'Email Marketing'],
@@ -323,7 +324,7 @@ export const dummyInternships = [
     industry: 'Content & Media'
   },
 
-  {//biz development
+  {//business development
     id: 11,
     title: 'Business Development Intern',
     company: 'Growth Ventures',
@@ -333,7 +334,7 @@ export const dummyInternships = [
     category: 'business',
     match: 79,
     logo: '📊',
-    description: 'Support business development initiatives and market research. Analyze market trends and identify new business opportunities.',
+    description: 'Support business development initiatives and market research. Analyse market trends and identify new business opportunities.',
     deadline: '10/07/2025',
     postedDate: '20/05/2025',
     skills: ['Business Analysis', 'Market Research', 'Excel', 'PowerPoint', 'Communication'],
@@ -364,7 +365,7 @@ export const dummyInternships = [
     category: 'business',
     match: 82,
     logo: '📋',
-    description: 'Work with product teams to define and launch new features. Conduct user research and analyze product metrics to drive decisions.',
+    description: 'Work with product teams to define and launch new features. Conduct user research and analyse product metrics to drive decisions.',
     deadline: '05/07/2025',
     postedDate: '22/05/2025',
     skills: ['Product Strategy', 'User Research', 'Analytics', 'Wireframing', 'Agile'],

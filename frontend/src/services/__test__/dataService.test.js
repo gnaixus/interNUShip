@@ -1,4 +1,3 @@
-// Realistic dataService.test.js - Based on actual behavior
 import DataService from '../dataService.js';
 
 // Mock localStorage
