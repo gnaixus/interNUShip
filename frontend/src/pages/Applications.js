@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from './auth/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from '../styles/Home.module.css';
-import DataService from '../services/dataService';
 
 const Applications = () => {
   const { user, isGuest, logout } = useAuth();
@@ -104,6 +103,64 @@ const Applications = () => {
     return diffInDays;
   };
 
+  // Load applications from localStorage or create initial empty state
+  const loadUserApplications = (userId) => {
+    try {
+      const savedApplications = localStorage.getItem(`userApplications_${userId}`);
+      if (savedApplications) {
+        return JSON.parse(savedApplications);
+      }
+      return []; // Return empty array for new users
+    } catch (error) {
+      console.error('Error loading applications from localStorage:', error);
+      return [];
+    }
+  };
+
+  // Save applications to localStorage
+  const saveUserApplications = (userId, applications) => {
+    try {
+      localStorage.setItem(`userApplications_${userId}`, JSON.stringify(applications));
+    } catch (error) {
+      console.error('Error saving applications to localStorage:', error);
+    }
+  };
+
+  // Add a new application (this would be called when user applies to an internship)
+  const addNewApplication = (internshipData, applicationData = {}) => {
+    if (!user) return;
+
+    const newApplication = {
+      id: Date.now(),
+      internshipId: internshipData.id,
+      userId: user.id,
+      status: 'pending',
+      submittedAt: new Date().toISOString(),
+      lastUpdated: new Date().toISOString(),
+      internship: internshipData,
+      documents: applicationData.documents || ['resume.pdf'],
+      notes: applicationData.notes || '',
+      ...applicationData
+    };
+
+    const updatedApplications = [newApplication, ...userApplications];
+    setUserApplications(updatedApplications);
+    saveUserApplications(user.id, updatedApplications);
+    
+    return newApplication;
+  };
+
+  // Update an existing application
+  const updateApplication = (applicationId, updates) => {
+    const updatedApplications = userApplications.map(app => 
+      app.id === applicationId 
+        ? { ...app, ...updates, lastUpdated: new Date().toISOString() }
+        : app
+    );
+    setUserApplications(updatedApplications);
+    saveUserApplications(user.id, updatedApplications);
+  };
+
   // Redirect users who aren't logged in
   useEffect(() => {
     if (!user && !isGuest) {
@@ -111,7 +168,7 @@ const Applications = () => {
     }
   }, [user, isGuest, navigate]);
 
-  // Load applications data
+  // Load applications data when user changes
   useEffect(() => {
     const loadApplications = async () => {
       if (!user) return;
@@ -120,10 +177,13 @@ const Applications = () => {
         setLoading(true);
         setError(null);
         
-        const response = await DataService.getUserApplications(user.id);
-        if (response.success) {
-          setUserApplications(response.data);
-        }
+        // Load from localStorage
+        const applications = loadUserApplications(user.id);
+        setUserApplications(applications);
+        
+        // Simulate a small delay for better UX
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
       } catch (err) {
         console.error('Error loading applications:', err);
         setError('Failed to load applications. Please try again.');
@@ -135,12 +195,31 @@ const Applications = () => {
     loadApplications();
   }, [user]);
 
+  // Make addNewApplication available globally for other components
+  useEffect(() => {
+    if (user) {
+      // Store the function globally so other components can add applications
+      window.addApplicationToTracker = addNewApplication;
+    }
+    
+    return () => {
+      // Cleanup
+      delete window.addApplicationToTracker;
+    };
+  }, [user, userApplications]);
+
   // Navigation items for the header
-  const navigationItems = [
+  const navItems = user ? [
     { path: '/home', label: 'Home', icon: '🏠' },
     { path: '/internships', label: 'Browse', icon: '🔍' },
     { path: '/applications', label: 'Applications', icon: '📝' },
-    { path: '/bookmarks', label: 'Bookmarks', icon: '🔖' }
+    { path: '/bookmarks', label: 'Bookmarks', icon: '🔖' },
+    { path: '/community', label: 'Community', icon: '👥' },
+    { path: '/about', label: 'About', icon: '🏢' }
+  ] : [
+    { path: '/home', label: 'Home', icon: '🏠' },
+    { path: '/internships', label: 'Browse', icon: '🔍' },
+    { path: '/about', label: 'About', icon: '🏢' }
   ];
 
   // Configuration for different application statuses
@@ -148,7 +227,8 @@ const Applications = () => {
     pending: { color: '#f59e0b', icon: '⏳', label: 'Under Review' },
     interview: { color: '#3b82f6', icon: '🎯', label: 'Interview Stage' },
     accepted: { color: '#10b981', icon: '✅', label: 'Accepted' },
-    rejected: { color: '#ef4444', icon: '❌', label: 'Not Selected' }
+    rejected: { color: '#ef4444', icon: '❌', label: 'Not Selected' },
+    withdrawn: { color: '#6b7280', icon: '🚫', label: 'Withdrawn' }
   };
 
   // Tab options for filtering applications
@@ -173,31 +253,47 @@ const Applications = () => {
       case 'editNotes':
         const newNotes = prompt('Edit your notes:', applicationData.notes);
         if (newNotes !== null) {
-          // In real app, this would update via API
-          const updatedApplications = userApplications.map(app => 
-            app.id === applicationData.id ? { ...app, notes: newNotes } : app
-          );
-          setUserApplications(updatedApplications);
+          updateApplication(applicationData.id, { notes: newNotes });
           alert('Notes updated!');
+        }
+        break;
+      case 'updateStatus':
+        const newStatus = prompt('Update status (pending/interview/accepted/rejected):', applicationData.status);
+        if (newStatus && ['pending', 'interview', 'accepted', 'rejected'].includes(newStatus)) {
+          updateApplication(applicationData.id, { status: newStatus });
+          alert('Status updated!');
         }
         break;
       case 'withdrawApplication':
         if (window.confirm('Are you sure you want to withdraw this application?')) {
           try {
-            // Simulate withdrawal API call
-            await new Promise(resolve => setTimeout(resolve, 500));
-            
-            const updatedApplications = userApplications.map(app => 
-              app.id === applicationData.id 
-                ? { ...app, status: 'withdrawn', currentStep: 'Application withdrawn' }
-                : app
-            );
-            setUserApplications(updatedApplications);
+            updateApplication(applicationData.id, { 
+              status: 'withdrawn', 
+              currentStep: 'Application withdrawn',
+              nextStep: null
+            });
             alert('Application withdrawn successfully');
           } catch (error) {
             alert('Failed to withdraw application. Please try again.');
           }
         }
+        break;
+      case 'addTestApplication':
+        // Add a test application for demo purposes
+        const testInternship = {
+          id: Date.now(),
+          title: 'Software Engineering Intern',
+          company: 'Tech Corp Singapore',
+          location: 'Singapore',
+          deadline: '31/08/2025',
+          stipend: 'S$1,200/month',
+          logo: '💻'
+        };
+        addNewApplication(testInternship, {
+          notes: 'Applied through university career portal',
+          documents: ['resume.pdf', 'cover_letter.pdf']
+        });
+        alert('Test application added!');
         break;
       default:
         console.log('Unknown action:', actionType);
@@ -332,7 +428,7 @@ const Applications = () => {
           </div>
 
           <ul className={styles.navItems}>
-            {navigationItems.map(item => (
+            {navItems.map(item => (
               <li key={item.path}>
                 <button
                   className={`${styles.navLink} ${location.pathname === item.path ? styles.active : ''}`}
@@ -399,22 +495,33 @@ const Applications = () => {
           ))}
         </div>
 
-        <div className={styles.filterControls}>
-          <div className={styles.additionalFilters}>
-            <label htmlFor="sortBy" style={{ color: 'var(--text-primary)', marginRight: '0.5rem' }}>
-              Sort by:
-            </label>
-            <select 
-              id="sortBy"
-              value={sortOption} 
-              onChange={(e) => setSortOption(e.target.value)}
-              className={styles.filterSelect}
-            >
-              <option value="applied">Date Applied</option>
-              <option value="deadline">Deadline</option>
-              <option value="status">Status</option>
-            </select>
-          </div>
+        <div className={styles.additionalFilters}>
+          <select 
+            value={sortOption} 
+            onChange={(e) => setSortOption(e.target.value)}
+            className={styles.filterSelect}
+          >
+            <option value="applied">Recently Applied</option>
+            <option value="deadline">Deadline</option>
+            <option value="status">Status</option>
+          </select>
+          
+          {/* Add test application button for demo */}
+          <button 
+            onClick={() => handleUserAction('addTestApplication')}
+            style={{
+              marginLeft: '1rem',
+              padding: '0.5rem 1rem',
+              background: 'var(--accent-gradient)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '0.5rem',
+              cursor: 'pointer',
+              fontSize: '0.875rem'
+            }}
+          >
+            + Add Test Application
+          </button>
         </div>
       </section>
 
@@ -436,9 +543,22 @@ const Applications = () => {
                 : `No applications in the "${filterTabs.find(tab => tab.id === currentTab)?.label}" category.`
               }
             </p>
-            <button className={styles.ctaPrimary} onClick={() => navigate('/internships')}>
-              Browse Internships
-            </button>
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <button className={styles.ctaPrimary} onClick={() => navigate('/internships')}>
+                Browse Internships
+              </button>
+              <button 
+                className={styles.ctaSecondary} 
+                onClick={() => handleUserAction('addTestApplication')}
+                style={{
+                  background: 'var(--glass-bg)',
+                  color: 'var(--text-primary)',
+                  border: '1px solid var(--glass-border)'
+                }}
+              >
+                Add Test Application
+              </button>
+            </div>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -660,6 +780,20 @@ const Applications = () => {
                     >
                       Edit Notes
                     </button>
+                    <button
+                      onClick={() => handleUserAction('updateStatus', application)}
+                      style={{
+                        background: 'var(--glass-bg)',
+                        color: 'var(--text-primary)',
+                        border: '1px solid var(--glass-border)',
+                        padding: '0.75rem 1.5rem',
+                        borderRadius: '0.5rem',
+                        cursor: 'pointer',
+                        fontSize: '0.875rem'
+                      }}
+                    >
+                      Update Status
+                    </button>
                     {application.status !== 'accepted' && application.status !== 'withdrawn' && (
                       <button
                         onClick={() => handleUserAction('withdrawApplication', application)}
@@ -686,27 +820,27 @@ const Applications = () => {
 
       {/* Tips Section */}
       <section className={styles.tipsSection}>
-        <h2>💡 Application Tips</h2>
+        <h2>💡 Application Management Tips</h2>
         <div className={styles.tipsGrid}>
           <div className={styles.tipCard}>
             <div className={styles.tipIcon}>📝</div>
             <h3>Keep Detailed Notes</h3>
-            <p>Track important details about each application - interview feedback, key contacts, and next steps. This helps you stay organized and follow up effectively.</p>
+            <p>Track important details about each application - interview feedback, key contacts, and next steps. Use the "Edit Notes" feature to stay organized!</p>
           </div>
           <div className={styles.tipCard}>
-            <div className={styles.tipIcon}>📊</div>
-            <h3>Learn from Each Experience</h3>
-            <p>What went well in interviews? What could you improve? Track your progress and celebrate small wins!</p>
+            <div className={styles.tipIcon}>🔄</div>
+            <h3>Update Status Regularly</h3>
+            <p>Keep your application status current. Move applications to "Interview Stage" when scheduled, and update to "Accepted" or "Rejected" when you hear back.</p>
           </div>
           <div className={styles.tipCard}>
             <div className={styles.tipIcon}>📅</div>
-            <h3>Never Miss a Beat</h3>
-            <p>Set phone reminders for deadlines and follow-ups. Companies appreciate candidates who are responsive and proactive. A simple "thank you" email can make a difference!</p>
+            <h3>Monitor Deadlines</h3>
+            <p>Watch for red deadline warnings! Applications due soon are highlighted in red. Set phone reminders for important deadlines.</p>
           </div>
           <div className={styles.tipCard}>
-            <div className={styles.tipIcon}>✉️</div>
-            <h3>Follow Up Smartly</h3>
-            <p>If you haven't heard back in a week, a polite follow-up shows genuine interest. Keep it brief, friendly, and express continued enthusiasm for the role.</p>
+            <div className={styles.tipIcon}>📊</div>
+            <h3>Track Your Progress</h3>
+            <p>Use the stats above to monitor your success rate. Learn from rejections and celebrate acceptances. Every application is a learning opportunity!</p>
           </div>
         </div>
       </section>
