@@ -401,8 +401,7 @@ const Profile = () => {
       }
       
       updatedProfile.resumeUploaded = true;
-      updatedProfile.lastUpdated = new Date().toLocaleDateString('en-GB');
-
+      
       // LOG FINAL PROFILE STATE
       console.log('📊 Final profile update summary:');
       console.log('  Name:', updatedProfile.name);
@@ -480,7 +479,6 @@ const Profile = () => {
       setIsSubmitting(true);
       const updatedProfile = {
         ...finalData,  
-        lastUpdated: new Date().toLocaleDateString('en-GB'),
         savedAt: Date.now()
       };
       
@@ -906,11 +904,6 @@ const Profile = () => {
                   <span className={styles.resumeIcon}>📄</span>
                   <div>
                     <p className={styles.resumeStatus}>Resume uploaded</p>
-                    {profileData.lastUpdated && (
-                      <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
-                        Updated: {profileData.lastUpdated}
-                      </p>
-                    )}
                   </div>
                 </div>
               ) : (
