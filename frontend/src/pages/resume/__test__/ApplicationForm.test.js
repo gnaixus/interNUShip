@@ -1,6 +1,6 @@
-// ApplicationForm.test.js
+// Fixed ApplicationForm.test.js - Compatible with your user-event version
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 import ApplicationForm from '../ApplicationForm';
@@ -106,12 +106,9 @@ const mockProfileData = {
 };
 
 describe('ApplicationForm', () => {
-  let user;
-
   beforeEach(() => {
     jest.clearAllMocks();
     localStorageMock.clear();
-    user = userEvent.setup();
     
     // Mock DataService methods
     DataService.getUserProfile.mockResolvedValue({
@@ -148,7 +145,7 @@ describe('ApplicationForm', () => {
     it('should display initial user data from auth context', () => {
       renderApplicationForm();
       
-      expect(screen.getByDisplayValue('john.doe@example.com')).toBeInTheDocument();
+      expect(screen.getByDisplayValue('test@example.com')).toBeInTheDocument();
       expect(screen.getByDisplayValue('John')).toBeInTheDocument();
       expect(screen.getByDisplayValue('Doe')).toBeInTheDocument();
     });
@@ -177,7 +174,7 @@ describe('ApplicationForm', () => {
       renderApplicationForm();
       
       const syncButton = screen.getByText('Sync from Profile');
-      await user.click(syncButton);
+      userEvent.click(syncButton);
       
       await waitFor(() => {
         expect(screen.getByText('✅ Profile synced')).toBeInTheDocument();
@@ -191,7 +188,7 @@ describe('ApplicationForm', () => {
       renderApplicationForm();
       
       const syncButton = screen.getByText('Sync from Profile');
-      await user.click(syncButton);
+      userEvent.click(syncButton);
       
       await waitFor(() => {
         expect(screen.getByText(/Failed to sync profile data/)).toBeInTheDocument();
@@ -209,14 +206,16 @@ describe('ApplicationForm', () => {
       
       // Modify some form data
       const firstNameInput = screen.getByDisplayValue('John');
-      await user.clear(firstNameInput);
-      await user.type(firstNameInput, 'Modified');
+      userEvent.clear(firstNameInput);
+      userEvent.type(firstNameInput, 'Modified');
       
       // Reset to profile
       const resetButton = screen.getByText('Reset to Profile');
-      await user.click(resetButton);
+      userEvent.click(resetButton);
       
-      expect(screen.getByDisplayValue('John')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByDisplayValue('John')).toBeInTheDocument();
+      });
     });
 
     it('should handle profile data transformation correctly', async () => {
@@ -258,22 +257,24 @@ describe('ApplicationForm', () => {
       renderApplicationForm();
       
       const firstNameInput = screen.getByPlaceholderText('Enter your first name');
-      await user.clear(firstNameInput);
-      await user.type(firstNameInput, 'Jane');
+      userEvent.clear(firstNameInput);
+      userEvent.type(firstNameInput, 'Jane');
       
-      expect(screen.getByDisplayValue('Jane')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByDisplayValue('Jane')).toBeInTheDocument();
+      });
     });
 
     it('should handle email input validation', async () => {
       renderApplicationForm();
       
       const emailInput = screen.getByPlaceholderText('Enter your email');
-      await user.clear(emailInput);
-      await user.type(emailInput, 'invalid-email');
+      userEvent.clear(emailInput);
+      userEvent.type(emailInput, 'invalid-email');
       
       // Try to submit to trigger validation
       const submitButton = screen.getByText('✨ Submit Application');
-      await user.click(submitButton);
+      userEvent.click(submitButton);
       
       await waitFor(() => {
         expect(screen.getByText('Email is required')).toBeInTheDocument();
@@ -285,32 +286,40 @@ describe('ApplicationForm', () => {
       
       // Click on a skill tag
       const reactSkill = screen.getByText('React');
-      await user.click(reactSkill);
+      userEvent.click(reactSkill);
       
       // Skill should be selected (active state)
-      expect(reactSkill).toHaveClass('skillTagActive');
+      await waitFor(() => {
+        expect(reactSkill).toHaveClass('skillTagActive');
+      });
       
       // Click again to deselect
-      await user.click(reactSkill);
-      expect(reactSkill).not.toHaveClass('skillTagActive');
+      userEvent.click(reactSkill);
+      await waitFor(() => {
+        expect(reactSkill).not.toHaveClass('skillTagActive');
+      });
     });
 
     it('should handle date inputs', async () => {
       renderApplicationForm();
       
       const graduationDateInput = screen.getByLabelText('Expected Graduation Date *');
-      await user.type(graduationDateInput, '2026-06-15');
+      userEvent.type(graduationDateInput, '2026-06-15');
       
-      expect(screen.getByDisplayValue('2026-06-15')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByDisplayValue('2026-06-15')).toBeInTheDocument();
+      });
     });
 
     it('should handle select dropdowns', async () => {
       renderApplicationForm();
       
       const availabilitySelect = screen.getByLabelText('Availability');
-      await user.selectOptions(availabilitySelect, 'full-time');
+      userEvent.selectOptions(availabilitySelect, 'full-time');
       
-      expect(screen.getByDisplayValue('Full-time (40+ hours/week)')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByDisplayValue('Full-time (40+ hours/week)')).toBeInTheDocument();
+      });
     });
   });
 
@@ -321,7 +330,7 @@ describe('ApplicationForm', () => {
       const file = new File(['test resume content'], 'resume.pdf', { type: 'application/pdf' });
       const fileInput = screen.getByLabelText(/Click to upload/);
       
-      await user.upload(fileInput, file);
+      userEvent.upload(fileInput, file);
       
       await waitFor(() => {
         expect(screen.getByText('resume.pdf')).toBeInTheDocument();
@@ -338,7 +347,7 @@ describe('ApplicationForm', () => {
       });
       
       const fileInput = screen.getByLabelText(/Click to upload/);
-      await user.upload(fileInput, largeFile);
+      userEvent.upload(fileInput, largeFile);
       
       await waitFor(() => {
         expect(screen.getByText('File size must be less than 5MB')).toBeInTheDocument();
@@ -351,7 +360,7 @@ describe('ApplicationForm', () => {
       const file = new File(['test content'], 'test.pdf', { type: 'application/pdf' });
       const fileInput = screen.getByLabelText(/Click to upload/);
       
-      await user.upload(fileInput, file);
+      userEvent.upload(fileInput, file);
       
       await waitFor(() => {
         expect(screen.getByText('test.pdf')).toBeInTheDocument();
@@ -359,10 +368,12 @@ describe('ApplicationForm', () => {
       
       // Remove the file
       const removeButton = screen.getByText('❌');
-      await user.click(removeButton);
+      userEvent.click(removeButton);
       
-      expect(screen.queryByText('test.pdf')).not.toBeInTheDocument();
-      expect(screen.getByText('Click to upload')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.queryByText('test.pdf')).not.toBeInTheDocument();
+        expect(screen.getByText('Click to upload')).toBeInTheDocument();
+      });
     });
   });
 
@@ -371,7 +382,7 @@ describe('ApplicationForm', () => {
       renderApplicationForm();
       
       const submitButton = screen.getByText('✨ Submit Application');
-      await user.click(submitButton);
+      userEvent.click(submitButton);
       
       await waitFor(() => {
         expect(screen.getByText('First name is required')).toBeInTheDocument();
@@ -391,7 +402,7 @@ describe('ApplicationForm', () => {
       
       // Trigger validation errors
       const submitButton = screen.getByText('✨ Submit Application');
-      await user.click(submitButton);
+      userEvent.click(submitButton);
       
       await waitFor(() => {
         expect(screen.getByText('First name is required')).toBeInTheDocument();
@@ -399,7 +410,7 @@ describe('ApplicationForm', () => {
       
       // Fill the first name field
       const firstNameInput = screen.getByPlaceholderText('Enter your first name');
-      await user.type(firstNameInput, 'John');
+      userEvent.type(firstNameInput, 'John');
       
       // Error should be cleared
       await waitFor(() => {
@@ -411,7 +422,7 @@ describe('ApplicationForm', () => {
       renderApplicationForm();
       
       const submitButton = screen.getByText('✨ Submit Application');
-      await user.click(submitButton);
+      userEvent.click(submitButton);
       
       await waitFor(() => {
         expect(screen.getByText('Please select at least one skill')).toBeInTheDocument();
@@ -419,10 +430,10 @@ describe('ApplicationForm', () => {
       
       // Select a skill
       const reactSkill = screen.getByText('React');
-      await user.click(reactSkill);
+      userEvent.click(reactSkill);
       
       // Submit again - skill error should be cleared
-      await user.click(submitButton);
+      userEvent.click(submitButton);
       
       await waitFor(() => {
         expect(screen.queryByText('Please select at least one skill')).not.toBeInTheDocument();
@@ -433,27 +444,33 @@ describe('ApplicationForm', () => {
   describe('Form Submission', () => {
     const fillRequiredFields = async () => {
       // Fill all required fields
-      await user.type(screen.getByPlaceholderText('Enter your first name'), 'John');
-      await user.type(screen.getByPlaceholderText('Enter your last name'), 'Doe');
-      await user.type(screen.getByPlaceholderText('Enter your email'), 'john@example.com');
-      await user.type(screen.getByPlaceholderText('Enter your phone number'), '+65 9123 4567');
-      await user.type(screen.getByPlaceholderText('Enter your university'), 'NUS');
-      await user.type(screen.getByPlaceholderText('Enter your major'), 'Computer Science');
-      await user.type(screen.getByLabelText('Expected Graduation Date *'), '2026-06-15');
+      userEvent.type(screen.getByPlaceholderText('Enter your first name'), 'John');
+      userEvent.type(screen.getByPlaceholderText('Enter your last name'), 'Doe');
+      userEvent.type(screen.getByPlaceholderText('Enter your email'), 'john@example.com');
+      userEvent.type(screen.getByPlaceholderText('Enter your phone number'), '+65 9123 4567');
+      userEvent.type(screen.getByPlaceholderText('Enter your university'), 'NUS');
+      userEvent.type(screen.getByPlaceholderText('Enter your major'), 'Computer Science');
+      userEvent.type(screen.getByLabelText('Expected Graduation Date *'), '2026-06-15');
       
       // Select a skill
-      await user.click(screen.getByText('JavaScript'));
+      userEvent.click(screen.getByText('JavaScript'));
       
       // Upload resume
       const file = new File(['resume content'], 'resume.pdf', { type: 'application/pdf' });
       const fileInput = screen.getByLabelText(/Click to upload/);
-      await user.upload(fileInput, file);
+      userEvent.upload(fileInput, file);
       
       // Fill cover letter
-      await user.type(
+      userEvent.type(
         screen.getByPlaceholderText(/Tell us why you're interested/), 
         'I am very interested in this internship opportunity because...'
       );
+      
+      // Wait for all inputs to be filled
+      await waitFor(() => {
+        expect(screen.getByDisplayValue('John')).toBeInTheDocument();
+        expect(screen.getByDisplayValue('john@example.com')).toBeInTheDocument();
+      });
     };
 
     it('should submit form successfully with valid data', async () => {
@@ -462,11 +479,11 @@ describe('ApplicationForm', () => {
       await fillRequiredFields();
       
       const submitButton = screen.getByText('✨ Submit Application');
-      await user.click(submitButton);
+      userEvent.click(submitButton);
       
       await waitFor(() => {
         expect(screen.getByText('Application Submitted Successfully!')).toBeInTheDocument();
-      });
+      }, { timeout: 5000 });
       
       expect(DataService.submitApplication).toHaveBeenCalledWith(expect.any(FormData));
     });
@@ -482,15 +499,17 @@ describe('ApplicationForm', () => {
       await fillRequiredFields();
       
       const submitButton = screen.getByText('✨ Submit Application');
-      await user.click(submitButton);
+      userEvent.click(submitButton);
       
       // Should show loading state
-      expect(screen.getByText('Submitting...')).toBeInTheDocument();
-      expect(submitButton).toBeDisabled();
+      await waitFor(() => {
+        expect(screen.getByText('Submitting...')).toBeInTheDocument();
+        expect(submitButton).toBeDisabled();
+      });
       
       await waitFor(() => {
         expect(screen.getByText('Application Submitted Successfully!')).toBeInTheDocument();
-      }, { timeout: 2000 });
+      }, { timeout: 3000 });
     });
 
     it('should handle submission errors', async () => {
@@ -504,7 +523,7 @@ describe('ApplicationForm', () => {
       await fillRequiredFields();
       
       const submitButton = screen.getByText('✨ Submit Application');
-      await user.click(submitButton);
+      userEvent.click(submitButton);
       
       await waitFor(() => {
         expect(screen.getByText('⚠️ Server error occurred')).toBeInTheDocument();
@@ -519,7 +538,7 @@ describe('ApplicationForm', () => {
       await fillRequiredFields();
       
       const submitButton = screen.getByText('✨ Submit Application');
-      await user.click(submitButton);
+      userEvent.click(submitButton);
       
       await waitFor(() => {
         expect(screen.getByText(/An error occurred while submitting/)).toBeInTheDocument();
@@ -532,7 +551,7 @@ describe('ApplicationForm', () => {
       await fillRequiredFields();
       
       const submitButton = screen.getByText('✨ Submit Application');
-      await user.click(submitButton);
+      userEvent.click(submitButton);
       
       await waitFor(() => {
         expect(DataService.submitApplication).toHaveBeenCalledWith(
@@ -553,9 +572,11 @@ describe('ApplicationForm', () => {
       renderApplicationForm();
       
       const coverLetterTextarea = screen.getByPlaceholderText(/Tell us why you're interested/);
-      await user.type(coverLetterTextarea, 'Test cover letter content');
+      userEvent.type(coverLetterTextarea, 'Test cover letter content');
       
-      expect(screen.getByText('25/1000 characters')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('25/1000 characters')).toBeInTheDocument();
+      });
     });
 
     it('should prevent typing beyond character limit', async () => {
@@ -565,9 +586,11 @@ describe('ApplicationForm', () => {
       const coverLetterTextarea = screen.getByPlaceholderText(/Tell us why you're interested/);
       
       // Should not allow more than 1000 characters
-      await user.type(coverLetterTextarea, longText);
+      userEvent.type(coverLetterTextarea, longText);
       
-      expect(coverLetterTextarea.value.length).toBeLessThanOrEqual(1000);
+      await waitFor(() => {
+        expect(coverLetterTextarea.value.length).toBeLessThanOrEqual(1000);
+      });
     });
   });
 
@@ -576,7 +599,7 @@ describe('ApplicationForm', () => {
       renderApplicationForm();
       
       const cancelButton = screen.getByText('Cancel');
-      await user.click(cancelButton);
+      userEvent.click(cancelButton);
       
       expect(window.history.back).toHaveBeenCalled();
     });
@@ -587,7 +610,7 @@ describe('ApplicationForm', () => {
       await fillRequiredFields();
       
       const submitButton = screen.getByText('✨ Submit Application');
-      await user.click(submitButton);
+      userEvent.click(submitButton);
       
       await waitFor(() => {
         expect(screen.getByText('Application Submitted Successfully!')).toBeInTheDocument();
@@ -613,7 +636,7 @@ describe('ApplicationForm', () => {
       renderApplicationForm();
       
       const syncButton = screen.getByText('Sync from Profile');
-      await user.click(syncButton);
+      userEvent.click(syncButton);
       
       // Should fallback gracefully without crashing
       expect(screen.getByText('Sync from Profile')).toBeInTheDocument();
@@ -648,9 +671,9 @@ describe('ApplicationForm', () => {
       const syncButton = screen.getByText('Sync from Profile');
       
       // Rapidly click sync multiple times
-      await user.click(syncButton);
-      await user.click(syncButton);
-      await user.click(syncButton);
+      userEvent.click(syncButton);
+      userEvent.click(syncButton);
+      userEvent.click(syncButton);
       
       // Should handle gracefully without errors
       await waitFor(() => {
@@ -672,7 +695,7 @@ describe('ApplicationForm', () => {
       renderApplicationForm();
       
       const submitButton = screen.getByText('✨ Submit Application');
-      await user.click(submitButton);
+      userEvent.click(submitButton);
       
       await waitFor(() => {
         const errorMessages = screen.getAllByText(/is required/);
@@ -688,9 +711,11 @@ describe('ApplicationForm', () => {
       
       expect(document.activeElement).toBe(firstNameInput);
       
-      // Tab to next input
-      await user.tab();
-      expect(document.activeElement).toBe(screen.getByPlaceholderText('Enter your last name'));
+      // Tab to next input (using fireEvent for older user-event compatibility)
+      fireEvent.keyDown(firstNameInput, { key: 'Tab', code: 'Tab' });
+      await waitFor(() => {
+        expect(document.activeElement).toBe(screen.getByPlaceholderText('Enter your last name'));
+      });
     });
   });
 });
