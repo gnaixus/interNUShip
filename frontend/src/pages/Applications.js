@@ -18,6 +18,92 @@ const Applications = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Date formatting helper functions
+  const formatDateToDDMMYYYY = (dateString) => {
+    if (!dateString) return 'N/A';
+    
+    let date;
+    
+    // Handle different date formats
+    if (dateString.includes('/')) {
+      // If already in DD/MM/YYYY or MM/DD/YYYY format
+      const parts = dateString.split('/');
+      if (parts.length === 3) {
+        // Assume DD/MM/YYYY if day > 12, otherwise MM/DD/YYYY
+        if (parseInt(parts[0]) > 12) {
+          return dateString; // Already in DD/MM/YYYY
+        } else {
+          // Convert from MM/DD/YYYY to DD/MM/YYYY
+          return `${parts[1].padStart(2, '0')}/${parts[0].padStart(2, '0')}/${parts[2]}`;
+        }
+      }
+    } else {
+      // Handle ISO date strings (YYYY-MM-DD)
+      date = new Date(dateString);
+    }
+    
+    if (!date || isNaN(date.getTime())) {
+      date = new Date(dateString);
+    }
+    
+    if (isNaN(date.getTime())) {
+      return 'Invalid Date';
+    }
+    
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    
+    return `${day}/${month}/${year}`;
+  };
+
+  const formatTimeAgo = (dateString) => {
+    if (!dateString) return 'N/A';
+    
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Invalid Date';
+    
+    const now = new Date();
+    const diffInHours = Math.floor((now - date) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return 'Just now';
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) return `${diffInDays}d ago`;
+    
+    // For older dates, return DD/MM/YYYY format
+    return formatDateToDDMMYYYY(dateString);
+  };
+
+  // Calculate days until deadline
+  const getDaysUntilDeadline = (deadlineString) => {
+    if (!deadlineString) return null;
+    
+    let deadline;
+    
+    // Handle DD/MM/YYYY format
+    if (deadlineString.includes('/')) {
+      const parts = deadlineString.split('/');
+      if (parts.length === 3) {
+        // Assume DD/MM/YYYY format
+        const day = parseInt(parts[0]);
+        const month = parseInt(parts[1]) - 1; // Month is 0-indexed
+        const year = parseInt(parts[2]);
+        deadline = new Date(year, month, day);
+      }
+    } else {
+      deadline = new Date(deadlineString);
+    }
+    
+    if (!deadline || isNaN(deadline.getTime())) return null;
+    
+    const now = new Date();
+    const diffInDays = Math.ceil((deadline - now) / (1000 * 60 * 60 * 24));
+    
+    return diffInDays;
+  };
+
   // Redirect users who aren't logged in
   useEffect(() => {
     if (!user && !isGuest) {
@@ -50,17 +136,11 @@ const Applications = () => {
   }, [user]);
 
   // Navigation items for the header
-  const navItems = user ? [
+  const navigationItems = [
     { path: '/home', label: 'Home', icon: '🏠' },
     { path: '/internships', label: 'Browse', icon: '🔍' },
     { path: '/applications', label: 'Applications', icon: '📝' },
-    { path: '/bookmarks', label: 'Bookmarks', icon: '🔖' },
-    { path: '/community', label: 'Community', icon: '👥' },
-    { path: '/about', label: 'About', icon: '🏢' }
-  ] : [
-    { path: '/home', label: 'Home', icon: '🏠' },
-    { path: '/internships', label: 'Browse', icon: '🔍' },
-    { path: '/about', label: 'About', icon: '🏢' }
+    { path: '/bookmarks', label: 'Bookmarks', icon: '🔖' }
   ];
 
   // Configuration for different application statuses
@@ -252,7 +332,7 @@ const Applications = () => {
           </div>
 
           <ul className={styles.navItems}>
-            {navItems.map(item => (
+            {navigationItems.map(item => (
               <li key={item.path}>
                 <button
                   className={`${styles.navLink} ${location.pathname === item.path ? styles.active : ''}`}
@@ -319,16 +399,22 @@ const Applications = () => {
           ))}
         </div>
 
-        <div className={styles.additionalFilters}>
-          <select 
-            value={sortOption} 
-            onChange={(e) => setSortOption(e.target.value)}
-            className={styles.filterSelect}
-          >
-            <option value="applied">Recently Applied</option>
-            <option value="deadline">Deadline</option>
-            <option value="status">Status</option>
-          </select>
+        <div className={styles.filterControls}>
+          <div className={styles.additionalFilters}>
+            <label htmlFor="sortBy" style={{ color: 'var(--text-primary)', marginRight: '0.5rem' }}>
+              Sort by:
+            </label>
+            <select 
+              id="sortBy"
+              value={sortOption} 
+              onChange={(e) => setSortOption(e.target.value)}
+              className={styles.filterSelect}
+            >
+              <option value="applied">Date Applied</option>
+              <option value="deadline">Deadline</option>
+              <option value="status">Status</option>
+            </select>
+          </div>
         </div>
       </section>
 
@@ -343,112 +429,274 @@ const Applications = () => {
 
         {filteredApplications.length === 0 ? (
           <div className={styles.noResults}>
-            <h3>Nothing here yet!</h3>
+            <h3>No applications found</h3>
             <p>
               {currentTab === 'all' 
-                ? "Ready to start your internship journey? Browse opportunities and apply to roles that excite you!" 
-                : `No applications in this category yet. Keep applying - you've got this! 💪`}
+                ? "You haven't applied to any internships yet. Start browsing to find your perfect match!"
+                : `No applications in the "${filterTabs.find(tab => tab.id === currentTab)?.label}" category.`
+              }
             </p>
             <button className={styles.ctaPrimary} onClick={() => navigate('/internships')}>
-              Explore Opportunities
+              Browse Internships
             </button>
           </div>
         ) : (
-          <div className={styles.applicationsGrid}>
-            {filteredApplications.map(application => (
-              <div key={application.id} className={styles.applicationCard}>
-                <div 
-                  className={styles.statusBadge}
-                  style={{ backgroundColor: statusConfiguration[application.status]?.color || '#6b7280' }}
-                >
-                  {statusConfiguration[application.status]?.icon || '📋'} {statusConfiguration[application.status]?.label || application.status}
-                </div>
-                
-                <div className={styles.cardHeader}>
-                  <div className={styles.companyLogo}>{application.internship?.logo || '🏢'}</div>
-                  <div className={styles.companyInfo}>
-                    <h3 className={styles.jobTitle}>{application.internship?.title || 'Unknown Position'}</h3>
-                    <p className={styles.companyName}>{application.internship?.company || 'Unknown Company'}</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            {filteredApplications.map(application => {
+              const config = statusConfiguration[application.status] || statusConfiguration.pending;
+              const daysUntilDeadline = getDaysUntilDeadline(application.internship?.deadline);
+              
+              return (
+                <div key={application.id} style={{
+                  background: 'var(--glass-bg)',
+                  border: '1px solid var(--glass-border)',
+                  borderRadius: 'var(--border-radius-lg)',
+                  padding: '2rem',
+                  backdropFilter: 'blur(10px)'
+                }}>
+                  {/* Application Header */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
+                        <h3 style={{ 
+                          color: 'var(--text-primary)', 
+                          margin: 0,
+                          fontSize: '1.25rem',
+                          fontWeight: '600'
+                        }}>
+                          {application.internship?.title || 'Internship Position'}
+                        </h3>
+                        <span style={{
+                          background: config.color + '20',
+                          color: config.color,
+                          padding: '0.25rem 0.75rem',
+                          borderRadius: '1rem',
+                          fontSize: '0.8rem',
+                          fontWeight: '600',
+                          textTransform: 'uppercase',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.25rem'
+                        }}>
+                          {config.icon} {config.label}
+                        </span>
+                      </div>
+                      <p style={{ 
+                        color: 'var(--text-muted)', 
+                        margin: '0 0 0.5rem 0',
+                        fontSize: '1rem',
+                        fontWeight: '500'
+                      }}>
+                        {application.internship?.company || 'Company Name'}
+                      </p>
+                      <p style={{ 
+                        color: 'var(--text-secondary)', 
+                        margin: 0,
+                        fontSize: '0.875rem'
+                      }}>
+                        📍 {application.internship?.location || 'Location not specified'}
+                      </p>
+                    </div>
                   </div>
-                </div>
 
-                <div className={styles.jobDetails}>
-                  <div className={styles.detailItem}>
-                    <span>📅</span> Applied: {new Date(application.submittedAt).toLocaleDateString()}
-                  </div>
-                  <div className={styles.detailItem}>
-                    <span>⏰</span> Deadline: {application.internship?.deadline || 'N/A'}
-                  </div>
-                  <div className={styles.detailItem}>
-                    <span>📍</span> {application.internship?.location || 'Remote'}
-                  </div>
-                  <div className={styles.detailItem}>
-                    <span>💰</span> {application.internship?.stipend || 'Not specified'}
-                  </div>
-                </div>
+                  {/* Application Details */}
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+                    gap: '1rem',
+                    marginBottom: '1.5rem'
+                  }}>
+                    <div>
+                      <label style={{ color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        Applied On
+                      </label>
+                      <p style={{ color: 'var(--text-primary)', margin: '0.25rem 0 0 0', fontWeight: '500' }}>
+                        📅 {formatDateToDDMMYYYY(application.submittedAt)}
+                      </p>
+                    </div>
+                    
+                    {application.internship?.deadline && (
+                      <div>
+                        <label style={{ color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          Deadline
+                        </label>
+                        <p style={{ 
+                          color: daysUntilDeadline && daysUntilDeadline < 7 ? '#ef4444' : 'var(--text-primary)', 
+                          margin: '0.25rem 0 0 0', 
+                          fontWeight: '500' 
+                        }}>
+                          ⏰ {formatDateToDDMMYYYY(application.internship.deadline)}
+                          {daysUntilDeadline !== null && (
+                            <span style={{ fontSize: '0.8rem', marginLeft: '0.5rem' }}>
+                              ({daysUntilDeadline > 0 ? `${daysUntilDeadline} days left` : 
+                                daysUntilDeadline === 0 ? 'Due today' : 'Overdue'})
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                    )}
 
-                {application.nextStep && (
-                  <div className={styles.interviewInfo}>
-                    {application.nextStep}
+                    {application.internship?.stipend && (
+                      <div>
+                        <label style={{ color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          Stipend
+                        </label>
+                        <p style={{ color: 'var(--text-primary)', margin: '0.25rem 0 0 0', fontWeight: '500' }}>
+                          💰 {application.internship.stipend}
+                        </p>
+                      </div>
+                    )}
+
+                    <div>
+                      <label style={{ color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        Last Updated
+                      </label>
+                      <p style={{ color: 'var(--text-primary)', margin: '0.25rem 0 0 0', fontWeight: '500' }}>
+                        🔄 {formatTimeAgo(application.lastUpdated)}
+                      </p>
+                    </div>
                   </div>
-                )}
 
-                <div className={styles.nextStep}>
-                  <strong>Status:</strong> {application.status}
-                </div>
-
-                {application.notes && (
-                  <div className={styles.applicationNotes}>
-                    <strong>Notes:</strong>
-                    {application.notes}
-                  </div>
-                )}
-
-                <div className={styles.documents}>
-                  <strong>Documents:</strong>
-                  <div>
-                    {application.documents && application.documents.map(doc => (
-                      <span key={doc} className={styles.documentTag}>{doc}</span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className={styles.cardActions}>
-                  <button 
-                    className={styles.detailsButton} 
-                    onClick={() => handleUserAction('viewDetails', application)}
-                  >
-                    View Details
-                  </button>
-                  <button 
-                    className={styles.editButton} 
-                    onClick={() => handleUserAction('editNotes', application)}
-                  >
-                    Edit Notes
-                  </button>
-                  {(application.status === 'pending' || application.status === 'interview') && (
-                    <button 
-                      className={styles.withdrawButton} 
-                      onClick={() => handleUserAction('withdrawApplication', application)}
-                    >
-                      Withdraw
-                    </button>
+                  {/* Next Step or Special Info */}
+                  {application.nextStep && (
+                    <div style={{
+                      background: 'rgba(59, 130, 246, 0.1)',
+                      border: '1px solid rgba(59, 130, 246, 0.3)',
+                      borderRadius: '0.5rem',
+                      padding: '1rem',
+                      marginBottom: '1.5rem'
+                    }}>
+                      <p style={{ 
+                        color: '#3b82f6', 
+                        margin: 0, 
+                        fontWeight: '500',
+                        fontSize: '0.9rem'
+                      }}>
+                        🎯 Next Step: {application.nextStep}
+                      </p>
+                    </div>
                   )}
+
+                  {/* Documents */}
+                  {application.documents && application.documents.length > 0 && (
+                    <div style={{ marginBottom: '1.5rem' }}>
+                      <label style={{ color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '0.5rem' }}>
+                        Documents Submitted
+                      </label>
+                      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        {application.documents.map(doc => (
+                          <span
+                            key={doc}
+                            style={{
+                              background: 'rgba(167, 139, 250, 0.2)',
+                              color: '#c4b5fd',
+                              padding: '0.25rem 0.75rem',
+                              borderRadius: '1rem',
+                              fontSize: '0.8rem',
+                              fontWeight: '500'
+                            }}
+                          >
+                            📄 {doc}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Notes */}
+                  {application.notes && (
+                    <div style={{ marginBottom: '1.5rem' }}>
+                      <label style={{ color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '0.5rem' }}>
+                        Your Notes
+                      </label>
+                      <p style={{
+                        color: 'var(--text-secondary)',
+                        background: 'rgba(255, 255, 255, 0.02)',
+                        padding: '0.75rem',
+                        borderRadius: '0.5rem',
+                        border: '1px solid rgba(255, 255, 255, 0.05)',
+                        margin: 0,
+                        fontStyle: 'italic'
+                      }}>
+                        💭 {application.notes}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div style={{
+                    display: 'flex',
+                    gap: '1rem',
+                    paddingTop: '1.5rem',
+                    borderTop: '1px solid var(--glass-border)',
+                    flexWrap: 'wrap'
+                  }}>
+                    <button
+                      onClick={() => handleUserAction('viewDetails', application)}
+                      style={{
+                        background: 'var(--accent-gradient)',
+                        color: 'white',
+                        border: 'none',
+                        padding: '0.75rem 1.5rem',
+                        borderRadius: '0.5rem',
+                        cursor: 'pointer',
+                        fontSize: '0.875rem',
+                        fontWeight: '500'
+                      }}
+                    >
+                      View Details
+                    </button>
+                    <button
+                      onClick={() => handleUserAction('editNotes', application)}
+                      style={{
+                        background: 'var(--glass-bg)',
+                        color: 'var(--text-primary)',
+                        border: '1px solid var(--glass-border)',
+                        padding: '0.75rem 1.5rem',
+                        borderRadius: '0.5rem',
+                        cursor: 'pointer',
+                        fontSize: '0.875rem'
+                      }}
+                    >
+                      Edit Notes
+                    </button>
+                    {application.status !== 'accepted' && application.status !== 'withdrawn' && (
+                      <button
+                        onClick={() => handleUserAction('withdrawApplication', application)}
+                        style={{
+                          background: 'transparent',
+                          color: '#ef4444',
+                          border: '1px solid #ef4444',
+                          padding: '0.75rem 1.5rem',
+                          borderRadius: '0.5rem',
+                          cursor: 'pointer',
+                          fontSize: '0.875rem'
+                        }}
+                      >
+                        Withdraw
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>
 
       {/* Tips Section */}
       <section className={styles.tipsSection}>
-        <h2>💡 Your Success Toolkit</h2>
+        <h2>💡 Application Tips</h2>
         <div className={styles.tipsGrid}>
           <div className={styles.tipCard}>
-            <div className={styles.tipIcon}>📋</div>
-            <h3>Stay Organised</h3>
-            <p>Keep detailed notes about each application. What went well in interviews? What could you improve? Track your progress and celebrate small wins!</p>
+            <div className={styles.tipIcon}>📝</div>
+            <h3>Keep Detailed Notes</h3>
+            <p>Track important details about each application - interview feedback, key contacts, and next steps. This helps you stay organized and follow up effectively.</p>
+          </div>
+          <div className={styles.tipCard}>
+            <div className={styles.tipIcon}>📊</div>
+            <h3>Learn from Each Experience</h3>
+            <p>What went well in interviews? What could you improve? Track your progress and celebrate small wins!</p>
           </div>
           <div className={styles.tipCard}>
             <div className={styles.tipIcon}>📅</div>
@@ -467,5 +715,3 @@ const Applications = () => {
 };
 
 export default Applications;
-
-// ms2 final
