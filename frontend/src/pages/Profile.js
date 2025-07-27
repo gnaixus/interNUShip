@@ -70,6 +70,7 @@ const Profile = () => {
     name: '',
     major: '',
     university: '',
+    year: '',
     location: '',
     bio: ''
   });
@@ -118,11 +119,44 @@ const Profile = () => {
         name: profileData.name || '',
         major: profileData.major || '',
         university: profileData.university || '',
+        year: profileData.year || '',
         location: profileData.location || '',
         bio: profileData.bio || ''
       });
     }
   }, [isEditing, profileData.email, profileData.phone, profileData.name, profileData.major, profileData.university, profileData.location, profileData.bio]);
+
+  // Year Selector 
+  const YearSelector = ({ value, onChange, isEditing }) => {
+  const yearOptions = [
+    'Year 1',
+    'Year 2', 
+    'Year 3',
+    'Year 4',
+    'Year 5',
+    'Graduate',
+    'Alumni'
+  ];
+
+  if (!isEditing) {
+    return <span className={styles.contactValue}>{value || 'Not specified'}</span>;
+  }
+
+  return (
+    <select 
+      value={value || ''} 
+      onChange={(e) => onChange(e.target.value)}
+      className={styles.editInput}
+    >
+      <option value="">Select Year</option>
+      {yearOptions.map(year => (
+        <option key={year} value={year}>
+          {year}
+        </option>
+      ))}
+    </select>
+  );
+};
 
   // Handle local input changes with enhanced tracking
   const handleLocalInputChange = useCallback((field, value) => {
@@ -720,31 +754,44 @@ const Profile = () => {
               ) : (
                 <h1 className={styles.profileName}>{profileData.name || 'Name not set'}</h1>
               )}
+              
               <p className={styles.profileTitle}>
                 {isEditing ? (
-                  <input
-                    type="text"
-                    value={localInputs.major}
-                    onChange={(e) => handleLocalInputChange('major', e.target.value)}
-                    className={styles.editInput}
-                    placeholder="Major"
-                    autoComplete="off"
-                  />
+                  <>
+                    <input
+                      type="text"
+                      value={localInputs.major}
+                      onChange={(e) => handleLocalInputChange('major', e.target.value)}
+                      className={styles.editInput}
+                      placeholder="Major"
+                      autoComplete="off"
+                    />
+                    {' Student • '}
+                    <YearSelector 
+                      value={localInputs.year}
+                      onChange={(value) => handleLocalInputChange('year', value)}
+                      isEditing={true}
+                    />
+                    {' at '}
+                    <input
+                      type="text"
+                      value={localInputs.university}
+                      onChange={(e) => handleLocalInputChange('university', e.target.value)}
+                      className={styles.editInput}
+                      placeholder="University"
+                      autoComplete="off"
+                    />
+                  </>
                 ) : (
-                  profileData.major || 'Major not set'
-                )} Student at {isEditing ? (
-                  <input
-                    type="text"
-                    value={localInputs.university}
-                    onChange={(e) => handleLocalInputChange('university', e.target.value)}
-                    className={styles.editInput}
-                    placeholder="University"
-                    autoComplete="off"
-                  />
-                ) : (
-                  profileData.university || 'University not set'
+                  <>
+                    {profileData.major || 'Major not set'} Student
+                    {profileData.year && ` • ${profileData.year}`}
+                    {' at '}
+                    {profileData.university || 'University not set'}
+                  </>
                 )}
               </p>
+   
               <div className={styles.profileLocation}>
                 <MapPin size={16} />
                 {isEditing ? (

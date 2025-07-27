@@ -70,18 +70,6 @@ def extract_name_email_phone(text):
     if email_match:
         email = email_match.group().strip()
     
-    # # Extract phone
-    # phone_patterns = [
-    #     r"\+?\d{1,3}[-.\s]?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}",
-    #     r"\+?\d[\d\s\-\(\)]{8,}\d"
-    # ]
-    
-    # for pattern in phone_patterns:
-    #     phone_match = re.search(pattern, text)
-    #     if phone_match:
-    #         phone = phone_match.group().strip()
-    #         break
-    
     singapore_phone_patterns = [
         r"\+65[-\s]?[89]\d{3}[-\s]?\d{4}",  # +65 8XXX XXXX or +65 9XXX XXXX
         r"\+65[-\s]?6\d{3}[-\s]?\d{4}",     # +65 6XXX XXXX (landline)

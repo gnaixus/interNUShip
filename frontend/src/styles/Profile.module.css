@@ -575,6 +575,27 @@
     position: relative; 
     top: auto;
   }
+  
+  .editInput select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: white;
+  color: #333;
+  cursor: pointer;
+}
+
+.editInput select:focus {
+  outline: none;
+  border-color: var(--purple-light);
+  box-shadow: 0 0 0 2px rgba(139, 69, 219, 0.1);
+}
+
+.editInput select option {
+  padding: 8px;
+}
 }
 
 /* ms2 final */

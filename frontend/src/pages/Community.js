@@ -24,6 +24,23 @@ const Community = () => {
   const [replyingTo, setReplyingTo] = useState(null); 
   const [newComment, setNewComment] = useState(''); 
   const [newTag, setNewTag] = useState('');
+  
+  // ADD: Profile data state
+  const [profileData, setProfileData] = useState(null);
+
+  // ADD: Function to get profile data from localStorage
+  const getProfileData = () => {
+    try {
+      const savedProfile = localStorage.getItem('userProfileData');
+      if (savedProfile) {
+        return JSON.parse(savedProfile);
+      }
+      return null;
+    } catch (error) {
+      console.error('Error reading profile data:', error);
+      return null;
+    }
+  };
 
   // Navigation items
   const navItems = user ? [
@@ -250,6 +267,12 @@ const Community = () => {
     }, 500);
   }, []);
 
+  // Load profile data on component mount
+  useEffect(() => {
+    const profile = getProfileData();
+    setProfileData(profile);
+  }, []);
+
   // Filter and sort posts
   const getFilteredPosts = () => {
     let filtered = posts;
@@ -285,12 +308,15 @@ const Community = () => {
     return filtered;
   };
 
-  // Handle post creation
+  // UPDATED: Handle post creation with profile data
   const handleCreatePost = () => {
     if (!newPost.title.trim() || !newPost.content.trim()) {
       alert('Please fill in both title and content');
       return;
     }
+
+    // Get fresh profile data
+    const currentProfileData = getProfileData();
 
     const post = {
       id: Date.now(),
@@ -299,8 +325,8 @@ const Community = () => {
       author: {
         name: user?.full_name || 'Anonymous User',
         avatar: user?.full_name?.split(' ').map(n => n[0]).join('') || 'AU',
-        year: 'Year 3',
-        major: 'Computer Science'
+        year: currentProfileData?.year || 'Year not specified', 
+        major: currentProfileData?.major || 'Major not specified' 
       },
       category: newPost.category,
       tags: newPost.tags,
@@ -374,20 +400,23 @@ const Community = () => {
     setNewComment('');
   };
 
-  // Handle submit comment
+  // Handle submit comment with profile data
   const handleSubmitComment = (postId) => {
     if (!newComment.trim()) {
       alert('Please enter a comment');
       return;
     }
 
+    // Get fresh profile data
+    const currentProfileData = getProfileData();
+
     const comment = {
       id: Date.now(),
       author: {
         name: user?.full_name || 'Anonymous User',
         avatar: user?.full_name?.split(' ').map(n => n[0]).join('') || 'AU',
-        year: 'Year 3',
-        major: 'Computer Science'
+        year: currentProfileData?.year || 'Year not specified', 
+        major: currentProfileData?.major || 'Major not specified' 
       },
       content: newComment,
       createdAt: new Date().toISOString(),
@@ -433,6 +462,58 @@ const Community = () => {
     if (diffInDays < 7) return `${diffInDays}d ago`;
     
     return date.toLocaleDateString();
+  };
+
+  // ProfileStatus component for create post modal
+  const ProfileStatus = () => {
+    const currentProfileData = getProfileData();
+    
+    return (
+      <div style={{
+        background: 'rgba(59, 130, 246, 0.1)',
+        border: '1px solid rgba(59, 130, 246, 0.3)',
+        borderRadius: '0.5rem',
+        padding: '1rem',
+        marginBottom: '1rem'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+          <span style={{ fontSize: '1rem' }}>👤</span>
+          <span style={{ color: 'var(--text-primary)', fontWeight: '600' }}>Posting as:</span>
+        </div>
+        <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+          <div><strong>Name:</strong> {user?.full_name || 'Anonymous User'}</div>
+          <div><strong>Year:</strong> {currentProfileData?.year || 'Not specified'}</div>
+          <div><strong>Major:</strong> {currentProfileData?.major || 'Not specified'}</div>
+        </div>
+        {(!currentProfileData?.year || !currentProfileData?.major) && (
+          <div style={{ 
+            marginTop: '0.5rem',
+            fontSize: '0.8rem',
+            color: '#fbbf24',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.25rem'
+          }}>
+            <span>⚠️</span>
+            <span>
+              Update your <button 
+                onClick={() => navigate('/profile')} 
+                style={{ 
+                  background: 'none', 
+                  border: 'none', 
+                  color: '#3b82f6', 
+                  textDecoration: 'underline',
+                  cursor: 'pointer',
+                  fontSize: '0.8rem'
+                }}
+              >
+                profile
+              </button> to show your year and major in posts
+            </span>
+          </div>
+        )}
+      </div>
+    );
   };
 
   const filteredPosts = getFilteredPosts();
@@ -583,6 +664,9 @@ const Community = () => {
             overflowY: 'auto'
           }}>
             <h2 style={{ color: 'var(--text-primary)', marginBottom: '1.5rem' }}>Create New Post</h2>
+            
+            {/* ADD: Profile Status Display */}
+            <ProfileStatus />
             
             <div style={{ marginBottom: '1rem' }}>
               <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>Title *</label>
