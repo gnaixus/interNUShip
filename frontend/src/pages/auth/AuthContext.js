@@ -3,6 +3,8 @@ import axios from 'axios';
 
 export const AuthContext = createContext();
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -21,7 +23,7 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem("token");
     if (token) {
     //Verify token with backend
-      axios.get("http://localhost:8000/me", {
+      axios.get(`${API_URL}/me`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       .then(res => {
@@ -45,7 +47,7 @@ export const AuthProvider = ({ children }) => {
       formData.append('username', email);
       formData.append('password', password);
 
-      const res = await axios.post("http://localhost:8000/token", formData, {
+      const res = await axios.post(`${API_URL}/token`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -54,7 +56,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("token", res.data.access_token);
       
       //Fetch user details after successful login to home page
-      const userRes = await axios.get("http://localhost:8000/me", {
+      const userRes = await axios.get(`${API_URL}/me`, {
         headers: { Authorization: `Bearer ${res.data.access_token}` }
       });
       
@@ -84,7 +86,7 @@ export const AuthProvider = ({ children }) => {
 
       console.log('Sending signup data to backend:', signupData);
 
-      const response = await axios.post("http://localhost:8000/signup", signupData, {
+      const response = await axios.post(`${API_URL}/signup`, signupData, {
         headers: {
           'Content-Type': 'application/json',
         },
