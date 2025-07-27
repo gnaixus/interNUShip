@@ -401,7 +401,7 @@ const Profile = () => {
       }
       
       updatedProfile.resumeUploaded = true;
-  
+      updatedProfile.lastUpdated = new Date().toLocaleDateString('en-GB');
 
       // LOG FINAL PROFILE STATE
       console.log('📊 Final profile update summary:');
@@ -477,7 +477,12 @@ const Profile = () => {
         return;
       }
 
-      
+      setIsSubmitting(true);
+      const updatedProfile = {
+        ...finalData,  
+        lastUpdated: new Date().toLocaleDateString('en-GB'),
+        savedAt: Date.now()
+      };
       
       setProfileData(updatedProfile);
       setOriginalData(updatedProfile); // Update original data after successful save
