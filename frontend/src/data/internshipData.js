@@ -20,7 +20,7 @@ export const dummyInternships = [
     match: 92,
     logo: '💻',
     description: 'Build innovative web applications using React and Node.js. Work with senior developers on real-world projects that impact thousands of users.',
-    deadline: '15/06/2025',
+    deadline: '15/08/2025',
     postedDate: '01/05/2025',
     skills: ['React', 'Node.js', 'JavaScript', 'MongoDB', 'Git'],
     requirements: [
@@ -51,7 +51,7 @@ export const dummyInternships = [
     match: 89,
     logo: '⚙️',
     description: 'Develop scalable backend systems and APIs using Python and cloud technologies. Gain hands-on experience with microservices architecture.',
-    deadline: '18/06/2025',
+    deadline: '18/08/2025',
     postedDate: '02/05/2025',
     skills: ['Python', 'FastAPI', 'PostgreSQL', 'Docker', 'AWS'],
     requirements: [
@@ -82,7 +82,7 @@ export const dummyInternships = [
     match: 85,
     logo: '🎨',
     description: 'Create engaging and responsive user interfaces using modern frontend technologies. Work on cutting-edge web applications.',
-    deadline: '22/06/2025',
+    deadline: '22/08/2025',
     postedDate: '08/05/2025',
     skills: ['Vue.js', 'TypeScript', 'CSS3', 'HTML5', 'Figma'],
     requirements: [
@@ -113,7 +113,7 @@ export const dummyInternships = [
     match: 83,
     logo: '📱',
     description: 'Develop cross-platform mobile applications using React Native. Contribute to apps used by millions of users across Southeast Asia.',
-    deadline: '28/06/2025',
+    deadline: '28/08/2025',
     postedDate: '12/05/2025',
     skills: ['React Native', 'JavaScript', 'iOS', 'Android', 'Firebase'],
     requirements: [
@@ -145,7 +145,7 @@ export const dummyInternships = [
     match: 87,
     logo: '📊',
     description: 'Analyze large datasets and create machine learning models to drive business insights. Work with real customer data and advanced analytics tools.',
-    deadline: '20/06/2025',
+    deadline: '20/8/2025',
     postedDate: '03/05/2025',
     skills: ['Python', 'Machine Learning', 'SQL', 'Pandas', 'Tableau'],
     requirements: [
@@ -176,7 +176,7 @@ export const dummyInternships = [
     match: 91,
     logo: '🤖',
     description: 'Conduct research in artificial intelligence and machine learning. Contribute to cutting-edge research papers and innovative AI solutions.',
-    deadline: '25/06/2025',
+    deadline: '25/08/2025',
     postedDate: '06/05/2025',
     skills: ['Python', 'TensorFlow', 'PyTorch', 'Research', 'Deep Learning'],
     requirements: [
@@ -208,7 +208,7 @@ export const dummyInternships = [
     match: 81,
     logo: '🎨',
     description: 'Design user experiences for mobile and web applications. Work with product teams to create intuitive and beautiful interfaces.',
-    deadline: '25/06/2025',
+    deadline: '25/08/2025',
     postedDate: '05/05/2025',
     skills: ['Figma', 'UI/UX Design', 'Prototyping', 'User Research', 'Adobe Creative Suite'],
     requirements: [
@@ -239,7 +239,7 @@ export const dummyInternships = [
     match: 76,
     logo: '🖼️',
     description: 'Create visual content for digital and print media. Work on branding projects for diverse clients across various industries.',
-    deadline: '30/06/2025',
+    deadline: '30/08/2025',
     postedDate: '09/05/2025',
     skills: ['Adobe Photoshop', 'Adobe Illustrator', 'InDesign', 'Branding', 'Typography'],
     requirements: [
@@ -397,7 +397,7 @@ export const dummyInternships = [
     match: 84,
     logo: '💰',
     description: 'Conduct financial analysis and support investment decisions. Work with senior analysts on market research and financial modeling.',
-    deadline: '12/06/2025',
+    deadline: '12/08/2025',
     postedDate: '15/04/2025',
     skills: ['Financial Modeling', 'Excel', 'Bloomberg Terminal', 'Research', 'PowerPoint'],
     requirements: [
@@ -428,7 +428,7 @@ export const dummyInternships = [
     match: 86,
     logo: '🏦',
     description: 'Support deal execution and financial analysis for M&A transactions. Gain exposure to investment banking operations in Asia.',
-    deadline: '08/06/2025',
+    deadline: '08/08/2025',
     postedDate: '10/04/2025',
     skills: ['Financial Analysis', 'Valuation', 'Excel', 'PowerPoint', 'Capital Markets'],
     requirements: [
@@ -460,7 +460,7 @@ export const dummyInternships = [
     match: 77,
     logo: '⚙️',
     description: 'Work on mechanical design projects and assist with product development. Gain hands-on experience with CAD software and manufacturing processes.',
-    deadline: '30/06/2025',
+    deadline: '30/08/2025',
     postedDate: '25/05/2025',
     skills: ['CAD', 'SolidWorks', 'Manufacturing', 'Project Management', 'Problem Solving'],
     requirements: [
